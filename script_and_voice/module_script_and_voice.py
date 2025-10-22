@@ -66,29 +66,7 @@ def copy_files_to_project(
 ):
     """Copy generated files to project directory"""
     script_voice_dir = Path(__file__).parent
-    temp_dir = script_voice_dir / "temp"
     audio_dir = script_voice_dir / "audio"
-
-    # Copy outline.json to language directory
-    outline_src = temp_dir / "outline.json"
-    outline_dst = language_dir / "outline.json"
-    if outline_src.exists():
-        shutil.copy2(outline_src, outline_dst)
-        logging.info(f"📋 Outline copied: {outline_dst}")
-
-    # Copy final_script.txt to language directory
-    script_src = temp_dir / "final_script.txt"
-    script_dst = language_dir / "final_script.txt"
-    if script_src.exists():
-        shutil.copy2(script_src, script_dst)
-        logging.info(f"📝 Script copied: {script_dst}")
-
-    # Copy full_script.json to language directory
-    full_script_src = temp_dir / "full_script.json"
-    full_script_dst = language_dir / "full_script.json"
-    if full_script_src.exists():
-        shutil.copy2(full_script_src, full_script_dst)
-        logging.info(f"📋 Full script copied: {full_script_dst}")
 
     # Copy audio directory to language-specific directory (if not script-only OR if voice-only)
     language_audio_dir = language_dir / "audio"
@@ -270,6 +248,31 @@ Examples:
                         total_words += micro_section.get("actual_words", 0)
 
             logging.info(f"✅ Script generated: {total_words} words")
+
+            # Copy script files to language directory immediately after generation
+            script_voice_dir = Path(__file__).parent
+            temp_dir = script_voice_dir / "temp"
+
+            # Copy outline.json to language directory
+            outline_src = temp_dir / "outline.json"
+            outline_dst = language_dir / "outline.json"
+            if outline_src.exists():
+                shutil.copy2(outline_src, outline_dst)
+                logging.info(f"📋 Outline copied: {outline_dst}")
+
+            # Copy full_script.json to language directory
+            full_script_src = temp_dir / "full_script.json"
+            full_script_dst = language_dir / "full_script.json"
+            if full_script_src.exists():
+                shutil.copy2(full_script_src, full_script_dst)
+                logging.info(f"📋 Full script copied: {full_script_dst}")
+
+            # Copy final_script.txt to language directory if exists
+            script_src = temp_dir / "final_script.txt"
+            script_dst = language_dir / "final_script.txt"
+            if script_src.exists():
+                shutil.copy2(script_src, script_dst)
+                logging.info(f"📝 Script copied: {script_dst}")
 
         # Generate voice if needed
         if not args.script_only:
