@@ -47,3 +47,11 @@ heygen/
 assets/
 source/
 temp/
+
+# Environment files
+.env
+.env.local
+.env.*.local    
+
+# Specific virtual environment
+venv/
