@@ -1,0 +1,10 @@
+# API et requêtes
+openai>=1.0.0
+requests>=2.31.0
+
+# Configuration
+pyyaml>=6.0.1
+
+# Utilitaires
+tqdm>=4.66.1
+psutil>=5.9.0 

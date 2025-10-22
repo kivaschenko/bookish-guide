@@ -1,0 +1,49 @@
+# Virtual environments
+venv/
+venv_*/
+venv_py*/
+venv8_*/
+script_and_voice/venv/
+dashboard/venv_dashboard/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+log*.txt
+
+# Temporary files
+*.tmp
+*.temp
+
+# Large files that shouldn't be versioned
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.mp3
+*.wav
+*.flac
+
+# Project specific
+projects/
+b-roll/
+heygen/
+assets/
+source/
+temp/
