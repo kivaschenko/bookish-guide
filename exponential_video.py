@@ -1603,14 +1603,25 @@ def main():
                             logging.info(f"   {line}")
                 else:
                     logging.error("❌ Script and voice generation failed")
-                    logging.error("📋 Error output:")
-                    for line in result.stderr.split("\n"):
-                        if line.strip():
-                            logging.error(f"   {line}")
+                    logging.error(f"📋 Return code: {result.returncode}")
+                    if result.stdout:
+                        logging.error("📋 Standard output:")
+                        for line in result.stdout.split("\n"):
+                            if line.strip():
+                                logging.error(f"   {line}")
+                    if result.stderr:
+                        logging.error("📋 Error output:")
+                        for line in result.stderr.split("\n"):
+                            if line.strip():
+                                logging.error(f"   {line}")
                     sys.exit(1)
 
             except Exception as e:
                 logging.error(f"❌ Error calling script and voice module: {e}")
+                logging.error(f"📋 Command attempted: {' '.join(cmd)}")
+                import traceback
+
+                logging.error(f"📋 Traceback: {traceback.format_exc()}")
                 sys.exit(1)
 
         # Étape 2: Génération audio TTS (OpenAI)
