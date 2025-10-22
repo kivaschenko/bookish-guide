@@ -970,7 +970,7 @@ Convert this text into structured markdown format with clear sections, subsectio
                 ]
 
                 try:
-                    response = self.call_gpt5_text_only(messages)
+                    response = self.call_claude_text_only(messages)
                     if response and isinstance(response, str):
                         # Clean the response
                         corrected_para = response.strip()
@@ -1027,7 +1027,7 @@ Shortened paragraph:"""
                 ]
 
                 try:
-                    response = self.call_gpt5_text_only(messages)
+                    response = self.call_claude_text_only(messages)
                     if response and isinstance(response, str):
                         # Clean the response
                         corrected_para = response.strip()
@@ -1131,7 +1131,7 @@ Shortened paragraph:"""
             f"Creating structured ideas from input text... (target: {target_word_count} words)"
         )
         ideas_messages = self.create_ideas_prompt(original_text, language)
-        ideas_response = self.call_gpt5_text_only(ideas_messages)
+        ideas_response = self.call_claude_text_only(ideas_messages)
         logging.info("Ideas generation completed")
 
         # Save ideas
@@ -1143,7 +1143,7 @@ Shortened paragraph:"""
         outline_messages = self.create_outline_prompt(
             ideas_response, language, target_word_count
         )
-        outline_response = self.call_gpt5(outline_messages)
+        outline_response = self.call_claude(outline_messages)
         logging.info("Outline generation completed")
 
         # Save outline
