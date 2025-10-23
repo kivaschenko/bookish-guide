@@ -11,7 +11,6 @@ Usage:
 import argparse
 import sys
 import logging
-import shutil
 from pathlib import Path
 import json
 

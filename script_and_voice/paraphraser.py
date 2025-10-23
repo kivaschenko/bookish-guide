@@ -4,7 +4,7 @@
 """
 Script Paraphraser Module
 This module handles the transformation of original text into structured scripts (I1, I2, I3)
-using Claude API with JSON-formatted responses.
+using configurable AI API with JSON-formatted responses.
 """
 
 import logging
@@ -12,8 +12,14 @@ import json
 import os
 import re
 from pathlib import Path
-from anthropic import Anthropic
 from functools import wraps
+
+# Import AI client interface and factory
+try:
+    from ai_client_interface import create_ai_client
+except ImportError:
+    # Fallback for direct imports
+    from .ai_client_interface import create_ai_client
 
 
 def deprecated(func):
@@ -31,7 +37,7 @@ def deprecated(func):
 
 class Paraphraser:
     """
-    Handles text paraphrasing using Claude API.
+    Handles text paraphrasing using configurable AI API.
     Generates three deliverables: I1 (initial paraphrase), I2 (voice-over format), I3 (final script).
     """
 
@@ -42,17 +48,22 @@ class Paraphraser:
         Args:
             config (dict): Configuration loaded from config.yml
         """
-        self.client = Anthropic(
-            api_key=config["api"]["anthropic"]["api_key"],
-            max_retries=config["api"]["anthropic"].get("max_retries", 1),
-        )
+        # Create AI client based on provider configuration
+        self.ai_client = create_ai_client(config)
         self.config = config
+        
         # Use script_and_voice/temp directory regardless of execution location
         script_dir = Path(__file__).parent
         self.temp_path = script_dir / "temp"
-        self.model = config["api"]["anthropic"]["model"]
-        self.max_retries = config["api"]["anthropic"]["max_retries"]
-        self.max_tokens = config["api"]["anthropic"].get("max_tokens", 4096)
+        
+        # Get provider-specific settings
+        provider = config.get('api', {}).get('provider', 'openai')
+        if provider == 'anthropic':
+            self.max_retries = config["api"]["anthropic"].get("max_retries", 3)
+        elif provider == 'openai':
+            self.max_retries = config["api"]["openai"].get("max_retries", 3)
+        else:
+            self.max_retries = 3
 
         # Create temp directory if it doesn't exist
         self.temp_path.mkdir(exist_ok=True)
@@ -696,130 +707,29 @@ Convert this text into structured markdown format with clear sections, subsectio
 
     def call_claude(self, messages, max_retries=3):
         """
-        Call Claude API for JSON responses.
+        Call AI API for JSON responses using dependency injection.
 
         Args:
             messages (list): List of message dictionaries
             max_retries (int): Maximum number of retry attempts
 
         Returns:
-            dict: Parsed JSON response from Claude
+            dict: Parsed JSON response from AI model
         """
-        for attempt in range(max_retries):
-            try:
-                # Claude API expects messages in a specific format
-                # Convert system message to system parameter if present
-                system_message = None
-                user_messages = []
-
-                for msg in messages:
-                    if msg["role"] == "system":
-                        system_message = msg["content"]
-                    else:
-                        user_messages.append(msg)
-
-                # Make the API call
-                if system_message:
-                    response = self.client.messages.create(
-                        model=self.model,
-                        max_tokens=self.max_tokens,
-                        system=system_message,
-                        messages=user_messages,
-                    )
-                else:
-                    response = self.client.messages.create(
-                        model=self.model,
-                        max_tokens=self.max_tokens,
-                        messages=user_messages,
-                    )
-
-                # Extract text content from response
-                content = response.content[0].text
-
-                # Parse the JSON response from Claude
-                parsed_content = json.loads(content)
-
-                # Log the response for debugging
-                logging.info("=== Claude JSON Response ===")
-                logging.info(content)
-                logging.info("=== End Response ===")
-
-                return parsed_content
-
-            except Exception as e:
-                logging.error(
-                    f"❌ Claude error (attempt {attempt + 1}/{max_retries}): {str(e)}"
-                )
-                if attempt < max_retries - 1:
-                    logging.info("🔄 Retrying in 2 seconds...")
-                    import time
-
-                    time.sleep(2)
-                    continue
-                else:
-                    raise
+        return self.ai_client.generate_json_response(messages, max_retries)
 
     def call_claude_text_only(self, messages, max_retries=3):
         """
-        Call Claude API for free-text responses (not JSON).
+        Call AI API for text responses using dependency injection.
 
         Args:
             messages (list): List of message dictionaries
             max_retries (int): Maximum number of retry attempts
 
         Returns:
-            str: Text response from Claude
+            str: Text response from AI model
         """
-        for attempt in range(max_retries):
-            try:
-                # Claude API expects messages in a specific format
-                # Convert system message to system parameter if present
-                system_message = None
-                user_messages = []
-
-                for msg in messages:
-                    if msg["role"] == "system":
-                        system_message = msg["content"]
-                    else:
-                        user_messages.append(msg)
-
-                # Make the API call
-                if system_message:
-                    response = self.client.messages.create(
-                        model=self.model,
-                        max_tokens=self.max_tokens,
-                        system=system_message,
-                        messages=user_messages,
-                    )
-                else:
-                    response = self.client.messages.create(
-                        model=self.model,
-                        max_tokens=self.max_tokens,
-                        messages=user_messages,
-                    )
-
-                # Extract text content from response
-                content = response.content[0].text
-
-                # Log the response for debugging
-                logging.info("=== Claude Text Response ===")
-                logging.info(content)
-                logging.info("=== End Text Response ===")
-
-                return content
-
-            except Exception as e:
-                logging.error(
-                    f"❌ Claude text error (attempt {attempt + 1}/{max_retries}): {str(e)}"
-                )
-                if attempt < max_retries - 1:
-                    logging.info("🔄 Retrying in 2 seconds...")
-                    import time
-
-                    time.sleep(2)
-                    continue
-                else:
-                    raise
+        return self.ai_client.generate_text_response(messages, max_retries)
 
     @deprecated
     def verify_paragraphs(self, paragraphs):

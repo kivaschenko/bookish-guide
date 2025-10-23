@@ -159,15 +159,39 @@ class OpenAIClient(AIClientInterface):
         """Generate a JSON response from OpenAI"""
         for attempt in range(max_retries):
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    max_tokens=self.max_tokens,
-                    response_format={"type": "json_object"},
-                )
+                # Check if using GPT-5 with responses API
+                if self.model == "gpt-5":
+                    # Convert messages to input string for GPT-5 responses API
+                    input_text = ""
+                    for msg in messages:
+                        if msg["role"] == "system":
+                            input_text += f"SYSTEM: {msg['content']}\n\n"
+                        elif msg["role"] == "user":
+                            input_text += f"USER: {msg['content']}\n\n"  
+                        elif msg["role"] == "assistant":
+                            input_text += f"ASSISTANT: {msg['content']}\n\n"
 
-                content = response.choices[0].message.content
-                parsed_content = json.loads(content)
+                    response = self.client.responses.create(
+                        model="gpt-5",
+                        input=input_text.strip(),
+                        reasoning={"effort": "low"},
+                        text={"verbosity": "low", "format": {"type": "json_object"}},
+                    )
+                    
+                    # Parse the JSON response from GPT-5
+                    content = response.output_text
+                    parsed_content = json.loads(content)
+                else:
+                    # Use standard chat completions API for other models
+                    response = self.client.chat.completions.create(
+                        model=self.model,
+                        messages=messages,
+                        max_tokens=self.max_tokens,
+                        response_format={"type": "json_object"},
+                    )
+                    
+                    content = response.choices[0].message.content
+                    parsed_content = json.loads(content)
 
                 logging.info("=== OpenAI JSON Response ===")
                 logging.info(content)
@@ -192,11 +216,33 @@ class OpenAIClient(AIClientInterface):
         """Generate a text response from OpenAI"""
         for attempt in range(max_retries):
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model, messages=messages, max_tokens=self.max_tokens
-                )
+                # Check if using GPT-5 with responses API
+                if self.model == "gpt-5":
+                    # Convert messages to input string for GPT-5 responses API
+                    input_text = ""
+                    for msg in messages:
+                        if msg["role"] == "system":
+                            input_text += f"SYSTEM: {msg['content']}\n\n"
+                        elif msg["role"] == "user":
+                            input_text += f"USER: {msg['content']}\n\n"
+                        elif msg["role"] == "assistant":
+                            input_text += f"ASSISTANT: {msg['content']}\n\n"
 
-                content = response.choices[0].message.content
+                    response = self.client.responses.create(
+                        model="gpt-5",
+                        input=input_text.strip(),
+                        reasoning={"effort": "low"},
+                        text={"verbosity": "low"},
+                    )
+                    
+                    content = response.output_text
+                else:
+                    # Use standard chat completions API for other models
+                    response = self.client.chat.completions.create(
+                        model=self.model, messages=messages, max_tokens=self.max_tokens
+                    )
+
+                    content = response.choices[0].message.content
 
                 logging.info("=== OpenAI Text Response ===")
                 logging.info(content)
@@ -252,7 +298,7 @@ class MockAIClient(AIClientInterface):
 
 def create_ai_client(config: Dict[str, Any]) -> AIClientInterface:
     """Factory function to create AI client based on configuration"""
-    provider = config.get("provider", "anthropic").lower()
+    provider = config.get("api", {}).get("provider", "openai").lower()
 
     if provider == "anthropic":
         return AnthropicClient(
