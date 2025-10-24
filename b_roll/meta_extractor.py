@@ -8,14 +8,10 @@ Extrait la première frame de chaque vidéo et utilise l'API OpenAI pour l'analy
 
 import os
 import logging
-import json
 import traceback
-import sys
-import numpy as np
 
 # Image extraction disabled
 import requests
-from PIL import Image
 
 
 class MetaExtractor:
