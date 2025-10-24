@@ -21,6 +21,7 @@ Usage:
 from .meta_extractor import MetaExtractor
 from .vector_matcher import VectorMatcher
 from .broll_finder import BRollFinder, prepare_brolls_vector
+from .utils import clean_broll_selections
 from . import utils
 
 __version__ = "1.0.0"
@@ -31,5 +32,6 @@ __all__ = [
     "VectorMatcher",
     "BRollFinder",
     "prepare_brolls_vector",
+    "clean_broll_selections",
     "utils",
 ]

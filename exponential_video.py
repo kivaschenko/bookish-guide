@@ -16,11 +16,11 @@ import sys
 import argparse
 from pathlib import Path
 import yaml
-from src.paraphraser import Paraphraser
-from src.utils import setup_logging
+from script_and_voice.paraphraser import Paraphraser
+from utils import setup_logging
 import json
-from src.b_roll_finder import prepare_brolls_vector
-from src.jouer_son import lancement_premontage, fin_montage
+from b_roll import prepare_brolls_vector
+from jouer_son import lancement_premontage, fin_montage
 import subprocess
 import re
 import glob
@@ -1254,7 +1254,7 @@ la réponse sera juste affichée dans la console, pour pouvoir être copiée col
 
     # Appeler GPT-4
     try:
-        from src.paraphraser import Paraphraser
+        from script_and_voice.paraphraser import Paraphraser
 
         config = load_config()
         config["paths"]["temp"] = str(get_project_temp_path(project_name))
@@ -1397,7 +1397,7 @@ Voici mon script vidéo :
 
     # Appeler GPT-4
     try:
-        from src.paraphraser import Paraphraser
+        from script_and_voice.paraphraser import Paraphraser
 
         config = load_config()
         config["paths"]["temp"] = str(get_project_temp_path(project_name))
@@ -1466,7 +1466,7 @@ def main():
     # L'option --meta ne nécessite pas de nom de projet
     if args.meta:
         logging.info("Début de l'extraction des métadonnées des b-rolls...")
-        from src.meta_extractor import MetaExtractor
+        from b_roll import MetaExtractor
 
         config = load_config()
         extractor = MetaExtractor(config)
@@ -1507,14 +1507,14 @@ def main():
     # Ajout de l'option vectorbroll
     if args.vectorbroll:
         logging.info("Début de la préparation des b-rolls vectorielle...")
-        from src.b_roll_finder import prepare_brolls_vector
+        from b_roll import prepare_brolls_vector
 
         prepare_brolls_vector(config=config)
         return
 
     if args.testbrollchoice:
         logging.info("Mode test de sélection des b-rolls")
-        from src.b_roll_finder import BRollFinder
+        from b_roll import BRollFinder
 
         # Assume first rush is already generated and available
         first_rush_path = os.path.join(config["paths"]["heygen"], "rush1.mp4")
@@ -1528,7 +1528,7 @@ def main():
 
         # Create BRollFinder instance and prepare b-rolls for this rush only
         b_roll_finder = BRollFinder(config)
-        json_path = b_roll_finder.prepare_brolls_for_all_rushes([rush_duration])
+        json_path = b_roll_finder.generate_broll_timing([rush_duration])
 
         logging.info(
             f"Test de sélection des b-rolls terminé, résultats sauvegardés dans {json_path}"
@@ -1536,7 +1536,9 @@ def main():
         return
 
     if args.brolls_selection_correct:
-        if clean_broll_selections():
+        from b_roll import clean_broll_selections
+        config = load_config()
+        if clean_broll_selections(config):
             logging.info("Nettoyage des sélections de b-rolls terminé avec succès")
         else:
             logging.error("Erreur lors du nettoyage des sélections de b-rolls")
