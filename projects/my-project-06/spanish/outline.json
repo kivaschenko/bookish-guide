@@ -1,0 +1,125 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Considerer l'achat d'une maison : aspects financiers et non-financiers",
+      "Investir dans l'immobilier : quand est-ce une bonne idée ?",
+      "Pourquoi l'achat d'une maison n'est pas toujours un bon investissement"
+    ],
+    "tone_style": "conversation orale pédagogique et rythmée qui explique comment investir son argent",
+    "target_audience": "investisseurs particuliers, curieux en économie, 30–60 ans",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "L'achat d'une maison est souvent considéré comme un rêve et un investissement sûr, mais qu'en est-il vraiment ?",
+    "curiosity_loop": "Découvrez les perspectives financières et non-financières à prendre en compte avant de franchir le pas.",
+    "visual_suggestion": "Vue aérienne d'un quartier résidentiel avec maisons, voitures, arbres"
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "Pourquoi l'achat d'une maison peut être un mauvais investissement",
+      "core_idea": "Explorer les points de vue d'experts comme Warren Buffett sur l'investissement immobilier",
+      "key_points": [
+        {
+          "text": "Avis de Warren Buffett : 'Acheter une maison est généralement un mauvais investissement'"
+        },
+        {
+          "text": "Cet avis peut provoquer des débats passionnés parmi les acheteurs potentiels"
+        }
+      ],
+      "micro_curiosity_loop": "Découvrez les raisons qui poussent certains experts à remettre en question l'achat d'une maison comme investissement",
+      "rhetorical_question": "Mais si les experts considèrent l'achat d'une maison comme un mauvais investissement, pourquoi est-ce encore un rêve si répandu ?",
+      "visual_suggestion": "Gros plan sur le visage pensif de Warren Buffett"
+    },
+    {
+      "id": 2,
+      "title": "Les coûts cachés de l'achat d'une maison",
+      "core_idea": "Passer en revue les différents frais à prévoir lors de l'achat d'une maison",
+      "key_points": [
+        {
+          "text": "Mise de fonds recommandée de 10 à 20 % - Risque élevé avec peu ou pas de mise de fonds"
+        },
+        {
+          "text": "Taux hypothécaire élevés (environ 7 %) - Représente 7 % du prêt par an"
+        }
+      ],
+      "micro_curiosity_loop": "Découvrez tous les coûts annexes à prendre en compte, au-delà du simple prix d'achat",
+      "rhetorical_question": "Êtes-vous prêt à assumer ces coûts cachés pour devenir propriétaire ?",
+      "visual_suggestion": "Gros plan sur un document avec des chiffres et graphiques représentant les différents frais"
+    },
+    {
+      "id": 3,
+      "title": "Le coût d'opportunité : un facteur clé",
+      "core_idea": "Expliquer l'importance de considérer le coût d'opportunité d'un achat immobilier",
+      "key_points": [
+        {
+          "text": "L'argent investi dans l'achat ne peut plus être investi ailleurs"
+        },
+        {
+          "text": "Buffett a retardé son premier achat pour maximiser les rendements des investissements"
+        }
+      ],
+      "micro_curiosity_loop": "Découvrez comment le coût d'opportunité peut impacter la rentabilité d'un achat immobilier",
+      "rhetorical_question": "Êtes-vous sûr que l'achat d'une maison est le meilleur usage de votre argent ?",
+      "visual_suggestion": "Comparaison graphique des performances du marché boursier vs l'immobilier"
+    },
+    {
+      "id": 4,
+      "title": "Comparaison location vs achat",
+      "core_idea": "Comparer les coûts mensuels entre location et achat dans la plupart des villes",
+      "key_points": [
+        {
+          "text": "Exemple de coûts mensuels pour une maison de 500 000 $ : 4 270 $"
+        },
+        {
+          "text": "Même type de maison en location : 1 700 $ à 2 300 $ - Généralement moins cher de louer qu'acheter"
+        }
+      ],
+      "micro_curiosity_loop": "Découvrez pourquoi, dans la plupart des cas, il est plus avantageux de louer que d'acheter",
+      "rhetorical_question": "Pourriez-vous tirer un meilleur rendement de votre argent en le plaçant ailleurs qu'en l'investissant dans l'achat d'une maison ?",
+      "visual_suggestion": "Comparaison chiffrée des coûts de location vs achat pour une même propriété"
+    },
+    {
+      "id": 5,
+      "title": "Considérations non-financières de l'achat d'une maison",
+      "core_idea": "Aborder les aspects non financiers de la décision d'achat immobilier",
+      "key_points": [
+        {
+          "text": "Bien que souvent un mauvais investissement, l'achat peut apporter des bénéfices intangibles"
+        },
+        {
+          "text": "Buffett considère son achat comme l'une de ses meilleures dépenses malgré le faible rendement"
+        }
+      ],
+      "micro_curiosity_loop": "Découvrez les avantages non financiers de devenir propriétaire, au-delà du simple rendement de l'investissement",
+      "rhetorical_question": "Quels autres facteurs que le rendement financier pourraient vous pousser à acheter une maison ?",
+      "visual_suggestion": "Plans rapprochés d'une famille dans une maison, évoquant les moments de vie et souvenirs"
+    }
+  ],
+  "conclusion": {
+    "summary": "En résumé, l'achat d'une maison n'est pas toujours un bon investissement d'un point de vue purement financier, en raison des nombreux coûts cachés et du coût d'opportunité. Cependant, cela peut apporter des bénéfices intangibles importants.",
+    "final_message": "Avant de franchir le pas de l'achat, réfléchissez attentivement à vos priorités et à la meilleure utilisation de votre argent.",
+    "final_cta": "Partagez cette vidéo avec vos proches qui envisagent l'achat d'une maison, cela pourrait les aider à prendre la meilleure décision !",
+    "visual_suggestion": "Vue d'ensemble d'un quartier résidentiel avec des maisons, voitures et familles"
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Famille déballant des cartons dans une nouvelle maison",
+      "Couple regardant des plans de maisons"
+    ],
+    "animations": [
+      "Graphiques à barres comparant les performances de l'immobilier vs le marché boursier",
+      "Infographie des différents coûts liés à l'achat d'une maison"
+    ],
+    "on_screen_texts": [
+      "Coût d'opportunité",
+      "Rendement des investissements"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Rythme soutenu avec transitions fluides entre les sections, pour maintenir l'attention du public",
+    "tone_tips": "Ton pédagogique mais bienveillant, visant à informer sans porter de jugement",
+    "emotion_curve": "Créer de la curiosité et de l'intérêt dans un premier temps, puis susciter la réflexion et l'analyse avant de conclure sur une note positive",
+    "storytelling_hooks": "Utiliser les avis d'experts comme Warren Buffett pour captiver l'attention, et jouer sur les comparaisons chiffrées pour illustrer les points clés"
+  }
+}

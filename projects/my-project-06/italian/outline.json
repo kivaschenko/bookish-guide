@@ -1,0 +1,125 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Strategie per Investire in Immobili",
+      "Consigli di Buffett sull'Acquisto di Case",
+      "Costo Opportunità nell'Investimento Immobiliare"
+    ],
+    "tone_style": "Conversazione amichevole e istruttiva, ritmo vivace",
+    "target_audience": "Investitori individuali, appassionati di economia, 30-60 anni",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "Scopri il segreto degli investimenti immobiliari di successo!",
+    "curiosity_loop": "E se il vero costo fosse più alto di quanto pensi?",
+    "visual_suggestion": "Inquadrature dinamiche di città e case"
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "I Consigli di Warren Buffett",
+      "core_idea": "Visione unica sull'investimento immobiliare",
+      "key_points": [
+        {
+          "text": "Investire in casa non sempre conviene"
+        },
+        {
+          "text": "Ritardo nell'acquisto per strategie migliori"
+        }
+      ],
+      "micro_curiosity_loop": "Come ha usato il capitale in modo diverso?",
+      "rhetorical_question": "Vale la pena seguire l'esempio di Buffett?",
+      "visual_suggestion": "Immagini di Warren Buffett parlante"
+    },
+    {
+      "id": 2,
+      "title": "Strategie per Acquistare Casa",
+      "core_idea": "Quando è il momento giusto per comprare",
+      "key_points": [
+        {
+          "text": "Compra quando è veramente necessario"
+        },
+        {
+          "text": "Valutare necessità personali"
+        }
+      ],
+      "micro_curiosity_loop": "Quali fattori influenzano la decisione?",
+      "rhetorical_question": "Cosa determina la vera necessità?",
+      "visual_suggestion": "Animazioni di bilance e decisioni"
+    },
+    {
+      "id": 3,
+      "title": "Comprendere i Costi",
+      "core_idea": "Esplorare tutte le spese immobiliari",
+      "key_points": [
+        {
+          "text": "Acconto minimo e costi di interesse"
+        },
+        {
+          "text": "Importanza delle tasse e assicurazioni"
+        }
+      ],
+      "micro_curiosity_loop": "Quanto costano davvero questi extra?",
+      "rhetorical_question": "I veri costi stanno tutti in superficie?",
+      "visual_suggestion": "Grafici di costi e tabelle comparative"
+    },
+    {
+      "id": 4,
+      "title": "Storie di Successo",
+      "core_idea": "Casi di studio reali illustrano i concetti",
+      "key_points": [
+        {
+          "text": "John e il suo investimento da 500.000$"
+        },
+        {
+          "text": "Considerare il costo mensile effettivo"
+        }
+      ],
+      "micro_curiosity_loop": "Confronta il tuo caso con quello di John",
+      "rhetorical_question": "Quanto è simile la tua storia a quella di John?",
+      "visual_suggestion": "Video di case e persone reali"
+    },
+    {
+      "id": 5,
+      "title": "Affittare o Comprare?",
+      "core_idea": "Vantaggi e svantaggi dell'affitto",
+      "key_points": [
+        {
+          "text": "Affittare può ridurre sorprese e costi"
+        },
+        {
+          "text": "Perché può convenire in città"
+        }
+      ],
+      "micro_curiosity_loop": "Stai perdendo denaro comprando?",
+      "rhetorical_question": "Qual è la scelta giusta per te?",
+      "visual_suggestion": "Animazioni di confronto affitto vs acquisto"
+    }
+  ],
+  "conclusion": {
+    "summary": "Investire in immobiliare richiede pianificazione e valutazione attenta.",
+    "final_message": "Valuta i tuoi costi, i benefici e il contesto personale.",
+    "final_cta": "Continua a seguire per diventare un investitore esperto!",
+    "visual_suggestion": "Chiusura con immagini di successo e case felici"
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Città vivaci",
+      "Famiglie felici in casa"
+    ],
+    "animations": [
+      "Grafici in movimento",
+      "Confronti animati"
+    ],
+    "on_screen_texts": [
+      "Costo Opportunità",
+      "Vantaggi dell'Affitto"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Mantieni un ritmo vivace e coinvolgente",
+    "tone_tips": "Amichevole ma informativo, trasmetti fiducia",
+    "emotion_curve": "Alterna tensione e sollievo con storie e dati",
+    "storytelling_hooks": "Inizia con un problema comune, risolvi col finale"
+  }
+}
