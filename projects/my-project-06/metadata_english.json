@@ -1,0 +1,13 @@
+{
+  "project": "my-project-06",
+  "language": "english",
+  "generated_files": {
+    "outline": "/home/kostiantyn/projects/storyforge/projects/my-project-06/english/outline.json",
+    "full_script": "/home/kostiantyn/projects/storyforge/projects/my-project-06/english/full_script.json",
+    "audio_dir": "/home/kostiantyn/projects/storyforge/projects/my-project-06/english/audio"
+  },
+  "files_count": {
+    "audio_files": 15,
+    "wav_files": 15
+  }
+}

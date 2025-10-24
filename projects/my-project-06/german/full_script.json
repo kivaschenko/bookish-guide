@@ -1,0 +1,165 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Haus kaufen oder mieten? Buffetts unbequeme Wahrheit",
+      "Warum Mieten oft schlauer ist – mit Buffett-Logik",
+      "Eigenheim: Konsumgut oder Investment? Die klare Rechnung"
+    ],
+    "tone_style": "mündlich, pedagogisch, dynamisch – Geldanlage klar erklärt",
+    "target_audience": "Privatanleger, Wirtschaftsinteressierte, 30–60 Jahre",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "Würdest du 500.000 Euro ausgeben, wenn Mieten plus Investieren dir mehr bringt?",
+    "curiosity_loop": "Bleib dran: Die 10-Jahres-Rechnung dreht oft alles um.",
+    "visual_suggestion": "Split-Screen: Traumhaus vs. Aktienchart, Geld stapelt sich auf der Miet-Seite."
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "Buffetts Blick: Haus als Entscheidung, nicht als Dogma",
+      "core_idea": "Buffett priorisiert Kapitalflexibilität über Status; Kauf nur, wenn’s passt.",
+      "micro_curiosity_loop": "Gleich siehst du, wie Opportunitätskosten dein Ergebnis kippen.",
+      "rhetorical_question": "Ist dein Haus Wunsch – oder teurer Zinskäfig?",
+      "visual_suggestion": "Zeitstrahl: Buffett jung, kein Haus; später kleiner Vermögensanteil fürs Haus.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Kapital flexibel, Ertrag prüfen",
+          "paragraph": "Viele binden Geld zu lange und lassen Chancen liegen, weil Flexibilität sofort verschwindet. Wer Ausgaben streckt, hält Optionen offen und reagiert schnell, wenn Besseres auftaucht. Vergleiche jeden Euro heute mit dem erwarteten Ertrag morgen, nicht nur mit dem Preis. Leasing statt Kauf kann sinnvoll sein, wenn freie Mittel höhere Erträge anderswo ermöglichen. Monatsabo statt Jahresvertrag schützt Liquidität, falls neue Angebote schneller Wert liefern können. Rechne immer dagegen und frage, was die Alternative nach Kosten, Risiko und Zeit einbringt. Halte dein Geld beweglich, prüfe Erträge regelmäßig und entscheide erst dann bewusst. So vermeidest du teure Bindungen und nutzt Chancen, sobald sie sich zeigen.",
+          "target_words": 100,
+          "actual_words": 102
+        },
+        {
+          "id": 2,
+          "title": "Kaufen bei kleinem Anteil",
+          "paragraph": "Viele kaufen zu früh, wenn ein Trend überall im Gespräch ist. Klüger handelst du, wenn du erst kaufst, sobald der Anteil im Vermögen klein bleibt. So steuerst du das Risiko und vermeidest Käufe auf dem Höhepunkt. Siehst du Aktien, die schon viel Platz einnehmen, wartest du geduldig und hältst Geld zurück. Sinkt ihr Anteil später deutlich, kaufst du in kleinen Schritten und bleibst ruhig. Ähnlich gehst du bei Immobilien vor, wenn sie bereits einen großen Teil ausmachen. Erst kaufen, wenn der Anteil wieder gering wirkt, hält deine Struktur einfach und übersichtlich. Prüfe heute deinen Vermögensmix, markiere hohe Anteile und plane Käufe erst bei Rückgang.",
+          "target_words": 100,
+          "actual_words": 104
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Mythen platzen lassen: Die echten Vollkosten",
+      "core_idea": "Miete ist nicht „verloren“; Eigentum hat versteckte Kostenblöcke.",
+      "micro_curiosity_loop": "Gleich zerlegen wir eine Beispielrechnung – Zahl für Zahl.",
+      "rhetorical_question": "Rechnest du mit allen Posten oder nur der Rate?",
+      "visual_suggestion": "Kostenlayer blenden sich auf ein Haus ein: Zins, Steuer, Wartung.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Vollkosten schlagen Raten",
+          "paragraph": "Viele Käufer sehen zuerst den niedrigen Monatsbetrag beim Angebot und fühlen sich sicher. Der Rate wirkt klein, doch Gebühren, Laufzeit und Zusatzpakete erhöhen die Gesamtausgabe deutlich. Ein Smartphone wirkt günstig auf Raten, doch Versicherung und längere Bindung treiben den Preis. Ein Auto wirkt erschwinglich im Leasing, doch Kilometergrenzen und Rückgabekosten erhöhen die Zahlung. Smarte Entscheider vergleichen immer Barpreis, Zinsen, Gebühren und Restwert über die gesamte Zeit. Wer Vollkosten prüft, erkennt versteckte Risiken und verhandelt bessere Konditionen mit Anbietern. Überprüfe heute dein nächstes Angebot vollständig und entscheide erst nach der realen Gesamtsumme.",
+          "target_words": 100,
+          "actual_words": 91
+        },
+        {
+          "id": 2,
+          "title": "Die wahren Besitzkosten",
+          "paragraph": "Beim Kauf zählt nicht nur der Preis, denn jede Anschaffung kostet auch später Geld. Denke an vier Dinge, Steuern, Versicherung, Instandhaltung und die verpasste Chance auf Zinsen. Kaufst du ein Auto, zahlst du Fahrzeugsteuer, Versicherung, Werkstatt, und bindest viel Kapital. Kaufst du eine Wohnung, kommen Grundsteuer, Gebäudeversicherung und regelmäßige Reparaturen sicher dazu. Dazu fehlt dir Zinsgewinn, weil dein Geld in Auto oder Wohnung steckt. Rechne alles pro Jahr zusammen, teile durch Monate, und vergleiche mit Alternativen. So triffst du ruhigere Entscheidungen und vermeidest teure Überraschungen beim Besitz später. Prüfe diese Summe vor jeder Unterschrift und richte dein Budget danach früh.",
+          "target_words": 100,
+          "actual_words": 100
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Case Study: Kaufen vs. Mieten im Zahlencheck",
+      "core_idea": "Konkrete Monatskosten vs. investierte Ersparnis zeigen die Differenz.",
+      "micro_curiosity_loop": "In 10 Jahren? Die Rendite überrascht viele.",
+      "rhetorical_question": "Was bringt dir die nächste Dekade wirklich mehr?",
+      "visual_suggestion": "Diagramm: Monatliche Kaufgesamtkosten vs. Miete + ETF-Sparplan.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Kaufen kostet Flexibilität",
+          "paragraph": "Beim Kauf entstehen oft hohe feste Kosten, lange Bindung und wenig Flexibilität. Das frisst Budget am Anfang und erhöht Druck, selbst wenn Pläne sich ändern. Gleichzeitig verlieren Kaufende andere Chancen, weil das gebundene Geld anderswo fehlen könnte. Ein Beispiel ist Wohnen, eine Wohnung kaufen bindet Eigenkapital, Miete bleibt flexibler. Oder im Betrieb, Maschinen kaufen kostet viel sofort, Leasen verteilt Zahlungen und Risiken. Wer zuerst rechnet, vergleicht feste Kosten mit möglichen Gewinnen aus anderen Verwendungen. Prüfen Sie heute Bedarf, Laufzeit und Geldbedarf, und wählen Sie die beweglichere Option.",
+          "target_words": 100,
+          "actual_words": 87
+        },
+        {
+          "id": 2,
+          "title": "Mieten und klug investieren",
+          "paragraph": "Miete kostet oft weniger pro Monat als ein vergleichbarer Immobilienkredit mit Nebenkosten. Wer mietet, spart häufig Wartung, Grundsteuer und unerwartete Reparaturen am Gebäude. Diese freie Summe kann regelmäßig in einen breit gestreuten Indexfonds fließen, jeden Monat. Historische Daten zeigen langfristig solide Renditen, trotz Schwankungen einzelner Jahre in vielen Märkten weltweit. Parallel bleibt man flexibel, falls Job, Familie oder Markt die Stadt wechseln lassen. Ein praktisches Beispiel macht es deutlich und zeigt die Wirkung über mehrere Jahre. Liegt die Miete 400 Euro unter der Rate, wächst dieser Betrag konsequent investiert. Prüfe die eigenen Zahlen nüchtern, entscheide objektiv und setze einen automatischen Sparplan auf.",
+          "target_words": 100,
+          "actual_words": 102
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Leverage: Turbo oder Totalschaden?",
+      "core_idea": "Fremdkapital verstärkt Renditen – und Verluste brutal.",
+      "micro_curiosity_loop": "Wann Kauf trotz allem Sinn macht, kommt sofort.",
+      "rhetorical_question": "Kannst du Kursrückgänge emotional und finanziell tragen?",
+      "visual_suggestion": "Schaukelgrafik: Hebelwirkung nach oben/unten auf Eigenkapital.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Kleines Plus, großes Wachstum",
+          "paragraph": "Ein kleines Plus im Monat verändert über Jahre deutlich das Eigenkapital spürbar. Wer regelmäßig etwas zurücklegt, sieht Zinseszinseffekte, auch wenn der Start sehr klein wirkt. Jede Erhöhung, selbst zehn Euro pro Woche, beschleunigt den Aufbau messbar und dauerhaft. Ein kleiner Gehaltsbonus oder geringere Ausgaben pro Vertrag steigern die Sparrate ohne großen Aufwand. Wer Gewinne wieder anlegt, erhöht die Basis, sodass jedes künftige Plus stärker wirkt. Überprüfe die Rate vierteljährlich, erhöhe sie bei Spielraum, und setze automatische Aufstockung. Starte heute mit einem kleinen Plus, halte Kurs, und sieh dein Eigenkapital planbar wachsen.",
+          "target_words": 100,
+          "actual_words": 91
+        },
+        {
+          "id": 2,
+          "title": "Kleines Minus, großes Problem",
+          "paragraph": "Ein kleines Minus klingt harmlos, doch es kann eigenes Geld komplett auslöschen. Das passiert, wenn viel mit geliehenem Geld bezahlt wird und wenig Puffer bleibt. Fällt der Wert nur etwas, reicht das Minus, um das eigene Polster zu verbrauchen. Beispiel eins zeigt es klar, eine Wohnung fällt leicht, der Kredit frisst dein Eigenes. Beispiel zwei passt auch, eine Firma verkauft schwächer, die Zinsen steigen, das Eigenkapital verschwindet. Prüfe deshalb immer die Schulden, die Rücklagen und den Spielraum, bevor du investierst. So schützt du dein Kapital und vermeidest, dass ein kleines Minus alles zerstört.",
+          "target_words": 100,
+          "actual_words": 93
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Dein Entscheidungs-Framework in 5 Schritten",
+      "core_idea": "Bedarf, Zahlen, Liquidität, Zeit, Opportunität – dann entscheiden.",
+      "micro_curiosity_loop": "Zum Schluss: die drei Merksätze, die bleiben.",
+      "rhetorical_question": "Kaufst du fürs Leben – oder fürs Depot?",
+      "visual_suggestion": "Checkliste blendet nacheinander ein, Häkchen setzen sich.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Solide Basis schaffen",
+          "paragraph": "Du planst einen Kauf und willst ruhig schlafen. Starte mit mindestens 20 Prozent eigenem Geld. Das senkt die monatliche Rate und die Zinsen oft spürbar. Halte zusätzlich einen Notgroschen für drei bis sechs Monate bereit. Das deckt Miete, Lebensmittel und Versicherungen, wenn etwas schiefgeht. Ohne Notgroschen erzwingen kleine Probleme schnelle und teure Kredite. Mit beiden Bausteinen verhandelst du besser und bekommst oft bessere Konditionen. Beispiel: Ein Käufer mit 20 Prozent Eigenanteil zahlt weniger Gebühren. Beispiel: Eine Reparatur trifft nicht das Budget, weil der Notgroschen greift. Prüfe heute deine Zahlen und richte diese Reserve sofort ein.",
+          "target_words": 100,
+          "actual_words": 95
+        },
+        {
+          "id": 2,
+          "title": "Langfristig denken, Zinsen beobachten",
+          "paragraph": "Ein Anlagehorizont von über zehn Jahren gibt dir Zeit, Schwankungen gelassen auszuhalten. In so langen Phasen wirken Zinsen stark, sie bestimmen Rendite, Risiko und Geduld. Steigende Zinsen machen Kredite teurer und drücken oft Bewertungen von Anleihen und Aktien. Fallende Zinsen erleichtern Finanzierungen und können Preise für Vermögenswerte langfristig deutlich stützen. Ein Beispiel zeigt den Effekt, regelmäßiges Sparen profitiert stärker, wenn Zinsen früh reinvestiert werden. Ein weiteres Beispiel, eine Hypothek mit festem Zinssatz schützt Haushalte, wenn Zinsen plötzlich steigen. Plane heute mit einem Zehnjahresblick, prüfe regelmäßig Zinsen und passe deinen Plan konsequent an.",
+          "target_words": 100,
+          "actual_words": 92
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "summary": "Eigenheim ist Konsum mit Nebenrendite; Vollkosten und Alternativen entscheiden.",
+    "final_message": "Rechne nüchtern, liebe bewusst: Finanzen klar, Leben frei.",
+    "final_cta": "Lade dir die Vollkosten-Checkliste herunter und vergleiche heute.",
+    "visual_suggestion": "On-Screen: Drei Merksätze, daneben QR-Code zur Checkliste."
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Maklerbesichtigung, Familie schaut sich Haus an",
+      "Person investiert per App in ETFs"
+    ],
+    "animations": [
+      "Vollkosten-Torte mit aufklappenden Segmenten",
+      "Leverage-Pendel, das stärker ausschlägt"
+    ],
+    "on_screen_texts": [
+      "Vollkosten > Rate",
+      "Mieten + Investieren kann überlegen sein"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Schneller Einstieg, dann klare Blöcke, kurze Sätze, Zahlen knackig.",
+    "tone_tips": "Locker, respektvoll, nie belehrend; visuell viel verankern.",
+    "emotion_curve": "Neugier → Aha durch Zahlen → leichte Sorge bei Leverage → Erleichterung mit Framework.",
+    "storytelling_hooks": "Alltagsfrage, Buffett-Anekdote, Zahlen-Duell, Risiko-Minidrama, klare Handlungsanweisung."
+  }
+}

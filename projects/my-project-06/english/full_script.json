@@ -1,0 +1,200 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Is Buying a Home Actually a Bad Investment?",
+      "Rent vs Buy: The Math They Never Show You",
+      "Buffett’s Rule for Homeownership (And Your Wallet)"
+    ],
+    "tone_style": "conversational, educational, fast-paced money talk",
+    "target_audience": "individual investors, economics-curious viewers, ages 30–60",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "What if the ‘American Dream’ is draining your returns?",
+    "curiosity_loop": "Stay to see the 10-year outcome that flips the script.",
+    "visual_suggestion": "Split-screen: cozy house vs rising stock chart; money funneling into a house sink."
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "Home as Investment: Myth vs Reality",
+      "core_idea": "A home can be great for life, average for returns.",
+      "micro_curiosity_loop": "When does buying secretly earn 7–8%?",
+      "rhetorical_question": "Are you buying stability—or sacrificing compounding?",
+      "visual_suggestion": "Buffett photo morphs into calculator overlay; cash locked behind a door.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "High Purpose, Modest Returns",
+          "paragraph": "Many roles give strong life value, yet money returns often sit in the middle. People feel meaning through daily impact, but salaries may not match that feeling. A teacher guides minds and builds trust, yet pay stays steady, not exceptional. A nurse supports health and families, yet overtime fills gaps more than base pay. This pattern appears across regions and sectors, especially in care, education, and public work. You can value purpose and still plan savings, benefits, and side income carefully. You set clear goals, review costs, and choose paths that fit both aims.",
+          "target_words": 100,
+          "actual_words": 94
+        },
+        {
+          "id": 2,
+          "title": "Own or Rent Costs",
+          "paragraph": "Many people compare rent and mortgage payments but miss the full bill. Owning adds interest, property tax, insurance, repairs, and buying and selling costs. Renting adds deposits, renter insurance, rent hikes, and parking or pet fees. A small condo may look cheaper monthly, yet surprise repairs can raise yearly spending. A rental might rise each year, while the owner fixes broken appliances and leaks. Owning builds control and possible price gains, but ties cash and limits flexibility. Total monthly and one time costs for both over five years, then decide today.",
+          "target_words": 100,
+          "actual_words": 91
+        },
+        {
+          "id": 3,
+          "title": "Move Home Cash To Grow",
+          "paragraph": "Many people keep a lot of money tied up in their homes today. That money does not grow much because a home usually rises in value slowly. When money sits in a house, it misses steady gains from broad markets. For example, paying extra on a mortgage saves interest, but it stops bigger growth elsewhere. Another example, selling a second property and investing the proceeds can speed long term growth. This choice also spreads risk across many companies and regions, not one street. Review how much cash sits in the home, then move some to diverse investments.",
+          "target_words": 100,
+          "actual_words": 97
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The Hidden Costs Everyone Forgets",
+      "core_idea": "Mortgage vs rent is incomplete—stack every cost.",
+      "micro_curiosity_loop": "One line item rivals your mortgage—guess which?",
+      "rhetorical_question": "If rent is simple, why complicate ownership math?",
+      "visual_suggestion": "Receipt-style list adding line by line; graph of rising annual costs.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Mortgage costs made simple",
+          "paragraph": "Buying a home means more than the sale price you see online today. The monthly payment often bundles interest, property taxes, and home insurance too. A small down payment can trigger PMI, which adds another cost each month. A larger down payment lowers the loan amount and may remove PMI sooner. Interest rate changes also shift your payment, even when the home price stays steady. For example, a buyer with five percent down might pay PMI, while twenty percent avoids it. Add each piece to estimate your true payment, then set a budget you can keep.",
+          "target_words": 100,
+          "actual_words": 96
+        },
+        {
+          "id": 2,
+          "title": "Plan Yearly Repair Budget",
+          "paragraph": "You avoid surprise repair costs by planning a simple yearly repair budget. A practical rule has you set aside one to two percent of value. If a home is valued at 300,000 dollars, budget between 3,000 and 6,000. This covers routine fixes like roof patches, plumbing leaks, or appliance replacements. Older buildings or harsh climates may push your spending toward the higher end. Newer buildings or mild climates may keep your costs near the lower end. Set this amount aside monthly, review yearly, and keep repair bills from disrupting plans.",
+          "target_words": 100,
+          "actual_words": 90
+        },
+        {
+          "id": 3,
+          "title": "Down Payment Opportunity Cost",
+          "paragraph": "Many people save hard for a home down payment and feel confident about buying. The missed part is what that cash could do somewhere else right now instead. Put into a basic investment account, it might grow faster than early home equity. Used to clear high-interest debt, monthly costs drop, credit improves, and stress often fades. A larger down payment still cuts interest and risk, but it limits cash flexibility today. Think about timeline, likely returns, and your tolerance for surprise expenses and repairs. Run the numbers before locking cash away, then choose the path that fits you.",
+          "target_words": 100,
+          "actual_words": 98
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Case Study: The $500K Decision",
+      "core_idea": "Run the full cash flow, then add opportunity cost.",
+      "micro_curiosity_loop": "Does renting save enough to out-invest owning?",
+      "rhetorical_question": "Are you pricing the house—or the habit?",
+      "visual_suggestion": "Calculator app showing totals; $100K split into house vs index fund.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Monthly cost to own",
+          "paragraph": "Owning this place costs about four thousand three hundred dollars each month, all-in. That number usually includes the loan payment, property taxes, insurance, and routine upkeep. You might also add utilities, internet, and small repairs to keep the numbers honest. Compare that monthly cost with local rent for a similar home and location. If ownership is higher, weigh stability, control, and long-term value against today’s cash flow. If rent is higher, ownership still demands savings for repairs, taxes, and yearly upkeep. Set your budget, stress-test your income, and decide if this monthly cost fits today.",
+          "target_words": 100,
+          "actual_words": 95
+        },
+        {
+          "id": 2,
+          "title": "Hidden Down Payment Cost",
+          "paragraph": "Many buyers miss a quiet cost when moving cash into a home down payment. That money could earn about six percent yearly in a basic investment most people use. On 100,000 saved, six percent equals 6,000 a year, or roughly 500 each month. Put 100,000 into the house, and that 500 monthly return disappears for now. With 50,000, the missed return is about 250 each month, still meaningful. Compare the mortgage interest saved against this lost return before choosing a larger down payment. Run the numbers for your situation and pick the option that leaves more money.",
+          "target_words": 100,
+          "actual_words": 97
+        },
+        {
+          "id": 3,
+          "title": "True Cost Beats Price",
+          "paragraph": "You see a low price and feel relief, but that number can mislead you. True cost includes energy use, maintenance, repairs, time, and fees you pay later. A budget laptop may seem smart, yet slow performance and fixes waste hours and money. A cheap flight looks great, until baggage charges and extra transfers raise total travel costs. When comparing choices, add recurring expenses, expected lifespan, and support quality to the calculation. Ask how long it lasts, what it consumes, and what surprises appear after purchase. Choose the option with the lowest true cost, and keep more value over time.",
+          "target_words": 100,
+          "actual_words": 99
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Rent vs Buy in Today’s Market",
+      "core_idea": "In many cities, renting wins on cash and flexibility.",
+      "micro_curiosity_loop": "So when does buying actually win?",
+      "rhetorical_question": "What could your savings compound into by year ten?",
+      "visual_suggestion": "Map with rent-vs-buy markers; 10-year chart crossing over.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Owning Costs, Renting Limits",
+          "paragraph": "People face a simple choice today between owning things and renting them when needed. Owning often demands high upfront cash, plus repairs, insurance, and storage over time. Renting can feel easier at first, but many services skip big-ticket items entirely. For example, rental platforms offer tools and furniture, but rarely include cars or major appliances. This gap limits access for people who need expensive gear briefly, like contractors or students. It also pushes households toward debt when purchase becomes the only workable option. Viewers can compare total costs and ask providers to add costly items, then choose wisely.",
+          "target_words": 100,
+          "actual_words": 98
+        },
+        {
+          "id": 2,
+          "title": "City gaps hit record",
+          "paragraph": "Across most cities, the gap between high and low incomes is the widest in decades. Housing costs rise fast while wages for many workers move slowly or stay flat. High paying jobs cluster in certain districts, leaving other areas with fewer chances. In New York, median rent jumps faster than service pay, squeezing household budgets hard. In London, entry roles lag behind living costs, so families cut essentials to cope. City leaders expand transit and training, yet results arrive slowly and miss many residents. Review your budget, seek upskilling options, and compare neighborhoods before signing any lease.",
+          "target_words": 100,
+          "actual_words": 97
+        },
+        {
+          "id": 3,
+          "title": "Rent Then Invest Wins",
+          "paragraph": "Many people rush to buy a home, but a ten-year rent plan can win. You rent a place you like, then invest the money owning would have used. That means saving the down payment, extra fees, repairs, and higher monthly costs. Over ten years, steady investing can grow, while owners face taxes, insurance, and upkeep. In many markets, rent stays lower than mortgages, so your investments work even harder. For example, investing a modest difference monthly can build a strong cushion by year ten. Run your numbers, compare both paths, and choose the one that meets your goals today.",
+          "target_words": 100,
+          "actual_words": 99
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Leverage, Life Value, and Your Playbook",
+      "core_idea": "Use leverage wisely, honor life goals, run the math.",
+      "micro_curiosity_loop": "A two-minute model to decide today.",
+      "rhetorical_question": "Is your home a tool—or a trophy?",
+      "visual_suggestion": "Scale: family photos vs calculator; slider for appreciation assumptions.",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Leverage Boosts And Breaks",
+          "paragraph": "Leverage means using borrowed money to make a position bigger than cash allows. When prices move up, the gain looks large because the stake is bigger. When prices drop, losses hit equity fast because debt still needs payment. A trader buys oil with borrowed funds and doubles money after a rally. The same trade collapses if oil falls sharply, and the account gets closed. A property investor faces this too when rents drop but loan bills stay. Use small leverage, set hard loss limits, and plan exits before opening positions.",
+          "target_words": 100,
+          "actual_words": 90
+        },
+        {
+          "id": 2,
+          "title": "Buy smart, invest smarter",
+          "paragraph": "Many people mix shopping and investing, and that creates costly mistakes over time. As a shopper, you choose products that fit needs and last, not to make money. As an investor, you choose assets for returns and risk, not daily use or style. You buy shoes for comfort and durability, then wear them without worry. You buy a stock or fund for long term growth, not brand appeal. This clear split reduces stress, saves money, and builds better habits across markets. Start buying for life fit and investing for returns, and watch your outcomes improve.",
+          "target_words": 100,
+          "actual_words": 95
+        },
+        {
+          "id": 3,
+          "title": "Decide With Confidence",
+          "paragraph": "Start with a clear outcome you want, then pick three simple criteria that matter. Score each option from zero to five on every criterion using plain facts, not wishes. Add the scores, drop any option that fails one key requirement without excuses. Compare the top two, think about the worst likely downside, and plan a safeguard. Set a short deadline, choose the winner, and write one sentence why. Share that reason with someone you trust to check for gaps or bias. Move forward now, because this simple framework gives you enough clarity to act.",
+          "target_words": 100,
+          "actual_words": 94
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "summary": "Owning builds stability; investing builds returns—run the full cost to choose.",
+    "final_message": "Buy when life demands it and numbers work; otherwise rent and automate investing.",
+    "final_cta": "Download the free rent-vs-buy calculator and plug your city’s numbers today.",
+    "visual_suggestion": "End card with checklist and QR code to calculator."
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Families in homes, neighborhood shots, school drop-off scenes",
+      "Close-ups of leaking pipes, roofers, HVAC repairs"
+    ],
+    "animations": [
+      "Stacked bar of ownership costs vs rent line",
+      "Ten-year compounding comparison: home equity vs index fund"
+    ],
+    "on_screen_texts": [
+      "Don’t compare rent to mortgage—compare ALL-IN",
+      "Opportunity Cost: What your down payment could earn"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Fast open, crisp transitions, short sentences, keep momentum.",
+    "tone_tips": "Be friendly, non-judgmental, data-driven with plain language.",
+    "emotion_curve": "Curiosity → surprise at costs → clarity via framework → empowerment.",
+    "storytelling_hooks": "Open with a contrarian claim, tease the 10-year flip, deliver a simple decision model."
+  }
+}
