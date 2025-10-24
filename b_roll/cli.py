@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 def load_config():
     """Load configuration from config.yml"""
     config_path = Path(__file__).parent.parent / "config.yml"
+    logger.info(f"Loading config from {config_path}")
     if not config_path.exists():
         logger.warning(f"Config file not found at {config_path}")
         return {}
