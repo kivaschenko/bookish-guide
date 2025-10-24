@@ -46,6 +46,7 @@ def setup_logging():
 def load_config():
     """Load configuration from config.yml"""
     config_path = Path(__file__).parent / "config.yml"
+    logging.info(f"Loading configuration from: {config_path}")
     try:
         with open(config_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
@@ -59,17 +60,19 @@ def ensure_project_dirs(project_name, language):
     project_root = PROJECTS_DIR / project_name
     language_dir = project_root / language
     audio_dir = language_dir / "audio"
-    
+
     # Create all directories at once
     project_root.mkdir(parents=True, exist_ok=True)
     language_dir.mkdir(parents=True, exist_ok=True)
     audio_dir.mkdir(parents=True, exist_ok=True)
-    
+
     logging.info(f"📁 Project directories ready: {project_root}")
     return project_root, language_dir, audio_dir
 
 
-def save_metadata(project_root, language_dir, audio_dir, project_name, language, has_audio=False):
+def save_metadata(
+    project_root, language_dir, audio_dir, project_name, language, has_audio=False
+):
     """Save project metadata"""
     metadata = {
         "project": project_name,
@@ -79,18 +82,18 @@ def save_metadata(project_root, language_dir, audio_dir, project_name, language,
             "full_script": str(language_dir / "full_script.json"),
         },
     }
-    
+
     if has_audio:
         metadata["generated_files"]["audio_dir"] = str(audio_dir)
         metadata["files_count"] = {
             "audio_files": len(list(audio_dir.glob("*.mp3"))),
             "wav_files": len(list(audio_dir.glob("*.wav"))),
         }
-    
+
     metadata_file = project_root / f"metadata_{language}.json"
     with open(metadata_file, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
-    
+
     logging.info(f"📊 Metadata saved: {metadata_file}")
     return metadata
 
@@ -172,7 +175,9 @@ Examples:
     config = load_config()
 
     # Create project structure
-    project_root, language_dir, audio_dir = ensure_project_dirs(args.project, args.language)
+    project_root, language_dir, audio_dir = ensure_project_dirs(
+        args.project, args.language
+    )
 
     try:
         # Read input text
@@ -186,9 +191,11 @@ Examples:
         # Handle script generation (-s flag)
         if args.script_only:
             logging.info("📝 Generating script only...")
-            
+
             paraphraser = Paraphraser(config)
-            result = paraphraser.process(language=args.language, input_file_path=str(input_path))
+            result = paraphraser.process(
+                language=args.language, input_file_path=str(input_path)
+            )
 
             if not result.get("success"):
                 logging.error("❌ Script generation failed")
@@ -215,40 +222,62 @@ Examples:
                         total_words += micro_section.get("actual_words", 0)
 
             logging.info(f"✅ Script generated: {total_words} words")
-            save_metadata(project_root, language_dir, audio_dir, args.project, args.language, has_audio=False)
+            save_metadata(
+                project_root,
+                language_dir,
+                audio_dir,
+                args.project,
+                args.language,
+                has_audio=False,
+            )
 
         # Handle audio generation (-ag flag)
         elif args.audio_gemini:
             logging.info("🎤 Generating audio with Gemini...")
-            
+
             # Check if full_script.json exists
             full_script_file = language_dir / "full_script.json"
             if not full_script_file.exists():
-                logging.error("❌ full_script.json not found. Generate script first with -s")
+                logging.error(
+                    "❌ full_script.json not found. Generate script first with -s"
+                )
                 sys.exit(1)
 
             gemini_tts = GeminiTTS(config)
             # Override the audio output path to project audio dir
             gemini_tts.audio_path = audio_dir
-            
+
             # Extract text and generate audio
-            script_content = gemini_tts.extract_text_from_full_script_json(str(full_script_file))
+            script_content = gemini_tts.extract_text_from_full_script_json(
+                str(full_script_file)
+            )
             voice_result = gemini_tts.generate_all_audio(script_content)
 
             if not voice_result.get("success"):
                 logging.error("❌ Voice generation failed")
                 sys.exit(1)
 
-            logging.info(f"✅ Voice generated: {voice_result['total_duration']:.2f}s total")
-            save_metadata(project_root, language_dir, audio_dir, args.project, args.language, has_audio=True)
+            logging.info(
+                f"✅ Voice generated: {voice_result['total_duration']:.2f}s total"
+            )
+            save_metadata(
+                project_root,
+                language_dir,
+                audio_dir,
+                args.project,
+                args.language,
+                has_audio=True,
+            )
 
         # Handle both script and audio (default behavior)
         else:
             logging.info("📝🎤 Generating script and audio...")
-            
+
             # Generate script first
             paraphraser = Paraphraser(config)
-            result = paraphraser.process(language=args.language, input_file_path=str(input_path))
+            result = paraphraser.process(
+                language=args.language, input_file_path=str(input_path)
+            )
 
             if not result.get("success"):
                 logging.error("❌ Script generation failed")
@@ -270,23 +299,34 @@ Examples:
             # Generate audio
             gemini_tts = GeminiTTS(config)
             gemini_tts.audio_path = audio_dir
-            
-            script_content = gemini_tts.extract_text_from_full_script_json(str(full_script_file))
+
+            script_content = gemini_tts.extract_text_from_full_script_json(
+                str(full_script_file)
+            )
             voice_result = gemini_tts.generate_all_audio(script_content)
 
             if not voice_result.get("success"):
                 logging.error("❌ Voice generation failed")
                 sys.exit(1)
 
-            logging.info(f"✅ Script and Voice generated: {voice_result['total_duration']:.2f}s total")
-            save_metadata(project_root, language_dir, audio_dir, args.project, args.language, has_audio=True)
+            logging.info(
+                f"✅ Script and Voice generated: {voice_result['total_duration']:.2f}s total"
+            )
+            save_metadata(
+                project_root,
+                language_dir,
+                audio_dir,
+                args.project,
+                args.language,
+                has_audio=True,
+            )
 
         # Success summary
         logging.info("=" * 50)
         logging.info("✅ SUCCESS - Generation completed!")
         logging.info(f"📁 Project: {project_root}")
         logging.info(f"🌍 Language: {args.language}")
-        
+
         if (language_dir / "outline.json").exists():
             logging.info(f"📋 Outline: {language_dir / 'outline.json'}")
         if (language_dir / "full_script.json").exists():
