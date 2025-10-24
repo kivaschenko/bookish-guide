@@ -274,6 +274,111 @@ python exponential_video.py --vectorbroll --project "my-project"
 python exponential_video.py --testbrollchoice
 ```
 
+## 🧪 Testing with Sample Videos
+
+### Quick Test Video Generation
+
+If you need sample videos for testing, you can generate them using FFmpeg:
+
+```bash
+# Navigate to B-roll directory
+cd b-roll/
+
+# Generate test videos with different characteristics
+# Test Video 1: 10-second HD video with moving test pattern
+ffmpeg -f lavfi -i testsrc2=duration=10:size=1920x1080:rate=30 -c:v libx264 -pix_fmt yuv420p test_video_1.mp4
+
+# Test Video 2: 8-second HD video with solid blue background
+ffmpeg -f lavfi -i "color=blue:duration=8:size=1280x720:rate=25" -c:v libx264 -pix_fmt yuv420p test_video_2.mp4
+
+# Test Video 3: 6-second video with text overlay
+ffmpeg -f lavfi -i "testsrc=duration=6:size=854x480:rate=30" -vf "drawtext=text='Test B-Roll Video':fontsize=30:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2" -c:v libx264 -pix_fmt yuv420p test_video_3.mp4
+```
+
+### Generated Test Video Specifications
+
+| Video | Duration | Resolution | Size | Description |
+|-------|----------|------------|------|-------------|
+| `test_video_1.mp4` | 10s | 1920x1080 (Full HD) | ~7.9 MB | Moving test pattern with colors, 30 fps |
+| `test_video_2.mp4` | 8s | 1280x720 (HD) | ~12 KB | Solid blue background, 25 fps |
+| `test_video_3.mp4` | 6s | 854x480 (SD) | ~57 KB | Test pattern with text overlay, 30 fps |
+
+### Verify Test Setup
+
+```bash
+# Check that videos are detected
+python -m b_roll.cli analyze-library --verbose
+
+# Expected output:
+# 📊 B-roll Library Analysis
+# ========================================
+# 📁 Library Path: b-roll
+# 📹 Total Videos: 3
+# 📋 Metadata Files: 0
+# 📈 Coverage: 0/3 (0.0%)
+```
+
+## 🌐 Free Stock Video Sources
+
+### Recommended Platforms for Production B-roll
+
+#### 1. **Pixabay Videos** ⭐ (Most Recommended)
+- **URL**: https://pixabay.com/videos/
+- **License**: Completely free, no attribution required
+- **Quality**: High-quality MP4 downloads
+- **Content**: Business, nature, technology, lifestyle
+- **Formats**: Multiple resolutions available (HD, 4K)
+
+#### 2. **Pexels Videos** ⭐
+- **URL**: https://www.pexels.com/videos/
+- **License**: Free for commercial use
+- **Attribution**: Not required but appreciated
+- **Quality**: Professional-grade footage
+- **Content**: Diverse categories including business, people, nature
+
+#### 3. **Unsplash Videos**
+- **URL**: https://unsplash.com/t/videos
+- **License**: Free for commercial use
+- **Quality**: High-quality, artistic footage
+- **Content**: Curated aesthetic videos
+
+#### 4. **Videvo** (Free Tier)
+- **URL**: https://www.videvo.net/
+- **License**: Free with attribution (some no-attribution options)
+- **Quality**: Good variety of HD videos
+- **Content**: Stock footage, motion graphics
+
+#### 5. **Coverr**
+- **URL**: https://coverr.co/
+- **License**: Free for commercial use
+- **Quality**: Beautiful, short video clips
+- **Content**: Modern lifestyle, business, abstract
+
+### Download Tips
+
+1. **File Format**: Download MP4 format for best compatibility
+2. **Resolution**: 1080p or higher for professional results
+3. **Duration**: 10-30 second clips work best for B-roll
+4. **Content Strategy**: 
+   - Business/finance: Charts, handshakes, office scenes
+   - Technology: Keyboards, screens, data visualization  
+   - Lifestyle: People, activities, environments
+   - Nature: Landscapes, time-lapses, abstract patterns
+
+### Integration Workflow
+
+```bash
+# 1. Download videos to B-roll directory
+# 2. Extract metadata
+python -m b_roll.cli extract-metadata
+
+# 3. Analyze library
+python -m b_roll.cli analyze-library --verbose
+
+# 4. Prepare vectors for semantic matching
+python -m b_roll.cli prepare-vectors
+```
+
 #### Workflow Breakdown
 
 **Command 1: `--meta`**
