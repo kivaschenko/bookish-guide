@@ -191,7 +191,7 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
                         ],
                     },
                 ],
-                "max_tokens": 1000,
+                "max_completion_tokens": 1000,
             }
 
             # Appel à l'API OpenAI
@@ -219,16 +219,7 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
                     "content"
                 ].strip()
 
-                # Écrire le résultat dans un fichier .txt
-                txt_path = os.path.splitext(image_path)[0] + ".txt"
-                try:
-                    with open(txt_path, "w", encoding="utf-8") as f:
-                        f.write(analysis_text)
-                    logging.info(f"Metadata saved in {txt_path}")
-                except Exception as e:
-                    logging.error(f"Error writing metadata: {e}")
-                    return {"error": str(e)}
-
+                logging.info(f"Received analysis text: {len(analysis_text)} characters")
                 return {"context": analysis_text, "error": None}
 
         except Exception as e:
@@ -268,10 +259,30 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
             txt_name = os.path.splitext(video_name)[0] + ".txt"
             txt_path = os.path.join(os.path.dirname(video_path), txt_name)
 
-            # Vérifier si l'analyse a déjà été effectuée (présence du fichier .txt)
+            # Vérifier si l'analyse a déjà été effectuée (présence du fichier .txt avec contenu)
             if os.path.exists(txt_path):
-                logging.info(f"Analysis already done for {video_name}, skipping")
-                return True
+                # Vérifier si le fichier a du contenu
+                try:
+                    with open(txt_path, "r", encoding="utf-8") as f:
+                        content = f.read().strip()
+                    if (
+                        content
+                        and not content.startswith("Erreur:")
+                        and not content == "Aucun contexte disponible pour cette vidéo"
+                    ):
+                        logging.info(
+                            f"Analysis already done for {video_name}, skipping"
+                        )
+                        return True
+                    else:
+                        logging.info(
+                            f"Found empty or error file for {video_name}, re-processing"
+                        )
+                except Exception as e:
+                    logging.warning(
+                        f"Could not read existing file for {video_name}: {e}"
+                    )
+                # Continue processing if file is empty or contains error
 
             # Extraire la première frame
             jpg_path = self.extract_first_frame(video_path)
@@ -286,14 +297,23 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
             # Analyser l'image
             analysis = self.analyze_image(jpg_path)
 
-            # Enregistrer uniquement le contexte dans un fichier .txt
+            # Enregistrer le résultat dans un fichier .txt
             with open(txt_path, "w", encoding="utf-8") as f:
-                if analysis and "context" in analysis:
+                if analysis and "context" in analysis and analysis["context"]:
                     f.write(analysis["context"])
+                    logging.info(
+                        f"Context saved for {video_name}: {len(analysis['context'])} characters"
+                    )
+                elif analysis and "error" in analysis and analysis["error"]:
+                    error_msg = f"Erreur lors de l'analyse: {analysis['error']}"
+                    f.write(error_msg)
+                    logging.error(f"Error analyzing {video_name}: {analysis['error']}")
+                    return False
                 else:
                     f.write("Aucun contexte disponible pour cette vidéo")
+                    logging.warning(f"No context available for {video_name}")
+                    return False
 
-            logging.info(f"Context saved for {video_name} (simplified format)")
             return True
 
         except Exception as e:
