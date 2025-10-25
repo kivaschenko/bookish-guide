@@ -73,10 +73,14 @@ class MetaExtractor:
             str: Chemin vers l'image JPG extraite, ou None en cas d'erreur
         """
         try:
+            logging.info(f"Extracting first frame from {video_path}...")
             # Create path for JPG image
             video_name = os.path.basename(video_path)
+            logging.debug(f"Video name: {video_name}")
             jpg_name = os.path.splitext(video_name)[0] + ".jpg"
+            logging.debug(f"JPG name: {jpg_name}")
             jpg_path = os.path.join(os.path.dirname(video_path), jpg_name)
+            logging.debug(f"JPG path: {jpg_path}")
 
             # If image already exists, return it directly
             if os.path.exists(jpg_path):
@@ -84,13 +88,12 @@ class MetaExtractor:
                     f"Image already extracted for {video_name}, using existing one"
                 )
                 return jpg_path
-
-            # Image extraction disabled
-            logging.warning(f"Image extraction disabled for {video_path}")
-            return None
-
-            return jpg_path
-
+            else:
+                logging.info(f"Extracting first frame from {video_path}...")
+                # Extract first frame using FFmpeg
+                return self.extract_first_frame_by_ffmpeg(
+                    video_path=video_path, image_path=jpg_path
+                )
         except Exception as e:
             logging.error(f"Error extracting first frame from {video_path}: {e}")
             traceback.print_exc()
@@ -338,3 +341,47 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
                 success_count += 1
 
         return total, success_count
+
+    def extract_first_frame_by_ffmpeg(self, video_path, image_path=None):
+        """
+        Extracts the first frame from an MP4/MOV video using ffmpeg
+        FFmpeg Command Breakdown:
+        -i video.mp4 → Input file
+        -vframes 1 → Extract only 1 frame
+        -q:v 2 → Quality setting (1=best, 31=worst)
+        -y → Overwrite output without asking
+        output.jpg → Output file
+        """
+        if image_path is None:
+            # Create path for JPG image
+            video_name = os.path.basename(video_path)
+            jpg_name = os.path.splitext(video_name)[0] + ".jpg"
+            image_path = os.path.join(os.path.dirname(video_path), jpg_name)
+
+        import subprocess
+
+        # FFmpeg command to extract first frame
+        cmd = [
+            "ffmpeg",
+            "-i",
+            str(video_path),  # Input video
+            "-vframes",
+            "1",  # Extract only 1 frame
+            "-q:v",
+            "2",  # High quality (1-31, lower = better)
+            "-y",  # Overwrite output file
+            str(image_path),  # Output image
+        ]
+
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            logging.debug(f"FFmpeg command output: {result.stdout}")
+            if result.returncode == 0:
+                logging.info(f"Extracted first frame: {image_path}")
+                return image_path
+            else:
+                logging.error(f"FFmpeg failed: {result.stderr}")
+                return None
+        except FileNotFoundError:
+            logging.error("FFmpeg not found on system")
+            return None

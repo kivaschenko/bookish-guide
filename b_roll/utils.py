@@ -5,7 +5,6 @@
 Utility functions for the B-roll Intelligence Module
 """
 
-import os
 import logging
 import json
 from pathlib import Path
