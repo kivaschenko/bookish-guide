@@ -32,4 +32,4 @@ def setup_logging():
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    logging.info("Système de logging initialisé") 
+    logging.info("Logging configuré avec succès")

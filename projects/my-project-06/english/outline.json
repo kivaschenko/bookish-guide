@@ -1,0 +1,145 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Is Buying a Home Actually a Bad Investment?",
+      "Rent vs Buy: The Math They Never Show You",
+      "Buffett’s Rule for Homeownership (And Your Wallet)"
+    ],
+    "tone_style": "conversational, educational, fast-paced money talk",
+    "target_audience": "individual investors, economics-curious viewers, ages 30–60",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "What if the ‘American Dream’ is draining your returns?",
+    "curiosity_loop": "Stay to see the 10-year outcome that flips the script.",
+    "visual_suggestion": "Split-screen: cozy house vs rising stock chart; money funneling into a house sink."
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "Home as Investment: Myth vs Reality",
+      "core_idea": "A home can be great for life, average for returns.",
+      "key_points": [
+        {
+          "text": "Life value high, financial return often middling"
+        },
+        {
+          "text": "Compare owning vs renting with real costs"
+        },
+        {
+          "text": "Capital tied in homes loses compounding power",
+          "target_words": 100
+        }
+      ],
+      "micro_curiosity_loop": "When does buying secretly earn 7–8%?",
+      "rhetorical_question": "Are you buying stability—or sacrificing compounding?",
+      "visual_suggestion": "Buffett photo morphs into calculator overlay; cash locked behind a door."
+    },
+    {
+      "id": 2,
+      "title": "The Hidden Costs Everyone Forgets",
+      "core_idea": "Mortgage vs rent is incomplete—stack every cost.",
+      "key_points": [
+        {
+          "text": "Down payment, interest, PMI, taxes, insurance"
+        },
+        {
+          "text": "Repairs: budget 1–2% of value yearly"
+        },
+        {
+          "text": "Opportunity cost: what your down payment misses",
+          "target_words": 100
+        }
+      ],
+      "micro_curiosity_loop": "One line item rivals your mortgage—guess which?",
+      "rhetorical_question": "If rent is simple, why complicate ownership math?",
+      "visual_suggestion": "Receipt-style list adding line by line; graph of rising annual costs."
+    },
+    {
+      "id": 3,
+      "title": "Case Study: The $500K Decision",
+      "core_idea": "Run the full cash flow, then add opportunity cost.",
+      "key_points": [
+        {
+          "text": "All-in monthly near $4,300 to own"
+        },
+        {
+          "text": "Down payment’s 6% returns add hidden $500"
+        },
+        {
+          "text": "True cost matters more than sticker price",
+          "target_words": 100
+        }
+      ],
+      "micro_curiosity_loop": "Does renting save enough to out-invest owning?",
+      "rhetorical_question": "Are you pricing the house—or the habit?",
+      "visual_suggestion": "Calculator app showing totals; $100K split into house vs index fund."
+    },
+    {
+      "id": 4,
+      "title": "Rent vs Buy in Today’s Market",
+      "core_idea": "In many cities, renting wins on cash and flexibility.",
+      "key_points": [
+        {
+          "text": "Owning costly; renting excludes big-ticket items"
+        },
+        {
+          "text": "Gap widest in decades across most cities"
+        },
+        {
+          "text": "Ten-year rent-and-invest can beat buying",
+          "target_words": 100
+        }
+      ],
+      "micro_curiosity_loop": "So when does buying actually win?",
+      "rhetorical_question": "What could your savings compound into by year ten?",
+      "visual_suggestion": "Map with rent-vs-buy markers; 10-year chart crossing over."
+    },
+    {
+      "id": 5,
+      "title": "Leverage, Life Value, and Your Playbook",
+      "core_idea": "Use leverage wisely, honor life goals, run the math.",
+      "key_points": [
+        {
+          "text": "Leverage magnifies upside—and wipes equity fast"
+        },
+        {
+          "text": "Buy for life fit; invest for returns"
+        },
+        {
+          "text": "Simple framework to decide with confidence",
+          "target_words": 100
+        }
+      ],
+      "micro_curiosity_loop": "A two-minute model to decide today.",
+      "rhetorical_question": "Is your home a tool—or a trophy?",
+      "visual_suggestion": "Scale: family photos vs calculator; slider for appreciation assumptions."
+    }
+  ],
+  "conclusion": {
+    "summary": "Owning builds stability; investing builds returns—run the full cost to choose.",
+    "final_message": "Buy when life demands it and numbers work; otherwise rent and automate investing.",
+    "final_cta": "Download the free rent-vs-buy calculator and plug your city’s numbers today.",
+    "visual_suggestion": "End card with checklist and QR code to calculator."
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Families in homes, neighborhood shots, school drop-off scenes",
+      "Close-ups of leaking pipes, roofers, HVAC repairs"
+    ],
+    "animations": [
+      "Stacked bar of ownership costs vs rent line",
+      "Ten-year compounding comparison: home equity vs index fund"
+    ],
+    "on_screen_texts": [
+      "Don’t compare rent to mortgage—compare ALL-IN",
+      "Opportunity Cost: What your down payment could earn"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Fast open, crisp transitions, short sentences, keep momentum.",
+    "tone_tips": "Be friendly, non-judgmental, data-driven with plain language.",
+    "emotion_curve": "Curiosity → surprise at costs → clarity via framework → empowerment.",
+    "storytelling_hooks": "Open with a contrarian claim, tease the 10-year flip, deliver a simple decision model."
+  }
+}

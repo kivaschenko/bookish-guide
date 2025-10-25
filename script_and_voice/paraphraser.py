@@ -9,7 +9,6 @@ using configurable AI API with JSON-formatted responses.
 
 import logging
 import json
-import os
 import re
 from pathlib import Path
 from functools import wraps
@@ -51,16 +50,16 @@ class Paraphraser:
         # Create AI client based on provider configuration
         self.ai_client = create_ai_client(config)
         self.config = config
-        
+
         # Use script_and_voice/temp directory regardless of execution location
         script_dir = Path(__file__).parent
         self.temp_path = script_dir / "temp"
-        
+
         # Get provider-specific settings
-        provider = config.get('api', {}).get('provider', 'openai')
-        if provider == 'anthropic':
+        provider = config.get("api", {}).get("provider", "openai")
+        if provider == "anthropic":
             self.max_retries = config["api"]["anthropic"].get("max_retries", 3)
-        elif provider == 'openai':
+        elif provider == "openai":
             self.max_retries = config["api"]["openai"].get("max_retries", 3)
         else:
             self.max_retries = 3

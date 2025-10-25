@@ -1,0 +1,165 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Considerer l'achat d'une maison : aspects financiers et non-financiers",
+      "Investir dans l'immobilier : quand est-ce une bonne idée ?",
+      "Pourquoi l'achat d'une maison n'est pas toujours un bon investissement"
+    ],
+    "tone_style": "conversation orale pédagogique et rythmée qui explique comment investir son argent",
+    "target_audience": "investisseurs particuliers, curieux en économie, 30–60 ans",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "L'achat d'une maison est souvent considéré comme un rêve et un investissement sûr, mais qu'en est-il vraiment ?",
+    "curiosity_loop": "Découvrez les perspectives financières et non-financières à prendre en compte avant de franchir le pas.",
+    "visual_suggestion": "Vue aérienne d'un quartier résidentiel avec maisons, voitures, arbres"
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "Pourquoi l'achat d'une maison peut être un mauvais investissement",
+      "core_idea": "Explorer les points de vue d'experts comme Warren Buffett sur l'investissement immobilier",
+      "micro_curiosity_loop": "Découvrez les raisons qui poussent certains experts à remettre en question l'achat d'une maison comme investissement",
+      "rhetorical_question": "Mais si les experts considèrent l'achat d'une maison comme un mauvais investissement, pourquoi est-ce encore un rêve si répandu ?",
+      "visual_suggestion": "Gros plan sur le visage pensif de Warren Buffett",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Consejos de inversión de Warren Buffett",
+          "paragraph": "Warren Buffett, uno de los inversores más exitosos del mundo, tiene un consejo sorprendente sobre comprar una casa. Dice que en la mayoría de los casos, no es una buena inversión. Según Buffett, la gente a menudo se enfoca demasiado en el valor de reventa de una casa y no tiene en cuenta los costos de mantenimiento, impuestos y otros gastos. En su lugar, él recomienda invertir el dinero en activos que generen ingresos constantes, como acciones o bienes raíces de alquiler. Así podrás construir riqueza a largo plazo de una manera más efectiva.",
+          "target_words": 100,
+          "actual_words": 94
+        },
+        {
+          "id": 2,
+          "title": "El debate sobre los comentarios de los compradores",
+          "paragraph": "Los comentarios de los clientes pueden a menudo generar debates interesantes entre los compradores potenciales. Algunos consumidores se enfocan en la información positiva, mientras que otros se centran en los aspectos negativos. El reto es encontrar un equilibrio y obtener una imagen realista del producto o servicio. Los compradores deben considerar cuidadosamente todos los comentarios antes de tomar una decisión. Al final, las opiniones de otros pueden ser útiles, pero cada uno debe llegar a su propia conclusión sobre si el producto vale la pena.",
+          "target_words": 100,
+          "actual_words": 85
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Les coûts cachés de l'achat d'une maison",
+      "core_idea": "Passer en revue les différents frais à prévoir lors de l'achat d'une maison",
+      "micro_curiosity_loop": "Découvrez tous les coûts annexes à prendre en compte, au-delà du simple prix d'achat",
+      "rhetorical_question": "Êtes-vous prêt à assumer ces coûts cachés pour devenir propriétaire ?",
+      "visual_suggestion": "Gros plan sur un document avec des chiffres et graphiques représentant les différents frais",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Cómo conseguir un préstamo con poco dinero",
+          "paragraph": "Conseguir un préstamo con poca o nula entrada puede ser una opción arriesgada. Expertos recomiendan una entrada del 10 al 20% para evitar problemas. Esto reduce el riesgo de que te quedes sin hogar si las cosas salen mal. Con poca entrada, el prestamista asume más riesgo, así que las cuotas serán más altas. Considéralo cuidadosamente antes de decidir. Una entrada mayor es la mejor forma de asegurarte de que puedes pagar tu hipoteca a largo plazo.",
+          "target_words": 100,
+          "actual_words": 77
+        },
+        {
+          "id": 2,
+          "title": "Altas tasas de interés hipotecarias",
+          "paragraph": "Con tasas de interés hipotecarias que rondan el 7% anualmente, es importante entender el impacto que esto tendrá en su préstamo. Estas altas tasas significan que una gran parte de su pago mensual se destinará únicamente a los intereses, en lugar de ir directo al capital. Esto puede hacer que le cueste más tiempo pagar su hipoteca y acumular valor en su propiedad. Por lo tanto, es crucial evaluar cuidadosamente las opciones de financiamiento y buscar formas de reducir estos costos a largo plazo.",
+          "target_words": 100,
+          "actual_words": 84
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Le coût d'opportunité : un facteur clé",
+      "core_idea": "Expliquer l'importance de considérer le coût d'opportunité d'un achat immobilier",
+      "micro_curiosity_loop": "Découvrez comment le coût d'opportunité peut impacter la rentabilité d'un achat immobilier",
+      "rhetorical_question": "Êtes-vous sûr que l'achat d'une maison est le meilleur usage de votre argent ?",
+      "visual_suggestion": "Comparaison graphique des performances du marché boursier vs l'immobilier",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Uso inteligente del dinero",
+          "paragraph": "Cuando compras algo, el dinero que gastas ya no puede ser utilizado en otro lugar. Es importante considerar cuidadosamente cada compra, ya que cada dólar que se gasta en una cosa significa que no podrá ser usado para otra. Piensa detenidamente en si realmente necesitas o quieres ese producto antes de comprarlo. De esta manera, podrás aprovechar mejor tu dinero y asegurarte de que cada gasto contribuya a tus objetivos a largo plazo.",
+          "target_words": 100,
+          "actual_words": 73
+        },
+        {
+          "id": 2,
+          "title": "Cómo Warren Buffett retrasó sus primeras compras",
+          "paragraph": "Warren Buffett, uno de los inversionistas más exitosos del mundo, tuvo una estrategia clave al principio de su carrera. En lugar de invertir de inmediato, Buffett esperó pacientemente el momento adecuado para realizar sus primeras compras. Al retrasar sus decisiones, pudo maximizar los rendimientos de sus inversiones. Esta táctica le permitió construir su riqueza a lo largo del tiempo de manera sostenible. Cuando finalmente invirtió, lo hizo de una forma más inteligente y con mayor potencial de ganancias. La paciencia y la disciplina de Buffett al principio de su carrera fueron cruciales para su éxito a largo plazo.",
+          "target_words": 100,
+          "actual_words": 98
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Comparaison location vs achat",
+      "core_idea": "Comparer les coûts mensuels entre location et achat dans la plupart des villes",
+      "micro_curiosity_loop": "Découvrez pourquoi, dans la plupart des cas, il est plus avantageux de louer que d'acheter",
+      "rhetorical_question": "Pourriez-vous tirer un meilleur rendement de votre argent en le plaçant ailleurs qu'en l'investissant dans l'achat d'une maison ?",
+      "visual_suggestion": "Comparaison chiffrée des coûts de location vs achat pour une même propriété",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "Detalles de costos de vivienda",
+          "paragraph": "¿Tiene una casa de 500,000 dólares? Puede esperar pagar aproximadamente 4,270 dólares al mes. Esto incluye el pago de la hipoteca, impuestos, seguros y otros gastos. Por supuesto, los montos exactos pueden variar según su situación. Lo importante es estar preparado y tener un presupuesto realista para mantener su hogar de manera sostenible.",
+          "target_words": 100,
+          "actual_words": 53
+        },
+        {
+          "id": 2,
+          "title": "Por qué alquilar puede ser mejor",
+          "paragraph": "Cuando se trata de encontrar una vivienda, el alquiler suele ser una opción más económica que la compra. Por ejemplo, una casa similar puede costar entre 1.700 y 2.300 dólares al mes en alquiler, mientras que la cuota de la hipoteca sería mucho más alta. Además, el alquiler brinda más flexibilidad para mudarse cuando sea necesario. Así que si estás buscando una opción más asequible y flexible, el alquiler puede ser la mejor elección para ti.",
+          "target_words": 100,
+          "actual_words": 76
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Considérations non-financières de l'achat d'une maison",
+      "core_idea": "Aborder les aspects non financiers de la décision d'achat immobilier",
+      "micro_curiosity_loop": "Découvrez les avantages non financiers de devenir propriétaire, au-delà du simple rendement de l'investissement",
+      "rhetorical_question": "Quels autres facteurs que le rendement financier pourraient vous pousser à acheter une maison ?",
+      "visual_suggestion": "Plans rapprochés d'une famille dans une maison, évoquant les moments de vie et souvenirs",
+      "micro_sections": [
+        {
+          "id": 1,
+          "title": "La sabiduría de la compra de una propiedad",
+          "paragraph": "La compra de una propiedad a menudo se considera una inversión sólida, pero la realidad es más complicada. Aunque puede no ser la mejor opción financiera, la compra de una casa puede brindar beneficios intangibles invaluables. Ofrece estabilidad, control y un sentido de pertenencia que no se puede comprar. Además, una propiedad propia puede convertirse en un legado para las futuras generaciones. Así que, si bien los números no siempre cuadran, la compra de una casa puede traer una riqueza que va más allá de lo meramente financiero.",
+          "target_words": 100,
+          "actual_words": 88
+        },
+        {
+          "id": 2,
+          "title": "El mejor investimento de Buffett",
+          "paragraph": "Warren Buffett, uno de los inversores más exitosos del mundo, describe su compra de un negocio con rendimientos modestos como una de sus mejores decisiones. A pesar de los bajos rendimientos, Buffett valora los beneficios a largo plazo de esta inversión. Él cree que algunas oportunidades valen la pena, incluso si no generan grandes ganancias de inmediato. La lección es que los inversores deben considerar factores más allá de los rendimientos a corto plazo al tomar decisiones sobre sus inversiones.",
+          "target_words": 100,
+          "actual_words": 80
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "summary": "En résumé, l'achat d'une maison n'est pas toujours un bon investissement d'un point de vue purement financier, en raison des nombreux coûts cachés et du coût d'opportunité. Cependant, cela peut apporter des bénéfices intangibles importants.",
+    "final_message": "Avant de franchir le pas de l'achat, réfléchissez attentivement à vos priorités et à la meilleure utilisation de votre argent.",
+    "final_cta": "Partagez cette vidéo avec vos proches qui envisagent l'achat d'une maison, cela pourrait les aider à prendre la meilleure décision !",
+    "visual_suggestion": "Vue d'ensemble d'un quartier résidentiel avec des maisons, voitures et familles"
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Famille déballant des cartons dans une nouvelle maison",
+      "Couple regardant des plans de maisons"
+    ],
+    "animations": [
+      "Graphiques à barres comparant les performances de l'immobilier vs le marché boursier",
+      "Infographie des différents coûts liés à l'achat d'une maison"
+    ],
+    "on_screen_texts": [
+      "Coût d'opportunité",
+      "Rendement des investissements"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Rythme soutenu avec transitions fluides entre les sections, pour maintenir l'attention du public",
+    "tone_tips": "Ton pédagogique mais bienveillant, visant à informer sans porter de jugement",
+    "emotion_curve": "Créer de la curiosité et de l'intérêt dans un premier temps, puis susciter la réflexion et l'analyse avant de conclure sur une note positive",
+    "storytelling_hooks": "Utiliser les avis d'experts comme Warren Buffett pour captiver l'attention, et jouer sur les comparaisons chiffrées pour illustrer les points clés"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "video_meta": {
+    "title_variants": [
+      "Haus kaufen oder mieten? Buffetts unbequeme Wahrheit",
+      "Warum Mieten oft schlauer ist – mit Buffett-Logik",
+      "Eigenheim: Konsumgut oder Investment? Die klare Rechnung"
+    ],
+    "tone_style": "mündlich, pedagogisch, dynamisch – Geldanlage klar erklärt",
+    "target_audience": "Privatanleger, Wirtschaftsinteressierte, 30–60 Jahre",
+    "estimated_words_count": 1000
+  },
+  "hook": {
+    "text": "Würdest du 500.000 Euro ausgeben, wenn Mieten plus Investieren dir mehr bringt?",
+    "curiosity_loop": "Bleib dran: Die 10-Jahres-Rechnung dreht oft alles um.",
+    "visual_suggestion": "Split-Screen: Traumhaus vs. Aktienchart, Geld stapelt sich auf der Miet-Seite."
+  },
+  "sections": [
+    {
+      "id": 1,
+      "title": "Buffetts Blick: Haus als Entscheidung, nicht als Dogma",
+      "core_idea": "Buffett priorisiert Kapitalflexibilität über Status; Kauf nur, wenn’s passt.",
+      "key_points": [
+        {
+          "text": "Kapital nicht fesseln, Renditen gegenrechnen"
+        },
+        {
+          "text": "Kaufen erst bei geringer Vermögensquote"
+        }
+      ],
+      "micro_curiosity_loop": "Gleich siehst du, wie Opportunitätskosten dein Ergebnis kippen.",
+      "rhetorical_question": "Ist dein Haus Wunsch – oder teurer Zinskäfig?",
+      "visual_suggestion": "Zeitstrahl: Buffett jung, kein Haus; später kleiner Vermögensanteil fürs Haus."
+    },
+    {
+      "id": 2,
+      "title": "Mythen platzen lassen: Die echten Vollkosten",
+      "core_idea": "Miete ist nicht „verloren“; Eigentum hat versteckte Kostenblöcke.",
+      "key_points": [
+        {
+          "text": "Rate täuscht, Vollkosten entscheiden immer"
+        },
+        {
+          "text": "Steuern, Versicherung, Instandhaltung, Opportunität"
+        }
+      ],
+      "micro_curiosity_loop": "Gleich zerlegen wir eine Beispielrechnung – Zahl für Zahl.",
+      "rhetorical_question": "Rechnest du mit allen Posten oder nur der Rate?",
+      "visual_suggestion": "Kostenlayer blenden sich auf ein Haus ein: Zins, Steuer, Wartung."
+    },
+    {
+      "id": 3,
+      "title": "Case Study: Kaufen vs. Mieten im Zahlencheck",
+      "core_idea": "Konkrete Monatskosten vs. investierte Ersparnis zeigen die Differenz.",
+      "key_points": [
+        {
+          "text": "Kaufen: hohe Fixkosten plus Opportunität"
+        },
+        {
+          "text": "Mieten: günstiger, Differenz investieren"
+        }
+      ],
+      "micro_curiosity_loop": "In 10 Jahren? Die Rendite überrascht viele.",
+      "rhetorical_question": "Was bringt dir die nächste Dekade wirklich mehr?",
+      "visual_suggestion": "Diagramm: Monatliche Kaufgesamtkosten vs. Miete + ETF-Sparplan."
+    },
+    {
+      "id": 4,
+      "title": "Leverage: Turbo oder Totalschaden?",
+      "core_idea": "Fremdkapital verstärkt Renditen – und Verluste brutal.",
+      "key_points": [
+        {
+          "text": "Kleines Plus, großes Eigenkapitalwachstum"
+        },
+        {
+          "text": "Kleines Minus, Eigenkapital vernichtet"
+        }
+      ],
+      "micro_curiosity_loop": "Wann Kauf trotz allem Sinn macht, kommt sofort.",
+      "rhetorical_question": "Kannst du Kursrückgänge emotional und finanziell tragen?",
+      "visual_suggestion": "Schaukelgrafik: Hebelwirkung nach oben/unten auf Eigenkapital."
+    },
+    {
+      "id": 5,
+      "title": "Dein Entscheidungs-Framework in 5 Schritten",
+      "core_idea": "Bedarf, Zahlen, Liquidität, Zeit, Opportunität – dann entscheiden.",
+      "key_points": [
+        {
+          "text": "Mindestens 20% EK, Notgroschen vorhanden"
+        },
+        {
+          "text": "Horizont 10+ Jahre, Zinsen im Blick"
+        }
+      ],
+      "micro_curiosity_loop": "Zum Schluss: die drei Merksätze, die bleiben.",
+      "rhetorical_question": "Kaufst du fürs Leben – oder fürs Depot?",
+      "visual_suggestion": "Checkliste blendet nacheinander ein, Häkchen setzen sich."
+    }
+  ],
+  "conclusion": {
+    "summary": "Eigenheim ist Konsum mit Nebenrendite; Vollkosten und Alternativen entscheiden.",
+    "final_message": "Rechne nüchtern, liebe bewusst: Finanzen klar, Leben frei.",
+    "final_cta": "Lade dir die Vollkosten-Checkliste herunter und vergleiche heute.",
+    "visual_suggestion": "On-Screen: Drei Merksätze, daneben QR-Code zur Checkliste."
+  },
+  "global_visuals": {
+    "b_rolls": [
+      "Maklerbesichtigung, Familie schaut sich Haus an",
+      "Person investiert per App in ETFs"
+    ],
+    "animations": [
+      "Vollkosten-Torte mit aufklappenden Segmenten",
+      "Leverage-Pendel, das stärker ausschlägt"
+    ],
+    "on_screen_texts": [
+      "Vollkosten > Rate",
+      "Mieten + Investieren kann überlegen sein"
+    ]
+  },
+  "notes_for_writer": {
+    "pacing": "Schneller Einstieg, dann klare Blöcke, kurze Sätze, Zahlen knackig.",
+    "tone_tips": "Locker, respektvoll, nie belehrend; visuell viel verankern.",
+    "emotion_curve": "Neugier → Aha durch Zahlen → leichte Sorge bei Leverage → Erleichterung mit Framework.",
+    "storytelling_hooks": "Alltagsfrage, Buffett-Anekdote, Zahlen-Duell, Risiko-Minidrama, klare Handlungsanweisung."
+  }
+}
