@@ -6,10 +6,15 @@ Gemini TTS Generator Module
 Handles text-to-speech generation using Google Gemini API via proxy.
 """
 
+# LibreSSL compatibility fix - suppress urllib3 warnings when LibreSSL is used instead of OpenSSL
+import warnings
+from urllib3.exceptions import NotOpenSSLWarning
 import logging
 import json
 import requests
 from pathlib import Path
+
+warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
 
 
 class GeminiTTS:

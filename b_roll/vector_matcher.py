@@ -1,3 +1,6 @@
+# LibreSSL compatibility fix - suppress urllib3 warnings when LibreSSL is used instead of OpenSSL
+import warnings
+from urllib3.exceptions import NotOpenSSLWarning
 import os
 import glob
 import json
@@ -7,6 +10,8 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 import requests
+
+warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
 
 
 class VectorMatcher:
@@ -25,7 +30,9 @@ class VectorMatcher:
         self.broll_folder = (
             broll_folder
             if broll_folder
-            else (config.get("paths", {}).get("b_roll", "b-roll") if config else "b-roll")
+            else (
+                config.get("paths", {}).get("b_roll", "b-roll") if config else "b-roll"
+            )
         )
         self.embeddings_file = embeddings_file
         self.model_name = model_name

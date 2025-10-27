@@ -6,12 +6,15 @@ Module d'extraction et d'analyse des métadonnées pour les vidéos b-roll.
 Extrait la première frame de chaque vidéo et utilise l'API OpenAI pour l'analyser.
 """
 
+# LibreSSL compatibility fix - suppress urllib3 warnings when LibreSSL is used instead of OpenSSL
+import warnings
+from urllib3.exceptions import NotOpenSSLWarning
 import os
 import logging
 import traceback
-
-# Image extraction disabled
 import requests
+
+warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
 
 
 class MetaExtractor:

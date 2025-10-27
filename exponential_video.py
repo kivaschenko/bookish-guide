@@ -6,6 +6,12 @@ Main script for automatic video generation.
 Supports step-by-step execution via command line arguments.
 """
 
+# LibreSSL compatibility fix - suppress urllib3 warnings when LibreSSL is used instead of OpenSSL
+import warnings
+from urllib3.exceptions import NotOpenSSLWarning
+
+warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
+
 # Disable tokenizer parallelism to avoid deadlocks
 import os
 
@@ -1537,6 +1543,7 @@ def main():
 
     if args.brolls_selection_correct:
         from b_roll import clean_broll_selections
+
         config = load_config()
         if clean_broll_selections(config):
             logging.info("Nettoyage des sélections de b-rolls terminé avec succès")
