@@ -1203,19 +1203,19 @@ def validate_mode_consistency(config, args):
 
 def generate_story_keywords(project_name):
     """
-    Génère une liste de keywords pour les images d'illustration du script i3.txt.
+    Generate a list of keywords for illustration images from the i3.txt script.
 
     Args:
-        project_name (str): Nom du projet
+        project_name (str): Project name
     """
-    # Chemin vers le fichier i3.txt
+    # Path to i3.txt file
     i3_path = get_projects_path() / project_name / "temp" / "i3.txt"
 
     if not i3_path.exists():
-        print(f"❌ Fichier i3.txt non trouvé: {i3_path}")
+        print(f"❌ i3.txt file not found: {i3_path}")
         return
 
-    # Lire le contenu du fichier i3.txt
+    # Read the content of i3.txt file
     try:
         with open(i3_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -1269,7 +1269,7 @@ la réponse sera juste affichée dans la console, pour pouvoir être copiée col
         messages = [
             {
                 "role": "system",
-                "content": "Vous êtes un expert en génération de keywords pour images d'illustration.",
+                "content": "You are an expert in generating keywords for illustration images.",
             },
             {"role": "user", "content": prompt},
         ]
@@ -1359,45 +1359,45 @@ la réponse sera juste affichée dans la console, pour pouvoir être copiée col
 
 def generate_youtube_help(project_name):
     """
-    Génère des informations pour YouTube (titres, description, tags) basées sur le script i3.txt.
+    Generate YouTube information (titles, description, tags) based on the i3.txt script.
 
     Args:
-        project_name (str): Nom du projet
+        project_name (str): Project name
     """
-    # Chemin vers le fichier i3.txt
+    # Path to i3.txt file
     i3_path = get_projects_path() / project_name / "temp" / "i3.txt"
 
     if not i3_path.exists():
-        print(f"❌ Fichier i3.txt non trouvé: {i3_path}")
+        print(f"❌ i3.txt file not found: {i3_path}")
         return
 
-    # Lire le contenu du fichier i3.txt
+    # Read the content of i3.txt file
     try:
         with open(i3_path, "r", encoding="utf-8") as f:
             content = f.read()
     except Exception as e:
-        print(f"❌ Erreur lors de la lecture du fichier i3.txt: {e}")
+        print(f"❌ Error reading i3.txt file: {e}")
         return
 
-    # Prompt pour YouTube
+    # YouTube prompt
     prompt = f"""
-Je suis en train de publier ma vidéo sur youtube.
+I am about to publish my video on YouTube.
 
-1. Génère moi 5 meilleurs titres youtube possibles pour ma vidéo (respecte le nombre de caractères max, essaie d'être clickbait)
+1. Generate 5 best possible YouTube titles for my video (respect the max character count, try to be clickbait)
 
-2. Génère moi une courte description en mettant à la fin 3 tags seulement. Et en dessous la phrase exacte : Cette vidéo est à but informatif et divertissant uniquement. Elle ne constitue en aucun cas un conseil financier, d'investissement ou juridique. Faites toujours vos propres recherches ou consultez un professionnel avant de prendre des décisions financières.
+2. Generate a short description putting 3 tags only at the end. And below the exact sentence: This video is for informational and entertainment purposes only. It does not constitute financial, investment or legal advice in any way. Always do your own research or consult a professional before making financial decisions.
 
-3. Les 3 tags avec #, remet les dans le paragraphe "Tags avec virgules" où tu ne mets pas le # et tu les sépare par des virgules
+3. The 3 tags with #, put them again in the "Tags with commas" paragraph where you don't put the # and you separate them with commas
 
-Voici mon script vidéo :
+Here is my video script:
 {content}
 """
 
-    # Afficher le prompt pour la miniature AVANT le reste
+    # Display the prompt for thumbnail BEFORE the rest
     print("\n" + "=" * 80)
-    print("A mettre dans GPT avec la miniature d'inspiration :")
+    print("To put in GPT with the inspiration thumbnail:")
     print(
-        "Je suis en train de publier ma vidéo sur youtube. Tu trouveras la miniature de la vidéo dont je me suis inspiré. Génère une miniature similaire pour ma vidéo en français. Crée l'image 16/9 avec la même personne, mais avec un fond en noir et blanc des couleurs jaune ou blanc pour les élements et le texte"
+        "I am publishing my video on YouTube. You will find the thumbnail of the video I was inspired by. Generate a similar thumbnail for my video in French. Create a 16/9 image with the same person, but with a black and white background with yellow or white colors for the elements and text"
     )
     print("=" * 80)
 
@@ -1412,7 +1412,7 @@ Voici mon script vidéo :
         messages = [
             {
                 "role": "system",
-                "content": "Vous êtes un expert en marketing YouTube et en création de contenu viral.",
+                "content": "You are an expert in YouTube marketing and viral content creation.",
             },
             {"role": "user", "content": prompt},
         ]

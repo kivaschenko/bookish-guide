@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Module d'extraction et d'analyse des métadonnées pour les vidéos b-roll.
-Extrait la première frame de chaque vidéo et utilise l'API OpenAI pour l'analyser.
+Metadata extraction and analysis module for b-roll videos.
+Extracts the first frame from each video and uses OpenAI API to analyze it.
 """
 
 # LibreSSL compatibility fix - suppress urllib3 warnings when LibreSSL is used instead of OpenSSL
@@ -19,15 +19,15 @@ warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
 
 class MetaExtractor:
     """
-    Classe responsable de l'extraction et de l'analyse des métadonnées des vidéos b-roll.
+    Class responsible for extracting and analyzing metadata from b-roll videos.
     """
 
     def __init__(self, config):
         """
-        Initialise l'extracteur de métadonnées avec la configuration.
+        Initialize the metadata extractor with configuration.
 
         Args:
-            config (dict): Configuration chargée depuis config.yml
+            config (dict): Configuration loaded from config.yml
         """
         self.config = config
         self.b_roll_path = config.get("paths", {}).get("b_roll", "b-roll")
@@ -67,13 +67,13 @@ class MetaExtractor:
 
     def extract_first_frame(self, video_path):
         """
-        Extrait la première frame d'une vidéo et la sauvegarde en JPG.
+        Extract the first frame from a video and save it as JPG.
 
         Args:
-            video_path (str): Chemin vers le fichier vidéo
+            video_path (str): Path to the video file
 
         Returns:
-            str: Chemin vers l'image JPG extraite, ou None en cas d'erreur
+            str: Path to the extracted JPG image, or None if error occurs
         """
         try:
             logging.info(f"Extracting first frame from {video_path}...")
@@ -104,27 +104,27 @@ class MetaExtractor:
 
     def analyze_image(self, image_path):
         """
-        Analyse une image avec l'API OpenAI GPT-4o.
+        Analyze an image using OpenAI GPT-4o API.
 
         Args:
-            image_path (str): Chemin vers l'image à analyser
+            image_path (str): Path to the image to analyze
 
         Returns:
-            dict: Dictionnaire contenant l'analyse, ou un message d'erreur
+            dict: Dictionary containing the analysis, or an error message
         """
         try:
-            # Vérifier que l'image existe
+            # Check if the image exists
             if not os.path.exists(image_path):
                 return {
-                    "error": f"L'image {os.path.basename(image_path)} n'existe pas",
+                    "error": f"Image {os.path.basename(image_path)} does not exist",
                     "description": "",
                     "context": "",
                 }
 
-            # Vérifier la clé API
+            # Check API key
             if not self.api_key:
                 return {
-                    "error": "Clé API OpenAI manquante",
+                    "error": "OpenAI API key missing",
                     "description": "",
                     "context": "",
                 }
@@ -152,38 +152,38 @@ class MetaExtractor:
                 "messages": [
                     {
                         "role": "system",
-                        "content": """Tu es un expert en analyse d'images et de vidéos. Tu vas recevoir une image qui est une frame d'une vidéo b-roll. Fournis une description détaillée, factuelle et objective de tout ce qui est visible dans cette image, sans interprétation ni supposition sur ce qui pourrait se passer ensuite.
+                        "content": """You are an expert in image and video analysis. You will receive an image that is a frame from a b-roll video. Provide a detailed, factual and objective description of everything visible in this image, without interpretation or assumptions about what might happen next.
 
-Ta description doit inclure, dans un seul paragraphe :
-- L'action en cours ou la posture des personnes.
-- Une description générale des personnes (âge approximatif, sexe, posture, vêtements, accessoires, rôle probable, émotion observable si clairement visible, ethnie apparente si visible ; sinon "ethnie non identifiable").
-- L'environnement et le décor (lieu, mobilier, objets notables, ambiance visuelle).
-- L'époque (moderne ou ancienne, ou décennie approximative si identifiable, sinon "époque non identifiable").
-- Les couleurs dominantes ou si la vidéo est en noir et blanc.
+Your description should include, in a single paragraph:
+- The ongoing action or posture of people.
+- A general description of people (approximate age, gender, posture, clothing, accessories, probable role, observable emotion if clearly visible, apparent ethnicity if visible; otherwise "ethnicity not identifiable").
+- The environment and setting (place, furniture, notable objects, visual atmosphere).
+- The era (modern or ancient, or approximate decade if identifiable, otherwise "era not identifiable").
+- Dominant colors or if the video is in black and white.
 
-Utilise un langage simple, direct et précis. La description doit être rédigée en un seul paragraphe narratif, sans liste ni titre. Même si certaines informations sont difficiles à identifier, donne une estimation ou indique explicitement qu'elles ne sont pas visibles.
+Use simple, direct and precise language. The description must be written in a single narrative paragraph, without lists or titles. Even if some information is difficult to identify, give an estimate or explicitly indicate that they are not visible.
 
-**À la fin de la description, ajoute une ou deux phrases indiquant :**
-- Les thèmes, concepts ou émotions que cette scène pourrait illustrer (par exemple : maladie, solitude, joie, drame, ambiance familiale, crise, etc.).
-- Les contextes narratifs possibles (par exemple : "cette scène pourrait être utilisée pour illustrer un diagnostic médical, l'annonce d'une maladie grave, une situation de stress ou d'attente en milieu hospitalier…").
+**At the end of the description, add one or two sentences indicating:**
+- The themes, concepts or emotions that this scene could illustrate (for example: illness, loneliness, joy, drama, family atmosphere, crisis, etc.).
+- Possible narrative contexts (for example: "this scene could be used to illustrate a medical diagnosis, the announcement of a serious illness, a situation of stress or waiting in a hospital environment...").
 
-**Enfin, termine par une ligne :**
-Mots-clés : mot1, mot2, mot3, ..., mot20
+**Finally, end with a line:**
+Keywords: word1, word2, word3, ..., word20
 
-où chaque mot-clé résume un thème, une émotion, une situation ou un concept illustré par la scène.
+where each keyword summarizes a theme, emotion, situation or concept illustrated by the scene.
 
-**Exemple de format attendu** :
+**Expected format example:**
 
-Une femme adulte d'apparence caucasienne, habillée d'une blouse blanche et d'un chapeau d'infirmière, se tient debout dans un cabinet médical à l'aspect vintage (années 1950). Elle tient un téléphone à cadran noir près de son oreille et porte des lunettes. Sur la table à côté d'elle, il y a un microscope, des flacons, une lampe de bureau articulée et des documents. Le mur derrière elle est en briques, les rideaux sont blancs et la lumière est douce. La scène est en noir et blanc. L'ambiance semble sérieuse.  
-Cette scène pourrait illustrer des thèmes comme la médecine d'époque, l'urgence médicale, l'attente d'un diagnostic, ou la solitude du personnel soignant dans les années 1950. Elle pourrait être utilisée dans un documentaire historique sur la santé, une fiction dramatique, ou toute situation liée à la maladie et à l'espoir.  
-Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail, solitude, tension, vintage, maladie""",
+An adult woman of Caucasian appearance, dressed in a white blouse and a nurse's cap, stands in a vintage-looking medical office (1950s). She holds a black rotary phone near her ear and wears glasses. On the table next to her, there is a microscope, vials, an articulated desk lamp and documents. The wall behind her is brick, the curtains are white and the light is soft. The scene is in black and white. The atmosphere seems serious.
+This scene could illustrate themes such as period medicine, medical emergency, waiting for a diagnosis, or the loneliness of healthcare workers in the 1950s. It could be used in a historical documentary about health, a dramatic fiction, or any situation related to illness and hope.
+Keywords: medicine, hospital, nurse, 1950s, diagnosis, work, loneliness, tension, vintage, illness""",
                     },
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "text",
-                                "text": """Voici l'image extraite d'une vidéo b-roll. Décris cette scène en détail, en un seul paragraphe narratif, selon les instructions précédentes. Concentre-toi uniquement sur ce qui est visible.""",
+                                "text": """Here is the image extracted from a b-roll video. Describe this scene in detail, in a single narrative paragraph, according to the previous instructions. Focus only on what is visible.""",
                             },
                             {
                                 "type": "image_url",
@@ -206,15 +206,15 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
 
             if response.status_code != 200:
                 logging.error(
-                    f"Erreur API OpenAI: {response.status_code} - {response.text}"
+                    f"OpenAI API error: {response.status_code} - {response.text}"
                 )
                 return {
-                    "error": f"Erreur API: {response.status_code}",
+                    "error": f"API Error: {response.status_code}",
                     "description": "",
                     "context": "",
                 }
 
-            # Traitement de la réponse
+            # Process the response
             response_content = response.json()
             if "choices" in response_content:
                 # Extraire directement le texte de la réponse
@@ -234,13 +234,13 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
 
     def _encode_image(self, image_data):
         """
-        Encode une image en base64 pour l'API OpenAI.
+        Encode an image in base64 for OpenAI API.
 
         Args:
-            image_data (bytes): Données de l'image en bytes
+            image_data (bytes): Image data in bytes
 
         Returns:
-            str: Image encodée en base64
+            str: Base64 encoded image
         """
         import base64
 
@@ -248,30 +248,30 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
 
     def process_video(self, video_path):
         """
-        Traite une vidéo : extraction de la première frame et analyse.
+        Process a video: extract first frame and analyze it.
 
         Args:
-            video_path (str): Chemin vers le fichier vidéo
+            video_path (str): Path to the video file
 
         Returns:
-            bool: True si le traitement a réussi, False sinon
+            bool: True if processing succeeded, False otherwise
         """
         try:
-            # Créer les chemins pour les fichiers de sortie
+            # Create paths for output files
             video_name = os.path.basename(video_path)
             txt_name = os.path.splitext(video_name)[0] + ".txt"
             txt_path = os.path.join(os.path.dirname(video_path), txt_name)
 
-            # Vérifier si l'analyse a déjà été effectuée (présence du fichier .txt avec contenu)
+            # Check if analysis has already been done (presence of .txt file with content)
             if os.path.exists(txt_path):
-                # Vérifier si le fichier a du contenu
+                # Check if file has content
                 try:
                     with open(txt_path, "r", encoding="utf-8") as f:
                         content = f.read().strip()
                     if (
                         content
-                        and not content.startswith("Erreur:")
-                        and not content == "Aucun contexte disponible pour cette vidéo"
+                        and not content.startswith("Error:")
+                        and not content == "No context available for this video"
                     ):
                         logging.info(
                             f"Analysis already done for {video_name}, skipping"
@@ -287,17 +287,15 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
                     )
                 # Continue processing if file is empty or contains error
 
-            # Extraire la première frame
+            # Extract first frame
             jpg_path = self.extract_first_frame(video_path)
             if not jpg_path:
-                # Enregistrer l'erreur dans le fichier .txt - format simple
+                # Save error in .txt file - simple format
                 with open(txt_path, "w", encoding="utf-8") as f:
-                    f.write(
-                        f"Erreur: Impossible d'extraire la première frame de {video_name}"
-                    )
+                    f.write(f"Error: Unable to extract first frame from {video_name}")
                 return False
 
-            # Analyser l'image
+            # Analyze the image
             analysis = self.analyze_image(jpg_path)
 
             # Enregistrer le résultat dans un fichier .txt
@@ -308,12 +306,12 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
                         f"Context saved for {video_name}: {len(analysis['context'])} characters"
                     )
                 elif analysis and "error" in analysis and analysis["error"]:
-                    error_msg = f"Erreur lors de l'analyse: {analysis['error']}"
+                    error_msg = f"Error during analysis: {analysis['error']}"
                     f.write(error_msg)
                     logging.error(f"Error analyzing {video_name}: {analysis['error']}")
                     return False
                 else:
-                    f.write("Aucun contexte disponible pour cette vidéo")
+                    f.write("No context available for this video")
                     logging.warning(f"No context available for {video_name}")
                     return False
 
@@ -328,17 +326,17 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
 
     def process_all_videos(self):
         """
-        Traite toutes les vidéos du dossier b-roll.
+        Process all videos in the b-roll folder.
 
         Returns:
-            tuple: (nombre de vidéos traitées, nombre de succès)
+            tuple: (number of videos processed, number of successes)
         """
-        # Vérifier que le dossier existe
+        # Check that folder exists
         if not os.path.exists(self.b_roll_path):
-            logging.error(f"Le dossier {self.b_roll_path} n'existe pas")
+            logging.error(f"Folder {self.b_roll_path} does not exist")
             return 0, 0
 
-        # Récupérer la liste des vidéos MP4 et MOV
+        # Get list of MP4 and MOV videos
         videos = [
             os.path.join(self.b_roll_path, f)
             for f in os.listdir(self.b_roll_path)
@@ -352,13 +350,13 @@ Mots-clés : médecine, hôpital, infirmière, années 1950, diagnostic, travail
 
         logging.info(f"Processing {total} videos in {self.b_roll_path}")
 
-        # Compter les succès
+        # Count successes
         success_count = 0
 
-        # Traiter chaque vidéo
+        # Process each video
         for i, video_path in enumerate(videos):
             logging.info(
-                f"[{i + 1}/{total}] Traitement de {os.path.basename(video_path)}..."
+                f"[{i + 1}/{total}] Processing {os.path.basename(video_path)}..."
             )
             if self.process_video(video_path):
                 success_count += 1
