@@ -147,6 +147,7 @@ async def serve_broll_file(
 ):
     """Serve B-roll files for preview."""
     full_path = Path(settings.paths.b_roll) / file_path
+    logging.info(f"Serving B-roll file: {full_path}")
 
     if not full_path.exists() or not full_path.is_file():
         raise HTTPException(status_code=404, detail="File not found")

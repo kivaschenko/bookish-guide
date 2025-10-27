@@ -5,6 +5,7 @@ Handles timeline data, file uploads, and other REST endpoints.
 
 import json
 import time
+import logging
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -14,6 +15,9 @@ from fastapi.security import HTTPBasicCredentials
 from config.settings import Settings, get_settings
 from auth.middleware import verify_credentials
 from models.schemas import TimelineUpdateRequest, UploadResponse
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter()
@@ -26,6 +30,7 @@ async def get_timeline_data(
 ):
     """Get the current timeline data from broll_timing.json."""
     broll_timing_file = Path(settings.paths.temp) / "broll_timing.json"
+    logger.info(f"Reading timeline data from {broll_timing_file}")
 
     if not broll_timing_file.exists():
         raise HTTPException(
@@ -36,6 +41,7 @@ async def get_timeline_data(
     try:
         with open(broll_timing_file, "r", encoding="utf-8") as f:
             timeline_data = json.load(f)
+            logger.info(f"Timeline data: {timeline_data}")
         return timeline_data
     except json.JSONDecodeError as e:
         raise HTTPException(
