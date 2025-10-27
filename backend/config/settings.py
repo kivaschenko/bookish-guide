@@ -18,6 +18,9 @@ from models.schemas import (
     PathSettings,
 )
 
+BASE_DIR = Path(__file__).parent.parent.parent
+print(f"BASE_DIR is {BASE_DIR}")
+
 
 class AppSettings(BaseSettings):
     """Application settings with environment variable support."""
@@ -32,7 +35,7 @@ class AppSettings(BaseSettings):
     auth_username: str = "admin"
     auth_password: str = "admin"
 
-    # Path settings
+    # Path settings - will be resolved to absolute paths later
     projects_path: str = "./projects"
     b_roll_path: str = "./b-roll"
     temp_path: str = "./temp"
@@ -125,11 +128,38 @@ def create_settings_from_config(config: dict) -> Settings:
         ),  # default reload setting, keep for production
     )
 
-    # Create path settings
+    # Create path settings with absolute paths resolved from BASE_DIR
+    # Check for environment variable overrides first
+    app_settings = AppSettings()  # This loads environment variables
+
+    raw_projects_path = paths_config.get("projects", app_settings.projects_path)
+    raw_b_roll_path = paths_config.get("b_roll", app_settings.b_roll_path)
+    raw_temp_path = paths_config.get("temp", app_settings.temp_path)
+
+    # Allow environment variable to override temp path (for project-specific temp)
+    if os.environ.get("PREMONTAGE_TEMP_PATH"):
+        raw_temp_path = os.environ["PREMONTAGE_TEMP_PATH"]
+
+    # Resolve paths relative to BASE_DIR
+    if not Path(raw_projects_path).is_absolute():
+        projects_path = str((BASE_DIR / raw_projects_path).resolve())
+    else:
+        projects_path = raw_projects_path
+
+    if not Path(raw_b_roll_path).is_absolute():
+        b_roll_path = str((BASE_DIR / raw_b_roll_path).resolve())
+    else:
+        b_roll_path = raw_b_roll_path
+
+    if not Path(raw_temp_path).is_absolute():
+        temp_path = str((BASE_DIR / raw_temp_path).resolve())
+    else:
+        temp_path = raw_temp_path
+
     path_settings = PathSettings(
-        projects=paths_config.get("projects", "./projects"),
-        b_roll=paths_config.get("b_roll", "./b-roll"),
-        temp=paths_config.get("temp", "./temp"),
+        projects=projects_path,
+        b_roll=b_roll_path,
+        temp=temp_path,
     )
 
     return Settings(
@@ -156,7 +186,27 @@ def get_settings() -> Settings:
         # Create settings from YAML config
         settings = create_settings_from_config(config)
     else:
-        # Fallback to environment variables and defaults
+        # Fallback to environment variables and defaults - resolve paths relative to BASE_DIR
+        raw_projects_path = app_settings.projects_path
+        raw_b_roll_path = app_settings.b_roll_path
+        raw_temp_path = app_settings.temp_path
+
+        # Resolve paths if they're relative
+        if not Path(raw_projects_path).is_absolute():
+            projects_path = str((BASE_DIR / raw_projects_path).resolve())
+        else:
+            projects_path = raw_projects_path
+
+        if not Path(raw_b_roll_path).is_absolute():
+            b_roll_path = str((BASE_DIR / raw_b_roll_path).resolve())
+        else:
+            b_roll_path = raw_b_roll_path
+
+        if not Path(raw_temp_path).is_absolute():
+            temp_path = str((BASE_DIR / raw_temp_path).resolve())
+        else:
+            temp_path = raw_temp_path
+
         settings = Settings(
             authentication=AuthenticationSettings(
                 enabled=app_settings.auth_enabled,
@@ -169,13 +219,30 @@ def get_settings() -> Settings:
                 reload=app_settings.server_reload,
             ),
             paths=PathSettings(
-                projects=app_settings.projects_path,
-                b_roll=app_settings.b_roll_path,
-                temp=app_settings.temp_path,
+                projects=projects_path,
+                b_roll=b_roll_path,
+                temp=temp_path,
             ),
         )
 
     return settings
+
+
+def get_absolute_paths(settings: Settings) -> dict:
+    """
+    Get absolute paths from settings.
+
+    Args:
+        settings: Application settings (paths are already absolute)
+
+    Returns:
+        Dictionary with absolute paths
+    """
+    return {
+        "projects": settings.paths.projects,
+        "b_roll": settings.paths.b_roll,
+        "temp": settings.paths.temp,
+    }
 
 
 def update_temp_path_for_project(project_name: str) -> None:
@@ -186,11 +253,17 @@ def update_temp_path_for_project(project_name: str) -> None:
     Args:
         project_name: Name of the project
     """
+    # Calculate the project temp path directly without using cached settings
+    current_settings = get_settings()
+    absolute_paths = get_absolute_paths(current_settings)
+    projects_path = Path(absolute_paths["projects"])
+    project_temp_path = projects_path / project_name / "temp"
+
+    # Set environment variable with absolute path
+    os.environ["PREMONTAGE_TEMP_PATH"] = str(project_temp_path)
+
     # Clear the cache to force reload
     get_settings.cache_clear()
-
-    # Update environment variable
-    os.environ["PREMONTAGE_TEMP_PATH"] = f"./projects/{project_name}/temp"
 
 
 def get_project_temp_path(project_name: str) -> Path:
@@ -204,7 +277,8 @@ def get_project_temp_path(project_name: str) -> Path:
         Path to the project's temp directory
     """
     settings = get_settings()
-    projects_path = Path(settings.paths.projects)
+    absolute_paths = get_absolute_paths(settings)
+    projects_path = Path(absolute_paths["projects"])
     return projects_path / project_name / "temp"
 
 
@@ -215,11 +289,13 @@ def ensure_directories_exist(settings: Settings) -> None:
     Args:
         settings: Application settings
     """
+    absolute_paths = get_absolute_paths(settings)
+
     directories = [
-        Path(settings.paths.projects),
-        Path(settings.paths.b_roll),
-        Path(settings.paths.temp),
-        Path(settings.paths.b_roll) / "ressources",
+        Path(absolute_paths["projects"]),
+        Path(absolute_paths["b_roll"]),
+        Path(absolute_paths["temp"]),
+        Path(absolute_paths["b_roll"]) / "ressources",
     ]
 
     for directory in directories:
@@ -238,10 +314,13 @@ def validate_configuration(settings: Settings) -> list:
     """
     issues = []
 
+    # Get absolute paths for validation
+    absolute_paths = get_absolute_paths(settings)
+
     # Validate paths
     required_paths = [
-        (settings.paths.projects, "projects"),
-        (settings.paths.b_roll, "b_roll"),
+        (absolute_paths["projects"], "projects"),
+        (absolute_paths["b_roll"], "b_roll"),
     ]
 
     for path_str, name in required_paths:

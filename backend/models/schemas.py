@@ -199,13 +199,15 @@ class ServerSettings(BaseModel):
 
 
 class PathSettings(BaseModel):
-    """Path configuration."""
+    """Path configuration with absolute paths."""
 
     projects: str = Field(
-        default="./projects", description="Path to projects directory"
+        default="./projects", description="Absolute path to projects directory"
     )
-    b_roll: str = Field(default="./b-roll", description="Path to B-roll directory")
-    temp: str = Field(default="./temp", description="Path to temporary files")
+    b_roll: str = Field(
+        default="./b-roll", description="Absolute path to B-roll directory"
+    )
+    temp: str = Field(default="./temp", description="Absolute path to temporary files")
 
 
 class Settings(BaseModel):
