@@ -140,9 +140,9 @@ def main():
         sys.exit(1)
 
     # Step 4: Run video assembler
-    print(f"🔄 Creating final video...")
+    print("🔄 Creating final video...")
     try:
-        result = subprocess.run(
+        subprocess.run(
             [
                 sys.executable,
                 "simple_video_assembler.py",
@@ -159,7 +159,7 @@ def main():
         output_video = f"{args.output}_final.mp4"
         if Path(output_video).exists():
             size_mb = Path(output_video).stat().st_size / (1024 * 1024)
-            print(f"🎉 SUCCESS! Video created:")
+            print("🎉 SUCCESS! Video created:")
             print(f"  📁 File: {output_video}")
             print(f"  📊 Size: {size_mb:.1f} MB")
         else:

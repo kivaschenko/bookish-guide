@@ -12,7 +12,6 @@ import subprocess
 import sys
 import logging
 from pathlib import Path
-import tempfile
 
 # Configure logging
 logging.basicConfig(
@@ -228,7 +227,7 @@ Examples:
         sys.exit(1)
 
     # Show what we're about to do
-    print(f"\n📋 Generation Plan:")
+    print("\n📋 Generation Plan:")
     print(f"  📝 Input: {len(args.input)} characters")
     print(f"  🎯 Output: {args.output}.mp4")
     print(f"  🌍 Language: {args.language}")
@@ -244,16 +243,16 @@ Examples:
         output_path = Path(result)
         if output_path.exists():
             size_mb = output_path.stat().st_size / (1024 * 1024)
-            print(f"\n🎉 SUCCESS! Your video is ready:")
+            print("\n🎉 SUCCESS! Your video is ready:")
             print(f"  📁 File: {result}")
             print(f"  📊 Size: {size_mb:.1f} MB")
-            print(f"  📺 Ready to upload to YouTube, TikTok, or any platform!")
+            print("  📺 Ready to upload to YouTube, TikTok, or any platform!")
 
             # Additional tips
-            print(f"\n💡 Next steps:")
+            print("\n💡 Next steps:")
             print(f"  1. Preview your video: Open {result} in your video player")
-            print(f"  2. Upload to social media platforms")
-            print(f"  3. Create more videos with different content!")
+            print("  2. Upload to social media platforms")
+            print("  3. Create more videos with different content!")
         else:
             print(f"❌ Error: Video file {result} was not created")
             sys.exit(1)
