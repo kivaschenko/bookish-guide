@@ -31,12 +31,37 @@ class TimelineData(BaseModel):
     project_name: Optional[str] = Field(None, description="Project name")
 
 
+class BrollClip(BaseModel):
+    """Individual B-roll clip within a rush."""
+
+    video: str = Field(..., description="Name of the B-roll video file")
+    start: float = Field(..., description="Start time within the video")
+    duration: float = Field(..., description="Duration of the clip")
+    score: float = Field(..., description="Matching score for the clip")
+
+
+class Rush(BaseModel):
+    """Individual rush/segment with associated B-roll clips."""
+
+    duration: float = Field(..., description="Duration of the rush in seconds")
+    brolls: List[BrollClip] = Field(
+        ..., description="List of B-roll clips for this rush"
+    )
+    message: str = Field(..., description="Descriptive message about the rush")
+
+
+class TimelineResponse(BaseModel):
+    """Complete timeline response structure matching broll_timing.json format."""
+
+    rushes: Dict[str, Rush] = Field(
+        ..., description="Dictionary of rushes keyed by rush ID"
+    )
+
+
 class TimelineUpdateRequest(BaseModel):
     """Request model for updating timeline data."""
 
-    timeline_data: List[Dict[str, Any]] = Field(
-        ..., description="Updated timeline data"
-    )
+    timeline_data: Dict[str, Any] = Field(..., description="Updated timeline data")
 
 
 class UploadResponse(BaseModel):

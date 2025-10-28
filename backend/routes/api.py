@@ -7,14 +7,14 @@ import json
 import time
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Dict
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from fastapi.security import HTTPBasicCredentials
 
 from config.settings import Settings, get_settings
 from auth.middleware import verify_credentials
-from models.schemas import TimelineUpdateRequest, UploadResponse
+from models.schemas import TimelineUpdateRequest, UploadResponse, TimelineResponse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/timeline", response_model=List[Dict[str, Any]])
+@router.get("/timeline", response_model=TimelineResponse)
 async def get_timeline_data(
     settings: Settings = Depends(get_settings),
     credentials: HTTPBasicCredentials = Depends(verify_credentials),
@@ -64,7 +64,7 @@ async def update_timeline_data(
         with open(broll_timing_file, "w", encoding="utf-8") as f:
             json.dump(request.timeline_data, f, indent=2, ensure_ascii=False)
 
-        return {"success": True, "message": "Timeline updated successfully"}
+        return {"success": "true", "message": "Timeline updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating timeline: {e}")
 
