@@ -483,21 +483,22 @@
             console.log('DEBUG: Element timeline trouvé:', timelineEl);
             timelineEl.innerHTML = '';
 
-            // Grouper les B-rolls par rush audio
-            const groups = {};
-            console.log('DEBUG: Groupement des items');
-            timelineData.forEach((item, index) => {
-                const rushName = item.rush || 'unknown';
-                if (!groups[rushName]) {
-                    groups[rushName] = [];
-                }
-                groups[rushName].push({...item, originalIndex: index});
-            });
-            console.log('DEBUG: Groupes créés:', groups);
+            // Handle new JSON structure with rushes
+            let rushesData;
+            if (timelineData.rushes) {
+                rushesData = timelineData.rushes;
+                console.log('DEBUG: Nouvelle structure JSON détectée avec rushes:', rushesData);
+            } else {
+                // Fallback for old structure (array format)
+                console.log('DEBUG: Structure ancienne (array) détectée');
+                rushesData = timelineData;
+            }
 
-            // Créer les groupes visuels
-            console.log('DEBUG: Création des groupes visuels');
-            Object.keys(groups).forEach(rushName => {
+            // Process rushes structure
+            Object.keys(rushesData).forEach(rushName => {
+                const rushData = rushesData[rushName];
+                console.log(`DEBUG: Traitement de ${rushName}:`, rushData);
+
                 // Créer le header du groupe
                 const groupHeader = document.createElement('div');
                 groupHeader.className = 'rush-group-header';
@@ -505,8 +506,8 @@
                 groupHeader.id = rushName; // Ajouter l'id sur le header du groupe
                 groupHeader.innerHTML = `
                     <div style="background: #007AFF; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
-                        <span>🎵 ${rushName}</span>
-                        <span style="font-size: 12px; opacity: 0.8;">${groups[rushName].length} B-roll(s)</span>
+                        <span>🎵 ${rushName} (${rushData.duration}s)</span>
+                        <span style="font-size: 12px; opacity: 0.8;">${rushData.brolls ? rushData.brolls.length : 0} B-roll(s)</span>
                     </div>
                 `;
                 timelineEl.appendChild(groupHeader);
@@ -517,13 +518,37 @@
                 groupContainer.style.cssText = 'border: 2px solid #007AFF; border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; background: #f8f9ff;';
 
                 // Ajouter les B-rolls du groupe
-                groups[rushName].forEach((item, groupIndex) => {
-                    const brollEl = createBrollElement(item, item.originalIndex, rushName);
-                    groupContainer.appendChild(brollEl);
-                });
+                if (rushData.brolls && rushData.brolls.length > 0) {
+                    rushData.brolls.forEach((broll, brollIndex) => {
+                        // Create a compatible item structure for createBrollElement
+                        const item = {
+                            broll: `b-roll/${broll.video}`,
+                            broll2: null, // No alternatives in new structure
+                            broll3: null, // No alternatives in new structure
+                            text: rushData.message || `Rush ${rushName} - B-roll ${brollIndex + 1}`,
+                            timing: `${broll.start}s - ${broll.start + broll.duration}s`,
+                            start_time: broll.start,
+                            end_time: broll.start + broll.duration,
+                            duration: broll.duration,
+                            score: broll.score,
+                            phrase: rushData.message || `Content for ${rushName}`,
+                            selected_broll: 'broll', // Default selection
+                            image: null // No overlay image initially
+                        };
+                        
+                        const brollEl = createBrollElement(item, `${rushName}_${brollIndex}`, rushName);
+                        groupContainer.appendChild(brollEl);
+                    });
+                } else {
+                    // Add empty state message
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.style.cssText = 'padding: 20px; text-align: center; color: #6c757d; font-style: italic;';
+                    emptyDiv.innerHTML = 'Aucun B-roll assigné à ce rush';
+                    groupContainer.appendChild(emptyDiv);
+                }
 
                 timelineEl.appendChild(groupContainer);
-                console.log('DEBUG: Groupe créé:', rushName, `(${groups[rushName].length} B-rolls)`);
+                console.log('DEBUG: Groupe créé:', rushName, `(${rushData.brolls ? rushData.brolls.length : 0} B-rolls)`);
             });
         }
 

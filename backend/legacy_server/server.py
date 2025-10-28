@@ -40,13 +40,18 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
     def __init__(self, *args, config=None, **kwargs):
         # Déterminer le chemin du fichier broll_timing.json
+        # Le serveur legacy doit pointer vers le répertoire racine du projet
+        project_root = Path(
+            __file__
+        ).parent.parent.parent  # backend/legacy_server/server.py -> project root
+
         if config and "paths" in config and "temp" in config["paths"]:
             temp_path = Path(config["paths"]["temp"])
         else:
-            temp_path = Path("temp")
+            temp_path = project_root / "temp"
 
         self.broll_timing_file = temp_path / "broll_timing.json"
-        self.ressources_dir = Path("b-roll/ressources")
+        self.ressources_dir = project_root / "b-roll" / "ressources"
         self.ressources_dir.mkdir(exist_ok=True)
         super().__init__(*args, **kwargs)
 
@@ -190,7 +195,10 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
     def _serve_broll_file(self):
         """Sert les fichiers B-roll pour prévisualisation."""
-        file_path = Path(self.path[1:])  # Enlever le '/' initial
+        # Construire le chemin relatif au projet root
+        project_root = Path(__file__).parent.parent.parent
+        relative_path = self.path[1:]  # Enlever le '/' initial
+        file_path = project_root / relative_path
 
         if file_path.exists():
             # Déterminer le type MIME
@@ -210,7 +218,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", content_type)
-            self.send_header("Content-length", len(data))
+            self.send_header("Content-length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
         else:
@@ -218,7 +226,10 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
     def _serve_project_file(self):
         """Sert les fichiers du dossier projects pour prévisualisation."""
-        file_path = Path(self.path[1:])  # Enlever le '/' initial
+        # Construire le chemin relatif au projet root
+        project_root = Path(__file__).parent.parent.parent
+        relative_path = self.path[1:]  # Enlever le '/' initial
+        file_path = project_root / relative_path
 
         if file_path.exists():
             # Déterminer le type MIME
@@ -242,7 +253,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", content_type)
-            self.send_header("Content-length", len(data))
+            self.send_header("Content-length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
         else:
@@ -329,7 +340,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-type", content_type)
         self.send_header(
-            "Content-length", len(data.encode() if isinstance(data, str) else data)
+            "Content-length", str(len(data.encode() if isinstance(data, str) else data))
         )
         self.end_headers()
 
