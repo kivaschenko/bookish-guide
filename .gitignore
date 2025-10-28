@@ -55,3 +55,6 @@ temp/*
 
 # Specific virtual environment
 venv/
+
+# Requirements installation marker
+.requirements_installed
