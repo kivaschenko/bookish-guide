@@ -13,6 +13,7 @@ from moviepy import (
     CompositeAudioClip,
 )
 import logging
+import yaml
 
 
 def create_video_from_project(project_name, language="english", output_path=None):
@@ -27,7 +28,20 @@ def create_video_from_project(project_name, language="english", output_path=None
     Returns:
         str: Path to created video file
     """
-    # 1. Load timing data
+    # 1. Load config for audio settings
+    config_path = Path("config.yml")
+    voice_volume = 1.3  # Default value
+    if config_path.exists():
+        try:
+            with open(config_path, "r") as f:
+                config = yaml.safe_load(f)
+                voice_volume = config.get("audio", {}).get("voice_volume", 1.3)
+        except Exception as e:
+            logging.warning(f"Could not load config: {e}")
+
+    logging.info(f"Using voice volume multiplier: {voice_volume}")
+
+    # 2. Load timing data
     timing_file = Path("temp/broll_timing.json")
     if not timing_file.exists():
         raise FileNotFoundError(
@@ -53,9 +67,12 @@ def create_video_from_project(project_name, language="english", output_path=None
         rush_duration = rush_data["duration"]
         brolls = rush_data.get("brolls", [])
 
-        # Add audio clip
+        # Add audio clip with volume boost
         audio_file = audio_files[int(rush_id.replace("rush", "")) - 1]
         audio_clip = AudioFileClip(str(audio_file))
+        # Apply volume boost from config
+        if voice_volume != 1.0:
+            audio_clip = audio_clip.with_volume_scaled(voice_volume)
         audio_clips.append(audio_clip.with_start(current_time))
 
         # Add B-roll clips for this rush
