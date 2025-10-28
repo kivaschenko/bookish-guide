@@ -95,6 +95,16 @@ storyforge/
 
 ## 🚀 Quick Start
 
+### Health Check
+
+Before starting development, run the backend health check:
+
+```bash
+python test_backend_health.py
+```
+
+This will validate your development environment and show next steps.
+
 ### Installation
 
 ```bash
@@ -257,17 +267,27 @@ projects/my-project/
 - [x] Professional CLI interface with 5 commands
 - [x] Complete integration with existing workflow
 
-### Phase 3: Platform Integration 📋 Future
-- [ ] Web dashboard interface
-- [ ] API endpoints for external integration
+### Phase 3: Platform Integration � In Progress
+- [x] FastAPI backend server foundation
+- [x] WebSocket support for real-time communication
+- [x] Basic authentication and configuration management
+- [x] Timeline API endpoints
+- [ ] Complete REST API for project management
+- [ ] Database integration and data models
+- [ ] File upload and management system
+- [ ] Frontend dashboard interface (Vue.js/React)
+- [ ] Advanced video editing features
 - [ ] Batch processing capabilities
-- [ ] Advanced AI avatar integration
-- [ ] Real-time video preview and editing
+- [ ] Production deployment pipeline
+
+**📊 [View Complete Project Audit & Roadmap](PROJECT_AUDIT_2025.md)**
 
 ## 📚 Documentation
 
+- **[📊 Project Business Audit 2025](PROJECT_AUDIT_2025.md)** - Complete project analysis, roadmap, and business strategy
 - **[Script & Voice Module](script_and_voice/README.md)** - Complete usage and testing guide
 - **[B-roll Intelligence Module](b_roll/README.md)** - Professional B-roll system documentation
+- **[Backend API Server](backend/README.md)** - FastAPI server documentation and development guide
 - **[B-roll Migration Guide](B_ROLL_MIGRATION_COMPLETE.md)** - Complete replacement summary
 - **[Manual Testing Guide](MANUAL_TEST_INSTRUCTIONS.md)** - Manual testing procedures
 - **[Configuration Guide](config.yml)** - System configuration options
