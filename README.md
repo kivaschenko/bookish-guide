@@ -103,7 +103,15 @@ Before starting development, run the backend health check:
 python test_backend_health.py
 ```
 
-This will validate your development environment and show next steps.
+### MVP Analysis
+
+To see exactly what's working and what's missing for MVP:
+
+```bash
+python mvp_analysis.py
+```
+
+This shows your completion status and next steps for the individual user MVP.
 
 ### Installation
 
@@ -284,7 +292,9 @@ projects/my-project/
 
 ## 📚 Documentation
 
-- **[📊 Project Business Audit 2025](PROJECT_AUDIT_2025.md)** - Complete project analysis, roadmap, and business strategy
+- **[🚀 MVP Summary for Individual Users](MVP_SUMMARY_INDIVIDUAL.md)** - Executive summary and 1-2 week implementation plan
+- **[�️ MVP Detailed Roadmap](MVP_ROADMAP_INDIVIDUAL.md)** - Step-by-step implementation guide with code samples
+- **[�📊 Project Business Audit 2025](PROJECT_AUDIT_2025.md)** - Complete project analysis, roadmap, and business strategy
 - **[Script & Voice Module](script_and_voice/README.md)** - Complete usage and testing guide
 - **[B-roll Intelligence Module](b_roll/README.md)** - Professional B-roll system documentation
 - **[Backend API Server](backend/README.md)** - FastAPI server documentation and development guide
