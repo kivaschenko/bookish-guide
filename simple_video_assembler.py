@@ -43,6 +43,7 @@ def create_video_from_project(project_name, language="english", output_path=None
 
     # 2. Load timing data
     timing_file = Path("temp/broll_timing.json")
+    # TODO: Adjust path if needed based on project structure, e.g., temp/{project_name}/broll_timing.json
     if not timing_file.exists():
         raise FileNotFoundError(
             "broll_timing.json not found. Run B-roll selection first."
@@ -79,6 +80,7 @@ def create_video_from_project(project_name, language="english", output_path=None
         for broll in brolls:
             broll_path = Path("b-roll") / broll["video"]
             if broll_path.exists():
+                # TODO: Check size/dimensions if needed, resize if necessary
                 video_clip = VideoFileClip(str(broll_path))
                 # Trim to specified duration and set timing
                 video_clip = video_clip.subclipped(
