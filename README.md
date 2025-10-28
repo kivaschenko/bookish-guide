@@ -2,6 +2,14 @@
 
 AI-powered video content generation platform that transforms text into comprehensive multimedia stories with voice narration and intelligent B-roll footage integration.
 
+## 🎯 MVP Testing (Individual Users)
+
+**🚀 Ready to test?** Check out the **[Individual MVP Testing Guide](INDIVIDUAL_MVP_TESTING.md)** for quick start instructions and test scenarios.
+
+**Branch**: `individual-mvp` | **Status**: 100% Functional | **Time to Video**: 2-5 minutes
+
+---
+
 ## 🚀 Overview
 
 StoryForge is a modular AI platform designed for automated video content generation. The system transforms raw text input into production-ready video content through a sophisticated multi-stage pipeline with professional-grade B-roll intelligence.
@@ -12,6 +20,7 @@ The project features a complete, production-ready modular architecture with two 
 
 1. **✅ Script & Voice** - Content generation module (Production Ready)
 2. **✅ B-roll Intelligence** - AI-powered video matching and selection (Production Ready)
+3. **✅ Video Assembly** - MoviePy-based final video creation (MVP Complete)
 
 ## 📦 Architecture
 
