@@ -10,7 +10,7 @@ import type {
 
 export const projectApi = {
   async getProjects(params?: { skip?: number; limit?: number; status_filter?: string }): Promise<ProjectListResponse> {
-    const response = await api.get('/projects', { params })
+    const response = await api.get('/projects/', { params })
     return response.data
   },
 
@@ -20,7 +20,7 @@ export const projectApi = {
   },
 
   async createProject(data: ProjectCreate): Promise<Project> {
-    const response = await api.post('/projects', data)
+    const response = await api.post('/projects/', data)
     return response.data
   },
 
