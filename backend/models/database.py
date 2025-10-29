@@ -63,6 +63,28 @@ class VideoGenerationStatus(enum.Enum):
     ERROR = "error"
 
 
+class BRollCategory(enum.Enum):
+    """B-roll video category enumeration."""
+
+    NATURE = "nature"
+    URBAN = "urban"
+    PEOPLE = "people"
+    TECHNOLOGY = "technology"
+    BUSINESS = "business"
+    LIFESTYLE = "lifestyle"
+    ABSTRACT = "abstract"
+    OTHER = "other"
+
+
+class BRollStatus(enum.Enum):
+    """B-roll status enumeration."""
+
+    PENDING = "pending"
+    PROCESSING = "processing"
+    AVAILABLE = "available"
+    ERROR = "error"
+
+
 class User(Base):
     """User model for authentication and authorization."""
 
@@ -227,3 +249,85 @@ class UserSession(Base):
 
     def __repr__(self) -> str:
         return f"<UserSession(id={self.id}, user_id={self.user_id}, expires_at='{self.expires_at}')>"
+
+
+class BRoll(Base):
+    """B-roll video model for managing video assets."""
+
+    __tablename__ = "brolls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_path: Mapped[str] = mapped_column(
+        String(500), nullable=False
+    )  # Relative to b-roll directory
+    file_size: Mapped[int] = mapped_column(Integer, nullable=False)  # Size in bytes
+    mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    # Video metadata
+    duration: Mapped[Optional[float]] = mapped_column(
+        nullable=True
+    )  # Duration in seconds
+    width: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    height: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    fps: Mapped[Optional[float]] = mapped_column(nullable=True)  # Frames per second
+    bitrate: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # Content metadata
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tags: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # JSON array as string
+    category: Mapped[BRollCategory] = mapped_column(
+        Enum(BRollCategory), default=BRollCategory.OTHER, nullable=False
+    )
+    status: Mapped[BRollStatus] = mapped_column(
+        Enum(BRollStatus), default=BRollStatus.PENDING, nullable=False
+    )
+
+    # AI-generated metadata
+    ai_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ai_tags: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # JSON array as string
+    embedding_vector: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # JSON array as string
+
+    # User association (optional - can be null for shared B-roll)
+    uploaded_by: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True, index=True
+    )
+    is_public: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False
+    )  # Public B-roll accessible to all users
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    uploader: Mapped[Optional["User"]] = relationship(
+        "User", foreign_keys=[uploaded_by]
+    )
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_broll_category", "category"),
+        Index("idx_broll_status", "status"),
+        Index("idx_broll_public", "is_public"),
+        Index("idx_broll_uploader", "uploaded_by"),
+        Index("idx_broll_created", "created_at"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<BRoll(id={self.id}, filename='{self.filename}', title='{self.title}', category='{self.category.value}')>"

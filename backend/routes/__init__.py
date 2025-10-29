@@ -2,6 +2,6 @@
 Routes package initialization.
 """
 
-from .api import router
+from . import api, auth, projects, broll
 
-__all__ = ["router"]
+__all__ = ["api", "auth", "projects", "broll"]

@@ -25,7 +25,7 @@ import uvicorn
 from config.settings import Settings, get_settings
 from auth.middleware import verify_credentials
 from models.connection import init_db, close_db
-from routes import api, auth, projects
+from routes import api, auth, projects, broll
 from websocket.handler import WebSocketManager
 
 
@@ -89,6 +89,7 @@ def create_app() -> FastAPI:
     # Include API routes
     app.include_router(auth.router, prefix="/api", tags=["authentication"])
     app.include_router(projects.router, prefix="/api", tags=["projects"])
+    app.include_router(broll.router, tags=["B-roll"])  # B-roll management
     app.include_router(api.router, prefix="/api", tags=["legacy"])  # Keep legacy routes
 
     return app

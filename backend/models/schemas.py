@@ -37,6 +37,24 @@ class VideoGenerationStatus(str, Enum):
     ERROR = "error"
 
 
+class BRollCategory(str, Enum):
+    NATURE = "nature"
+    URBAN = "urban"
+    PEOPLE = "people"
+    TECHNOLOGY = "technology"
+    BUSINESS = "business"
+    LIFESTYLE = "lifestyle"
+    ABSTRACT = "abstract"
+    OTHER = "other"
+
+
+class BRollStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    AVAILABLE = "available"
+    ERROR = "error"
+
+
 # Authentication schemas
 class UserLogin(BaseModel):
     """User login request."""
@@ -141,6 +159,108 @@ class VideoGenerationCreate(BaseModel):
 
     stage: VideoGenerationStage = VideoGenerationStage.SCRIPT
     force_restart: bool = False
+
+
+# B-roll schemas
+class BRollCreate(BaseModel):
+    """B-roll creation/upload request."""
+
+    title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    tags: Optional[List[str]] = Field(None, description="List of tags")
+    category: BRollCategory = BRollCategory.OTHER
+    is_public: bool = Field(
+        default=True, description="Make B-roll public for all users"
+    )
+
+
+class BRollUpdate(BaseModel):
+    """B-roll update request."""
+
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    tags: Optional[List[str]] = Field(None, description="List of tags")
+    category: Optional[BRollCategory] = None
+    is_public: Optional[bool] = None
+
+
+class BRollResponse(BaseModel):
+    """B-roll data response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    filename: str
+    original_filename: str
+    file_path: str
+    file_size: int
+    mime_type: str
+
+    # Video metadata
+    duration: Optional[float]
+    width: Optional[int]
+    height: Optional[int]
+    fps: Optional[float]
+    bitrate: Optional[int]
+
+    # Content metadata
+    title: str
+    description: Optional[str]
+    tags: Optional[List[str]] = None
+    category: BRollCategory
+    status: BRollStatus
+
+    # AI metadata
+    ai_description: Optional[str]
+    ai_tags: Optional[List[str]] = None
+
+    # User info
+    uploaded_by: Optional[int]
+    is_public: bool
+
+    # Timestamps
+    created_at: datetime
+    updated_at: datetime
+
+
+class BRollListResponse(BaseModel):
+    """B-roll list response."""
+
+    brolls: List[BRollResponse]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+
+
+class BRollUploadResponse(BaseModel):
+    """B-roll upload response."""
+
+    success: bool
+    message: str
+    broll: Optional[BRollResponse] = None
+    upload_id: Optional[str] = None
+
+
+class BRollSearchRequest(BaseModel):
+    """B-roll search request."""
+
+    query: Optional[str] = Field(
+        None, description="Search query for title, description, or tags"
+    )
+    category: Optional[BRollCategory] = None
+    status: Optional[BRollStatus] = None
+    is_public: Optional[bool] = None
+    tags: Optional[List[str]] = None
+    duration_min: Optional[float] = Field(
+        None, ge=0, description="Minimum duration in seconds"
+    )
+    duration_max: Optional[float] = Field(
+        None, ge=0, description="Maximum duration in seconds"
+    )
+    uploaded_by_me: Optional[bool] = Field(
+        None, description="Filter by current user uploads"
+    )
 
 
 # Existing timeline schemas (keeping for backward compatibility)
