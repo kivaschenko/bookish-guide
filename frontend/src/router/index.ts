@@ -65,8 +65,17 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to: any, from: any, next: any) => {
   const authStore = useAuthStore()
+  
+  // If user has token but no user data, try to load user data
+  if (authStore.token && !authStore.user) {
+    try {
+      await authStore.checkAuth()
+    } catch (error) {
+      console.error('Auth check failed:', error)
+    }
+  }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')

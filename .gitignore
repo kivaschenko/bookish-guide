@@ -63,3 +63,7 @@ venv/
 dist/
 build/
 node_modules/
+
+# SQLite database
+*.sqlite3
+storyforge.db

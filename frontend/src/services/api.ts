@@ -12,10 +12,14 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+      console.log('Adding auth header to request:', config.url)
+    } else {
+      console.log('No token available for request:', config.url)
     }
     return config
   },
   (error) => {
+    console.error('Request interceptor error:', error)
     return Promise.reject(error)
   }
 )
@@ -24,7 +28,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      data: error.response?.data
+    })
+    
     if (error.response?.status === 401) {
+      console.log('Received 401, clearing token and redirecting to login')
       // Token is invalid, remove it
       localStorage.removeItem('token')
       // Redirect to login page

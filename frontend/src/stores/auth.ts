@@ -94,13 +94,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   const checkAuth = async () => {
     if (!token.value) {
+      console.log('No token found, skipping auth check')
       return
     }
 
     try {
+      console.log('Checking authentication with token:', token.value.substring(0, 20) + '...')
       const user = await authApi.getCurrentUser()
       setUser(user)
-    } catch (err) {
+      console.log('Authentication successful, user:', user.username)
+    } catch (err: any) {
+      console.error('Auth check failed:', err.response?.data || err.message)
       // Token is invalid, clear it
       clearToken()
       clearUser()
