@@ -22,11 +22,8 @@ import sys
 import argparse
 from pathlib import Path
 import yaml
-from script_and_voice.paraphraser import Paraphraser
 from utils import setup_logging
 import json
-from b_roll import prepare_brolls_vector
-from jouer_son import lancement_premontage, fin_montage
 import subprocess
 import re
 import glob
