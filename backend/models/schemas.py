@@ -4,8 +4,146 @@ Pydantic models and schemas for API requests and responses.
 
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
+
+
+# Enums for API responses
+class UserRole(str, Enum):
+    USER = "user"
+    ADMIN = "admin"
+
+
+class ProjectStatus(str, Enum):
+    DRAFT = "draft"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    ERROR = "error"
+
+
+class VideoGenerationStage(str, Enum):
+    SCRIPT = "script"
+    VOICE = "voice"
+    BROLL = "broll"
+    ASSEMBLY = "assembly"
+    COMPLETE = "complete"
+
+
+class VideoGenerationStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    ERROR = "error"
+
+
+# Authentication schemas
+class UserLogin(BaseModel):
+    """User login request."""
+
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=6)
+
+
+class UserRegister(BaseModel):
+    """User registration request."""
+
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+
+
+class UserResponse(BaseModel):
+    """User data response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    email: str
+    role: UserRole
+    is_active: bool
+    created_at: datetime
+
+
+class TokenResponse(BaseModel):
+    """JWT token response."""
+
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+# Project schemas
+class ProjectCreate(BaseModel):
+    """Project creation request."""
+
+    name: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    input_text: Optional[str] = None
+    language: str = Field(default="english", max_length=20)
+
+
+class ProjectUpdate(BaseModel):
+    """Project update request."""
+
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    input_text: Optional[str] = None
+    language: Optional[str] = Field(None, max_length=20)
+    status: Optional[ProjectStatus] = None
+
+
+class ProjectResponse(BaseModel):
+    """Project data response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    description: Optional[str]
+    status: ProjectStatus
+    input_text: Optional[str]
+    language: str
+    project_path: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    user_id: int
+
+
+class ProjectListResponse(BaseModel):
+    """Project list response."""
+
+    projects: List[ProjectResponse]
+    total: int
+
+
+# Video generation schemas
+class VideoGenerationResponse(BaseModel):
+    """Video generation status response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    project_id: int
+    stage: VideoGenerationStage
+    status: VideoGenerationStatus
+    progress_percentage: int
+    error_message: Optional[str]
+    timeline_data: Optional[Dict[str, Any]]
+    output_files: Optional[Dict[str, Any]]
+    created_at: datetime
+    updated_at: datetime
+
+
+class VideoGenerationCreate(BaseModel):
+    """Video generation start request."""
+
+    stage: VideoGenerationStage = VideoGenerationStage.SCRIPT
+    force_restart: bool = False
+
+
+# Existing timeline schemas (keeping for backward compatibility)
 
 
 class TimelineItem(BaseModel):

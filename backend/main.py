@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
-FastAPI server for the premontage system.
-Provides a modern web interface for B-roll timeline editing and synchronization.
-
-Based on the legacy server but rebuilt with FastAPI for better performance,
-WebSocket support, and modern API architecture.
+FastAPI server for the StoryForge multi-user system.
+Provides a modern web interface for video generation with user authentication.
 """
 
 import logging
@@ -27,7 +24,8 @@ import uvicorn
 
 from config.settings import Settings, get_settings
 from auth.middleware import verify_credentials
-from routes import api
+from models.connection import init_db, close_db
+from routes import api, auth, projects
 from websocket.handler import WebSocketManager
 
 
@@ -40,9 +38,13 @@ async def lifespan(app: FastAPI):
     """Handle application startup and shutdown."""
     # Startup
     settings = get_settings()
-    logging.info("🚀 Starting Premontage FastAPI server")
+    logging.info("🚀 Starting StoryForge FastAPI server")
     logging.info(f"📁 Project path: {settings.paths.projects}")
     logging.info(f"🎬 B-roll path: {settings.paths.b_roll}")
+
+    # Initialize database
+    await init_db()
+    logging.info("🗄️ Database initialized")
 
     # Create necessary directories
     Path(settings.paths.b_roll).mkdir(exist_ok=True)
@@ -53,15 +55,23 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    logging.info("🛑 Shutting down Premontage FastAPI server")
+    logging.info("🛑 Shutting down StoryForge FastAPI server")
+    await close_db()
+    ressources_dir.mkdir(exist_ok=True)
+
+    yield
+
+    # Shutdown
+    logging.info("🛑 Shutting down StoryForge FastAPI server")
+    await close_db()
 
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="StoryForge Premontage API",
-        description="FastAPI backend for video premontage system with timeline editing and B-roll synchronization",
-        version="1.0.0",
+        title="StoryForge Multi-User API",
+        description="FastAPI backend for multi-user video generation system with authentication",
+        version="2.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
@@ -77,7 +87,9 @@ def create_app() -> FastAPI:
     )
 
     # Include API routes
-    app.include_router(api.router, prefix="/api", tags=["api"])
+    app.include_router(auth.router, prefix="/api", tags=["authentication"])
+    app.include_router(projects.router, prefix="/api", tags=["projects"])
+    app.include_router(api.router, prefix="/api", tags=["legacy"])  # Keep legacy routes
 
     return app
 
