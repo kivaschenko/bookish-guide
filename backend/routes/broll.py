@@ -5,7 +5,16 @@ B-roll management API routes.
 import json
 from pathlib import Path
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+    Query,
+    status,
+    Form,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_
@@ -78,10 +87,10 @@ def broll_to_response(broll: BRoll) -> BRollResponse:
 
 @router.post("/upload", response_model=BRollUploadResponse)
 async def upload_broll(
-    title: str,
-    description: Optional[str] = None,
-    category: Optional[BRollCategory] = None,
-    tags: Optional[str] = None,  # Comma-separated tags
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),  # Accept as string, convert to enum later
+    tags: Optional[str] = Form(None),  # Comma-separated tags
     file: UploadFile = File(...),
     current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -99,6 +108,12 @@ async def upload_broll(
         # Extract metadata if it's a video
         metadata = None
         ai_tags = None
+        duration = None
+        width = None
+        height = None
+        fps = None
+        bitrate = None
+
         if broll_service._is_video_file(filename):
             try:
                 metadata_result = await broll_service.extract_video_metadata(filename)
@@ -112,6 +127,15 @@ async def upload_broll(
                             k.strip() for k in keywords_section.split(",") if k.strip()
                         ]
                         ai_tags = keywords[:20]  # Limit to 20 tags
+
+                # Try to get basic video info using file_info
+                if file_info:
+                    duration = file_info.get("duration")
+                    width = file_info.get("width")
+                    height = file_info.get("height")
+                    fps = file_info.get("fps")
+                    bitrate = file_info.get("bitrate")
+
             except Exception as e:
                 print(f"Warning: Could not extract metadata for {filename}: {e}")
 
@@ -122,6 +146,15 @@ async def upload_broll(
 
         # Combine user tags and AI tags
         all_tags = user_tags + (ai_tags or [])
+
+        # Convert category string to enum
+        category_enum = BRollCategory.OTHER  # Default
+        if category:
+            try:
+                category_enum = BRollCategory(category.lower())
+            except ValueError:
+                # If invalid category provided, use OTHER as fallback
+                category_enum = BRollCategory.OTHER
 
         # Create database record
         db_broll = BRoll(
@@ -134,7 +167,12 @@ async def upload_broll(
             mime_type=file_info.get("mime_type", "application/octet-stream")
             if file_info
             else "application/octet-stream",
-            category=category or BRollCategory.OTHER,
+            duration=duration,
+            width=width,
+            height=height,
+            fps=fps,
+            bitrate=bitrate,
+            category=category_enum,
             tags=json.dumps(all_tags) if all_tags else None,
             ai_description=metadata.get("analysis") if metadata else None,
             ai_tags=json.dumps(ai_tags) if ai_tags else None,
@@ -168,8 +206,8 @@ async def upload_broll(
 async def list_broll(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    category: Optional[BRollCategory] = None,
-    status: Optional[BRollStatus] = None,
+    category: Optional[str] = None,  # Accept as string, convert to enum later
+    status: Optional[str] = None,  # Accept as string, convert to enum later
     search: Optional[str] = None,
     tags: Optional[str] = Query(None, description="Comma-separated tags to filter by"),
     current_user: UserResponse = Depends(get_current_user),
@@ -181,12 +219,22 @@ async def list_broll(
         or_(BRoll.uploaded_by == current_user.id, BRoll.is_public.is_(True))
     )
 
-    # Apply filters
+    # Convert string parameters to enums and apply filters
     if category:
-        query = query.where(BRoll.category == category)
+        try:
+            category_enum = BRollCategory(category.lower())
+            query = query.where(BRoll.category == category_enum)
+        except ValueError:
+            # Invalid category, ignore filter
+            pass
 
     if status:
-        query = query.where(BRoll.status == status)
+        try:
+            status_enum = BRollStatus(status.lower())
+            query = query.where(BRoll.status == status_enum)
+        except ValueError:
+            # Invalid status, ignore filter
+            pass
     else:
         # Default to available only
         query = query.where(BRoll.status == BRollStatus.AVAILABLE)

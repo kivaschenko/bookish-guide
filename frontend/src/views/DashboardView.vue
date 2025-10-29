@@ -63,6 +63,65 @@
     </div>
   </div>
 
+  <!-- B-roll Statistics -->
+  <div class="row mb-4" v-if="brollStats">
+    <div class="col-12">
+      <h5 class="mb-3">B-roll Library</h5>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-purple text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="card-title">Total Files</h6>
+              <h3 class="mb-0">{{ brollStats.user_stats.total_files }}</h3>
+            </div>
+            <i class="fas fa-file-video fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-teal text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="card-title">Videos</h6>
+              <h3 class="mb-0">{{ brollStats.user_stats.video_files }}</h3>
+            </div>
+            <i class="fas fa-video fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-indigo text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="card-title">Images</h6>
+              <h3 class="mb-0">{{ brollStats.user_stats.image_files }}</h3>
+            </div>
+            <i class="fas fa-image fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-orange text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="card-title">Storage</h6>
+              <h3 class="mb-0">{{ brollStats.user_stats.total_size_mb }}MB</h3>
+            </div>
+            <i class="fas fa-hdd fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Recent Projects -->
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -142,12 +201,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useProjectStore } from '@/stores/project'
+import { useBRollStore } from '@/stores/broll'
 import type { Project } from '@/types/project'
+import type { StorageStats } from '@/services/brollApi'
 
 const projectStore = useProjectStore()
+const brollStore = useBRollStore()
 
 const isLoading = ref(false)
 const recentProjects = ref<Project[]>([])
+const brollStats = ref<StorageStats | null>(null)
 
 const stats = computed(() => {
   const projects = recentProjects.value
@@ -186,7 +249,57 @@ const loadRecentProjects = async () => {
   }
 }
 
-onMounted(() => {
-  loadRecentProjects()
+const loadBRollStats = async () => {
+  try {
+    await brollStore.fetchStorageStats()
+    brollStats.value = brollStore.storageStats
+  } catch (error) {
+    console.error('Failed to load B-roll stats:', error)
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([
+    loadRecentProjects(),
+    loadBRollStats()
+  ])
 })
 </script>
+
+<style scoped>
+.bg-purple {
+  background-color: #8b5cf6 !important;
+}
+
+.bg-teal {
+  background-color: #06b6d4 !important;
+}
+
+.bg-indigo {
+  background-color: #6366f1 !important;
+}
+
+.bg-orange {
+  background-color: #f97316 !important;
+}
+
+.badge-completed {
+  background-color: #10b981;
+  color: white;
+}
+
+.badge-processing {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.badge-draft {
+  background-color: #6b7280;
+  color: white;
+}
+
+.badge-error {
+  background-color: #ef4444;
+  color: white;
+}
+</style>

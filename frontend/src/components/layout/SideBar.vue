@@ -24,10 +24,10 @@
           <h6 class="text-muted small text-uppercase">Tools</h6>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <RouterLink to="/broll" class="nav-link" active-class="active">
             <i class="fas fa-images me-2"></i>
             B-roll Library
-          </a>
+          </RouterLink>
         </li>
         <li class="nav-item">
           <a href="#" class="nav-link">

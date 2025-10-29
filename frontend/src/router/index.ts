@@ -9,6 +9,7 @@ import ProjectsView from '@/views/projects/ProjectsView.vue'
 import ProjectCreateView from '@/views/projects/ProjectCreateView.vue'
 import ProjectEditView from '@/views/projects/ProjectEditView.vue'
 import ProjectTimelineView from '@/views/projects/ProjectTimelineView.vue'
+import BRollView from '@/views/broll/BRollView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,6 +61,12 @@ const router = createRouter({
       component: ProjectTimelineView,
       meta: { requiresAuth: true },
       props: true
+    },
+    {
+      path: '/broll',
+      name: 'broll',
+      component: BRollView,
+      meta: { requiresAuth: true }
     }
   ]
 })
