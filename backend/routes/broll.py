@@ -440,27 +440,81 @@ async def delete_broll(
 @router.get("/files/{filename}")
 async def get_file(
     filename: str,
-    current_user: UserResponse = Depends(get_current_user),
+    token: Optional[str] = Query(
+        None, description="Authentication token as query parameter"
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     """Serve B-roll file."""
-    # Verify user has access to this file
-    query = select(BRoll).where(
-        and_(
-            BRoll.filename == filename,
-            or_(BRoll.uploaded_by == current_user.id, BRoll.is_public.is_(True)),
-            BRoll.status == BRollStatus.AVAILABLE.value,
-        )
-    )
+    # Handle authentication - require token in query parameter for media files
+    current_user = None
 
-    result = await db.execute(query)
-    broll = result.scalar_one_or_none()
+    if token:
+        # Verify token from query parameter
+        from auth.jwt_auth import verify_token
 
-    if not broll:
+        current_user = await verify_token(token, db)
+
+    if not current_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="File not found or access denied",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication token required in query parameter: ?token=your_token",
+            headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Check if this is a thumbnail request
+    is_thumbnail = filename.lower().endswith(".jpg")
+    broll = None
+
+    if is_thumbnail:
+        # For thumbnails, check if user has access to the corresponding video file
+        # Extract base filename and look for video variants
+        base_filename = filename.rsplit(".", 1)[0]  # Remove .jpg extension
+
+        # Look for corresponding video files
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".webm"]
+
+        for ext in video_extensions:
+            potential_video = f"{base_filename}{ext}"
+            query = select(BRoll).where(
+                and_(
+                    BRoll.filename == potential_video,
+                    or_(
+                        BRoll.uploaded_by == current_user.id, BRoll.is_public.is_(True)
+                    ),
+                    BRoll.status == BRollStatus.AVAILABLE.value,
+                )
+            )
+            result = await db.execute(query)
+            broll = result.scalar_one_or_none()
+
+            if broll:
+                break
+
+        if not broll:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Thumbnail not found or access denied",
+            )
+
+    else:
+        # For non-thumbnails, verify user has access to this file
+        query = select(BRoll).where(
+            and_(
+                BRoll.filename == filename,
+                or_(BRoll.uploaded_by == current_user.id, BRoll.is_public.is_(True)),
+                BRoll.status == BRollStatus.AVAILABLE.value,
+            )
+        )
+
+        result = await db.execute(query)
+        broll = result.scalar_one_or_none()
+
+        if not broll:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="File not found or access denied",
+            )
 
     # Serve file
     settings = get_settings()
@@ -472,10 +526,16 @@ async def get_file(
             status_code=status.HTTP_404_NOT_FOUND, detail="File not found on disk"
         )
 
+    # Determine media type
+    if is_thumbnail:
+        media_type = "image/jpeg"
+    else:
+        media_type = broll.mime_type
+
     return FileResponse(
         path=file_path,
         filename=filename,
-        media_type=broll.mime_type,
+        media_type=media_type,
         headers={
             "Cache-Control": "public, max-age=36000",  # 10 hours cache
             "Access-Control-Allow-Origin": "*",  # Allow CORS for media

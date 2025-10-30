@@ -164,15 +164,26 @@
           <div class="card h-100">
             <div class="position-relative">
               <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                <video 
-                  v-if="broll.mime_type.startsWith('video/')"
-                  :src="getFileUrl(broll.filename)"
-                  class="img-fluid"
-                  style="max-height: 100%; max-width: 100%;"
-                  controls
-                  preload="metadata"
-                >
-                </video>
+                <!-- Video thumbnail or fallback to video player -->
+                <div v-if="broll.mime_type.startsWith('video/')" class="w-100 h-100 d-flex align-items-center justify-content-center">
+                  <img 
+                    :src="getThumbnailUrl(broll.filename)"
+                    class="img-fluid"
+                    style="max-height: 100%; max-width: 100%; object-fit: cover;"
+                    :alt="broll.title"
+                    @error="handleThumbnailError(broll.id)"
+                    v-if="!shouldShowVideo(broll.id)"
+                  />
+                  <video 
+                    v-else
+                    :src="getFileUrl(broll.filename)"
+                    class="img-fluid"
+                    style="max-height: 100%; max-width: 100%;"
+                    controls
+                    preload="metadata"
+                  >
+                  </video>
+                </div>
                 <img 
                   v-else-if="broll.mime_type.startsWith('image/')"
                   :src="getFileUrl(broll.filename)"
@@ -242,13 +253,23 @@
             <tr v-for="broll in brolls" :key="broll.id">
               <td>
                 <div class="d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 40px;">
-                  <video 
-                    v-if="broll.mime_type.startsWith('video/')"
-                    :src="getFileUrl(broll.filename)"
-                    style="max-height: 100%; max-width: 100%;"
-                    muted
-                  >
-                  </video>
+                  <!-- Video thumbnail or fallback to video player -->
+                  <div v-if="broll.mime_type.startsWith('video/')" class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    <img 
+                      :src="getThumbnailUrl(broll.filename)"
+                      style="max-height: 100%; max-width: 100%; object-fit: cover;"
+                      :alt="broll.title"
+                      @error="handleThumbnailError(broll.id)"
+                      v-if="!shouldShowVideo(broll.id)"
+                    />
+                    <video 
+                      v-else
+                      :src="getFileUrl(broll.filename)"
+                      style="max-height: 100%; max-width: 100%;"
+                      muted
+                    >
+                    </video>
+                  </div>
                   <img 
                     v-else-if="broll.mime_type.startsWith('image/')"
                     :src="getFileUrl(broll.filename)"
@@ -395,6 +416,7 @@ const viewMode = ref<'grid' | 'list'>('grid')
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const selectedStatus = ref('')
+const failedThumbnails = ref<Set<number>>(new Set())
 
 // Computed properties - Use storeToRefs to maintain reactivity
 const { 
@@ -420,7 +442,37 @@ const visiblePages = computed(() => {
 
 // Methods
 const getFileUrl = (filename: string): string => {
-  return brollStore.getFileUrl(filename)
+  const baseUrl = brollStore.getFileUrl(filename)
+  const token = localStorage.getItem('token')
+  if (token) {
+    return `${baseUrl}?token=${encodeURIComponent(token)}`
+  }
+  return baseUrl
+}
+
+const getThumbnailUrl = (filename: string): string => {
+  // Replace video extension with .jpg for thumbnail
+  const baseFilename = filename.replace(/\.(mp4|avi|mov|mkv|webm)$/i, '')
+  const baseUrl = brollStore.getFileUrl(`${baseFilename}.jpg`)
+  const token = localStorage.getItem('token')
+  if (token) {
+    return `${baseUrl}?token=${encodeURIComponent(token)}`
+  }
+  return baseUrl
+}
+
+const getAuthenticatedImageUrl = async (filename: string): Promise<string> => {
+  // Since we're now using token in URL, just return the regular URL
+  return getThumbnailUrl(filename)
+}
+
+const handleThumbnailError = (brollId: number) => {
+  // Mark this thumbnail as failed so we show the video player instead
+  failedThumbnails.value.add(brollId)
+}
+
+const shouldShowVideo = (brollId: number): boolean => {
+  return failedThumbnails.value.has(brollId)
 }
 
 const formatFileSize = (bytes: number): string => {
