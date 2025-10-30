@@ -159,6 +159,34 @@
                 </div>
               </div>
             </div>
+
+            <!-- Process Video Button (for videos without AI analysis) -->
+            <div v-else-if="broll.mime_type.startsWith('video/')" class="card bg-warning-subtle mt-3">
+              <div class="card-header py-2">
+                <h6 class="mb-0">
+                  <i class="fas fa-cog me-2"></i>
+                  Video Processing
+                </h6>
+              </div>
+              <div class="card-body">
+                <p class="text-muted mb-3">
+                  This video hasn't been processed yet. Click the button below to generate a thumbnail and AI analysis.
+                </p>
+                <button 
+                  type="button" 
+                  class="btn btn-warning"
+                  @click="handleProcessVideo"
+                  :disabled="isProcessing"
+                >
+                  <span v-if="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+                  <i v-else class="fas fa-play me-2"></i>
+                  {{ isProcessing ? 'Processing...' : 'Process Video' }}
+                </button>
+                <div class="form-text">
+                  This will extract a thumbnail image and generate AI-powered tags and description.
+                </div>
+              </div>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -201,6 +229,7 @@ const notificationStore = useNotificationStore()
 
 // State
 const isUpdating = ref(false)
+const isProcessing = ref(false)
 const tagsInput = ref('')
 
 const formData = ref({
@@ -268,6 +297,30 @@ const getStatusBadgeClass = (status: string): string => {
       return 'bg-danger'
     default:
       return 'bg-secondary'
+  }
+}
+
+const handleProcessVideo = async () => {
+  isProcessing.value = true
+
+  try {
+    const result = await brollStore.processBRoll(props.broll.id)
+    
+    notificationStore.addNotification({
+      message: result.message || 'Video processed successfully',
+      type: 'success'
+    })
+
+    // The store will refresh the data, which will update the props.broll
+    emit('updated')
+  } catch (error) {
+    console.error('Process video error:', error)
+    notificationStore.addNotification({
+      message: 'Failed to process video. Please try again.',
+      type: 'error'
+    })
+  } finally {
+    isProcessing.value = false
   }
 }
 

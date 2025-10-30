@@ -4,12 +4,16 @@ B-roll service for file handling and metadata extraction.
 
 import uuid
 import mimetypes
+import logging
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 import aiofiles
 from fastapi import UploadFile, HTTPException
 
 from config.settings import get_settings
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class BRollService:
@@ -19,6 +23,7 @@ class BRollService:
         self.settings = get_settings()
         self.broll_dir = Path(self.settings.paths.b_roll)
         self.broll_dir.mkdir(exist_ok=True)
+        logger.info(f"B-roll directory set to: {self.broll_dir}")
 
     def _get_file_extension(self, filename: str) -> str:
         """Get file extension from filename."""
@@ -58,6 +63,7 @@ class BRollService:
         Returns:
             Tuple of (filename, file_path, file_size)
         """
+        logger.info(f"Saving uploaded file: {file.filename}")
         if not file.filename:
             raise HTTPException(status_code=400, detail="No filename provided")
 
@@ -81,23 +87,28 @@ class BRollService:
                 await f.write(content)
 
             file_size = len(content)
+            logger.info(f"File saved: {file_path} (size: {file_size} bytes)")
             return filename, str(file_path.relative_to(self.broll_dir)), file_size
 
         except Exception as e:
             # Clean up file if something went wrong
             if file_path.exists():
                 file_path.unlink()
+            logger.error(f"Error saving file {file.filename}: {e}")
             raise HTTPException(status_code=500, detail=f"Failed to save file: {e}")
 
     def delete_file(self, filename: str) -> bool:
         """Delete B-roll file from filesystem."""
+        logger.info(f"Deleting B-roll file: {filename}")
         try:
             file_path = self.broll_dir / filename
             if file_path.exists():
                 file_path.unlink()
+                logger.info(f"File deleted: {file_path}")
                 return True
             return False
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error deleting file {filename}: {e}")
             return False
 
     def get_file_info(self, filename: str) -> Optional[Dict[str, Any]]:
@@ -123,8 +134,17 @@ class BRollService:
         Extract video metadata using existing B-roll meta extractor.
         This integrates with the existing b_roll/meta_extractor.py
         """
+        logger.info(f"Extracting metadata for video file: {filename}")
         try:
             # Import the existing meta extractor
+            # Add parent directory to Python path to find b_roll module
+            import sys
+            from pathlib import Path
+
+            parent_dir = Path(__file__).parent.parent.parent
+            if str(parent_dir) not in sys.path:
+                sys.path.insert(0, str(parent_dir))
+
             from b_roll.meta_extractor import MetaExtractor
             import os
 
@@ -136,17 +156,36 @@ class BRollService:
             openai_api_key = os.getenv("OPENAI_API_KEY")
             if not openai_api_key:
                 # Try to load from config.yml
+                logger.info("Loading OpenAI API key from config.yml")
                 try:
                     import yaml
 
-                    config_path = Path(__file__).parent.parent.parent / "config.yml"
-                    if config_path.exists():
+                    # Use a more robust way to find config.yml
+                    current_dir = Path.cwd()
+                    config_path = None
+
+                    # Try different possible locations for config.yml
+                    possible_paths = [
+                        current_dir / "config.yml",
+                        current_dir.parent / "config.yml",
+                        Path("/home/kostiantyn/projects/storyforge/config.yml"),
+                        self.broll_dir.parent / "config.yml",
+                    ]
+
+                    for path in possible_paths:
+                        if path.exists():
+                            config_path = path
+                            break
+
+                    if config_path and config_path.exists():
                         with open(config_path, "r") as f:
                             config = yaml.safe_load(f)
                         openai_api_key = (
                             config.get("api", {}).get("openai", {}).get("api_key")
                         )
-                except Exception:
+                        logger.info(f"Loaded OpenAI API key from {config_path}")
+                except Exception as e:
+                    logger.warning(f"Could not load config.yml: {e}")
                     pass
 
             config = {
@@ -155,6 +194,8 @@ class BRollService:
             }
 
             extractor = MetaExtractor(config)
+
+            logger.info(f"Processing video for metadata extraction: {file_path}")
 
             # Use the existing process_video method
             success = extractor.process_video(str(file_path))
@@ -168,12 +209,17 @@ class BRollService:
                     with open(txt_path, "r", encoding="utf-8") as f:
                         context = f.read().strip()
 
+                    logger.info(f"Metadata extracted for {file_path}: {context}")
+
                     return {
                         "analysis": context,
                         "has_metadata": True,
                         "extracted_at": file_path.stat().st_mtime,
                     }
-
+                else:
+                    logger.warning(
+                        f"Metadata file not found for {file_path}: {txt_path}"
+                    )
             return {
                 "analysis": None,
                 "has_metadata": False,
@@ -184,7 +230,7 @@ class BRollService:
             # If meta extractor is not available, return basic info
             return None
         except Exception as e:
-            print(f"Error extracting metadata for {filename}: {e}")
+            logger.error(f"Error extracting metadata for {filename}: {e}")
             return None
 
     def get_file_url(self, filename: str) -> str:

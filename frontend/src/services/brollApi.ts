@@ -154,6 +154,11 @@ class BRollApi {
     return response.data
   }
 
+  async processBRoll(id: number): Promise<{ message: string; ai_description?: string; ai_tags?: string[]; thumbnail_generated: boolean }> {
+    const response = await api.post(`/broll/${id}/process`)
+    return response.data
+  }
+
   getFileUrl(filename: string): string {
     return `/api/broll/files/${filename}`
   }

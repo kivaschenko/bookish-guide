@@ -230,6 +230,26 @@ export const useBRollStore = defineStore('broll', () => {
     return brollApi.getFileUrl(filename)
   }
 
+  const processBRoll = async (id: number) => {
+    try {
+      isLoading.value = true
+      clearError()
+
+      const result = await brollApi.processBRoll(id)
+      
+      // Refresh the B-roll data to get updated AI analysis
+      await fetchBRolls()
+      
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process B-roll'
+      setError(errorMessage)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // State
     brolls,
@@ -260,5 +280,6 @@ export const useBRollStore = defineStore('broll', () => {
     filterByTags,
     changePage,
     getFileUrl,
+    processBRoll,
   }
 })
