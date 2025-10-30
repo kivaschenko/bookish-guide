@@ -14,75 +14,16 @@ from sqlalchemy import (
     Text,
     JSON,
     ForeignKey,
-    Enum,
     Index,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-import enum
 
 
 class Base(DeclarativeBase):
     """Base class for all database models."""
 
     pass
-
-
-class UserRole(enum.Enum):
-    """User role enumeration."""
-
-    USER = "user"
-    ADMIN = "admin"
-
-
-class ProjectStatus(enum.Enum):
-    """Project status enumeration."""
-
-    DRAFT = "draft"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    ERROR = "error"
-
-
-class VideoGenerationStage(enum.Enum):
-    """Video generation stage enumeration."""
-
-    SCRIPT = "script"
-    VOICE = "voice"
-    BROLL = "broll"
-    ASSEMBLY = "assembly"
-    COMPLETE = "complete"
-
-
-class VideoGenerationStatus(enum.Enum):
-    """Video generation status enumeration."""
-
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    ERROR = "error"
-
-
-class BRollCategory(enum.Enum):
-    """B-roll video category enumeration."""
-
-    NATURE = "nature"
-    URBAN = "urban"
-    PEOPLE = "people"
-    TECHNOLOGY = "technology"
-    BUSINESS = "business"
-    LIFESTYLE = "lifestyle"
-    ABSTRACT = "abstract"
-    OTHER = "other"
-
-
-class BRollStatus(enum.Enum):
-    """B-roll status enumeration."""
-
-    PENDING = "pending"
-    PROCESSING = "processing"
-    AVAILABLE = "available"
-    ERROR = "error"
 
 
 class User(Base):
@@ -98,9 +39,7 @@ class User(Base):
         String(255), unique=True, index=True, nullable=False
     )
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole), default=UserRole.USER, nullable=False
-    )
+    role: Mapped[str] = mapped_column(String(20), default="user", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -135,9 +74,7 @@ class Project(Base):
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=False, index=True
     )
-    status: Mapped[ProjectStatus] = mapped_column(
-        Enum(ProjectStatus), default=ProjectStatus.DRAFT, nullable=False
-    )
+    status: Mapped[str] = mapped_column(String(20), default="draft", nullable=False)
     input_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     language: Mapped[str] = mapped_column(String(20), default="english", nullable=False)
     project_path: Mapped[Optional[str]] = mapped_column(
@@ -166,7 +103,7 @@ class Project(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<Project(id={self.id}, name='{self.name}', user_id={self.user_id}, status='{self.status.value}')>"
+        return f"<Project(id={self.id}, name='{self.name}', user_id={self.user_id}, status='{self.status}')>"
 
 
 class VideoGeneration(Base):
@@ -178,12 +115,10 @@ class VideoGeneration(Base):
     project_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("projects.id"), nullable=False, index=True
     )
-    stage: Mapped[VideoGenerationStage] = mapped_column(
-        Enum(VideoGenerationStage), default=VideoGenerationStage.SCRIPT, nullable=False
-    )
-    status: Mapped[VideoGenerationStatus] = mapped_column(
-        Enum(VideoGenerationStatus),
-        default=VideoGenerationStatus.PENDING,
+    stage: Mapped[str] = mapped_column(String(20), default="script", nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(20),
+        default="pending",
         nullable=False,
     )
     progress_percentage: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -216,7 +151,7 @@ class VideoGeneration(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<VideoGeneration(id={self.id}, project_id={self.project_id}, stage='{self.stage.value}', status='{self.status.value}')>"
+        return f"<VideoGeneration(id={self.id}, project_id={self.project_id}, stage='{self.stage}', status='{self.status}')>"
 
 
 class UserSession(Base):
@@ -280,12 +215,8 @@ class BRoll(Base):
     tags: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )  # JSON array as string
-    category: Mapped[BRollCategory] = mapped_column(
-        Enum(BRollCategory), default=BRollCategory.OTHER, nullable=False
-    )
-    status: Mapped[BRollStatus] = mapped_column(
-        Enum(BRollStatus), default=BRollStatus.PENDING, nullable=False
-    )
+    category: Mapped[str] = mapped_column(String(20), default="other", nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
 
     # AI-generated metadata
     ai_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -330,4 +261,4 @@ class BRoll(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<BRoll(id={self.id}, filename='{self.filename}', title='{self.title}', category='{self.category.value}')>"
+        return f"<BRoll(id={self.id}, filename='{self.filename}', title='{self.title}', category='{self.category}')>"

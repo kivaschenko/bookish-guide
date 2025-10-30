@@ -4,6 +4,7 @@ Project management API routes with user isolation.
 
 from pathlib import Path
 from typing import List, Dict, Optional
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +23,9 @@ from models.schemas import (
 from auth.dependencies import get_current_active_user
 from config.settings import get_settings
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -81,6 +85,9 @@ async def create_project(
     db: AsyncSession = Depends(get_db),
 ) -> ProjectResponse:
     """Create a new project for the current user."""
+    logger.info(
+        f"User {current_user.id} is creating a new project: {project_data.name}"
+    )
 
     # Check if project name already exists for this user
     result = await db.execute(
@@ -126,6 +133,8 @@ async def create_project(
     db.add(project)
     await db.commit()
     await db.refresh(project)
+
+    logger.info(f"User {current_user.id} created a new project: {project_data.name}")
 
     return ProjectResponse.model_validate(project)
 
@@ -192,7 +201,7 @@ async def delete_project(
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, str]:
     """Delete a project and its files."""
-
+    logger.info(f"User {current_user.id} is deleting project ID: {project_id}")
     result = await db.execute(
         select(Project).where(
             and_(Project.id == project_id, Project.user_id == current_user.id)
@@ -231,6 +240,7 @@ async def delete_project(
     await db.delete(project)
     await db.commit()
 
+    logger.info(f"User {current_user.id} deleted project ID: {project_id}")
     return {"message": "Project deleted successfully"}
 
 
@@ -243,7 +253,9 @@ async def list_video_generations(
     db: AsyncSession = Depends(get_db),
 ) -> List[VideoGenerationResponse]:
     """List video generations for a project."""
-
+    logger.info(
+        f"User {current_user.id} is listing video generations for project ID: {project_id}"
+    )
     # Verify project ownership
     result = await db.execute(
         select(Project).where(
@@ -276,7 +288,9 @@ async def create_video_generation(
     db: AsyncSession = Depends(get_db),
 ) -> VideoGenerationResponse:
     """Start video generation for a project."""
-
+    logger.info(
+        f"User {current_user.id} is starting video generation for project ID: {project_id}"
+    )
     # Verify project ownership
     result = await db.execute(
         select(Project).where(
@@ -306,7 +320,9 @@ async def create_video_generation(
     db.add(generation)
     await db.commit()
     await db.refresh(generation)
-
+    logger.info(
+        f"User {current_user.id} started video generation ID: {generation.id} for project ID: {project_id}"
+    )
     # TODO: Here you would trigger the actual video generation process
     # For now, we just return the created record
 

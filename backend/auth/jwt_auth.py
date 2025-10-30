@@ -27,12 +27,29 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    # Truncate password to 72 bytes for bcrypt compatibility
+    password_bytes = plain_password.encode("utf-8")
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    truncated_password = password_bytes.decode("utf-8", errors="ignore")
+
+    return pwd_context.verify(truncated_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Generate password hash."""
-    return pwd_context.hash(password)
+    """
+    Generate password hash.
+
+    Note: Bcrypt has a 72-byte limit. Passwords are truncated to this limit
+    using UTF-8 encoding to ensure compatibility.
+    """
+    # Truncate password to 72 bytes for bcrypt compatibility
+    password_bytes = password.encode("utf-8")
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    truncated_password = password_bytes.decode("utf-8", errors="ignore")
+
+    return pwd_context.hash(truncated_password)
 
 
 async def authenticate_user(

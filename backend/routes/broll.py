@@ -23,15 +23,15 @@ from sqlalchemy import select, and_, or_
 from auth.dependencies import get_current_user
 from config.settings import get_settings
 from models.connection import get_db
-from models.database import BRoll, BRollCategory, BRollStatus
+from models.database import BRoll
 from models.schemas import (
     BRollUpdate,
     BRollResponse,
     BRollListResponse,
     BRollUploadResponse,
     UserResponse,
-    BRollCategory as SchemaBRollCategory,
-    BRollStatus as SchemaBRollStatus,
+    BRollCategory,
+    BRollStatus,
 )
 from services.broll_service import BRollService
 
@@ -63,6 +63,44 @@ def broll_to_response(broll: BRoll) -> BRollResponse:
         except Exception:
             ai_tags = []
 
+    # Convert database enum values to schema enum values
+    # Handle both old enum constants (e.g., "NATURE") and new lowercase values (e.g., "nature")
+    category_mapping = {
+        "NATURE": "nature",
+        "URBAN": "urban",
+        "PEOPLE": "people",
+        "TECHNOLOGY": "technology",
+        "BUSINESS": "business",
+        "LIFESTYLE": "lifestyle",
+        "ABSTRACT": "abstract",
+        "OTHER": "other",
+        # Also handle if values are already lowercase
+        "nature": "nature",
+        "urban": "urban",
+        "people": "people",
+        "technology": "technology",
+        "business": "business",
+        "lifestyle": "lifestyle",
+        "abstract": "abstract",
+        "other": "other",
+    }
+
+    status_mapping = {
+        "PENDING": "pending",
+        "PROCESSING": "processing",
+        "AVAILABLE": "available",
+        "ERROR": "error",
+        # Also handle if values are already lowercase
+        "pending": "pending",
+        "processing": "processing",
+        "available": "available",
+        "error": "error",
+    }
+
+    # Convert category and status with fallback to original value
+    category_value = category_mapping.get(broll.category, broll.category)
+    status_value = status_mapping.get(broll.status, broll.status)
+
     return BRollResponse(
         id=broll.id,
         filename=broll.filename,
@@ -78,8 +116,8 @@ def broll_to_response(broll: BRoll) -> BRollResponse:
         title=broll.title,
         description=broll.description,
         tags=tags,
-        category=SchemaBRollCategory(broll.category.value),  # Convert enum
-        status=SchemaBRollStatus(broll.status.value),  # Convert enum
+        category=BRollCategory(category_value),
+        status=BRollStatus(status_value),
         ai_description=broll.ai_description,
         ai_tags=ai_tags,
         uploaded_by=broll.uploaded_by,
@@ -156,8 +194,8 @@ async def upload_broll(
         if category:
             logger.info(f"Setting B-roll category to: {category}")
             try:
-                category_enum = BRollCategory(category.lower())
-            except ValueError:
+                category_enum = BRollCategory[category.upper()]
+            except KeyError:
                 # If invalid category provided, use OTHER as fallback
                 category_enum = BRollCategory.OTHER
 
@@ -177,12 +215,12 @@ async def upload_broll(
             height=height,
             fps=fps,
             bitrate=bitrate,
-            category=category_enum.name,
+            category=category_enum.value,
             tags=json.dumps(all_tags) if all_tags else None,
             ai_description=metadata.get("analysis") if metadata else None,
             ai_tags=json.dumps(ai_tags) if ai_tags else None,
             uploaded_by=current_user.id,
-            status=BRollStatus.AVAILABLE,
+            status=BRollStatus.AVAILABLE.value,
         )
 
         db.add(db_broll)
@@ -228,7 +266,8 @@ async def list_broll(
     if category:
         try:
             category_enum = BRollCategory(category.lower())
-            query = query.where(BRoll.category == category_enum)
+            # Compare against the string value since DB now stores strings
+            query = query.where(BRoll.category == category_enum.value)
         except ValueError:
             # Invalid category, ignore filter
             pass
@@ -236,13 +275,14 @@ async def list_broll(
     if status:
         try:
             status_enum = BRollStatus(status.lower())
-            query = query.where(BRoll.status == status_enum)
+            # Compare against the string value since DB now stores strings
+            query = query.where(BRoll.status == status_enum.value)
         except ValueError:
             # Invalid status, ignore filter
             pass
     else:
         # Default to available only
-        query = query.where(BRoll.status == BRollStatus.AVAILABLE)
+        query = query.where(BRoll.status == BRollStatus.AVAILABLE.value)
 
     if search:
         search_term = f"%{search}%"
@@ -391,7 +431,7 @@ async def delete_broll(
         return {"message": "B-roll item permanently deleted"}
     else:
         # Change status to ERROR (closest to soft delete)
-        broll.status = BRollStatus.ERROR
+        broll.status = BRollStatus.ERROR.value
         await db.commit()
 
         return {"message": "B-roll item status changed to error"}
@@ -409,7 +449,7 @@ async def get_file(
         and_(
             BRoll.filename == filename,
             or_(BRoll.uploaded_by == current_user.id, BRoll.is_public.is_(True)),
-            BRoll.status == BRollStatus.AVAILABLE,
+            BRoll.status == BRollStatus.AVAILABLE.value,
         )
     )
 
@@ -454,7 +494,8 @@ async def get_storage_stats(
     # Get user's file count and sizes from database
     query = select(BRoll).where(
         and_(
-            BRoll.uploaded_by == current_user.id, BRoll.status == BRollStatus.AVAILABLE
+            BRoll.uploaded_by == current_user.id,
+            BRoll.status == BRollStatus.AVAILABLE.value,
         )
     )
 
