@@ -602,7 +602,6 @@ const getTagsArray = (tagsString: string | null | string[]): string[] => {
           return parsed
         }
       } catch (e) {
-        console.error('Failed to parse cleaned tags JSON:', e)
         // Fallback: extract quoted strings manually
         const matches = joinedString.match(/"([^"]+)"/g)
         if (matches) {
@@ -624,7 +623,6 @@ const getTagsArray = (tagsString: string | null | string[]): string[] => {
           return parsed
         }
       } catch (e) {
-        console.error('Failed to parse tags JSON:', e)
         return [tagsString]
       }
     }

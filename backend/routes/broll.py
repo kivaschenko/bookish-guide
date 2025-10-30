@@ -3,6 +3,7 @@ B-roll management API routes.
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import Optional
 from fastapi import (
@@ -33,6 +34,9 @@ from models.schemas import (
     BRollStatus as SchemaBRollStatus,
 )
 from services.broll_service import BRollService
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/broll", tags=["B-roll"])
 
@@ -97,7 +101,7 @@ async def upload_broll(
 ):
     """Upload a new B-roll file."""
     broll_service = BRollService()
-
+    logger.info(f"User {current_user.id} uploading B-roll file: {file.filename}")
     try:
         # Save the file
         filename, file_path, file_size = await broll_service.save_upload_file(file)
@@ -150,6 +154,7 @@ async def upload_broll(
         # Convert category string to enum
         category_enum = BRollCategory.OTHER  # Default
         if category:
+            logger.info(f"Setting B-roll category to: {category}")
             try:
                 category_enum = BRollCategory(category.lower())
             except ValueError:
@@ -172,7 +177,7 @@ async def upload_broll(
             height=height,
             fps=fps,
             bitrate=bitrate,
-            category=category_enum,
+            category=category_enum.name,
             tags=json.dumps(all_tags) if all_tags else None,
             ai_description=metadata.get("analysis") if metadata else None,
             ai_tags=json.dumps(ai_tags) if ai_tags else None,
@@ -335,6 +340,9 @@ async def update_broll(
     for field, value in update_data.items():
         if field == "tags" and value is not None:
             setattr(broll, field, json.dumps(value))
+        elif field == "category" and value is not None:
+            print(f"Updating category to: {value}. Setting enum name. {value.name}")
+            setattr(broll, field, value.name)  # Store enum as its name
         else:
             setattr(broll, field, value)
 
@@ -417,13 +425,22 @@ async def get_file(
     # Serve file
     settings = get_settings()
     file_path = Path(settings.paths.b_roll) / filename
+    logger.info(f"Serving B-roll file from path: {file_path}")
 
     if not file_path.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="File not found on disk"
         )
 
-    return FileResponse(path=file_path, filename=filename, media_type=broll.mime_type)
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type=broll.mime_type,
+        headers={
+            "Cache-Control": "public, max-age=36000",  # 10 hours cache
+            "Access-Control-Allow-Origin": "*",  # Allow CORS for media
+        },
+    )
 
 
 @router.get("/stats/storage")
