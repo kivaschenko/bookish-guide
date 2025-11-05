@@ -6,19 +6,98 @@ Visual interface for editing broll_timing.json with B-roll selection and image u
 Usage: python editing_server/server.py
 """
 
-import os
 import json
-import shutil
 import logging
-import webbrowser
 import base64
 import secrets
 import yaml
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import parse_qs, urlparse
-import cgi
 import time
+
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
+def parse_multipart_form(rfile, headers):
+    """
+    Parse multipart form data without using deprecated cgi module.
+    Returns a dictionary with field names as keys.
+    For file fields, the value is a dict with 'filename', 'content', and 'content_type'.
+    For regular fields, the value is a dict with 'value'.
+    """
+    content_type = headers.get("Content-Type", "")
+    if not content_type.startswith("multipart/form-data"):
+        return {}
+
+    # Extract boundary from content-type
+    boundary = None
+    for part in content_type.split(";"):
+        if "boundary=" in part:
+            boundary = part.split("boundary=")[1].strip()
+            break
+
+    if not boundary:
+        return {}
+
+    # Read the entire body
+    content_length = int(headers.get("Content-Length", 0))
+    body = rfile.read(content_length)
+
+    # Parse multipart data manually
+    boundary_bytes = f"--{boundary}".encode()
+    parts = body.split(boundary_bytes)
+
+    form_data = {}
+
+    for part in parts:
+        if not part or part == b"--\r\n" or part == b"--":
+            continue
+
+        # Split headers and content
+        if b"\r\n\r\n" not in part:
+            continue
+
+        header_section, content = part.split(b"\r\n\r\n", 1)
+
+        # Remove trailing \r\n
+        content = content.rstrip(b"\r\n")
+
+        # Parse headers
+        headers_text = header_section.decode("utf-8", errors="ignore")
+        field_name = None
+        filename = None
+        content_type = None
+
+        for line in headers_text.split("\r\n"):
+            if line.lower().startswith("content-disposition:"):
+                # Extract field name and filename
+                for item in line.split(";"):
+                    item = item.strip()
+                    if 'name="' in item:
+                        field_name = item.split('name="')[1].split('"')[0]
+                    if 'filename="' in item:
+                        filename = item.split('filename="')[1].split('"')[0]
+            elif line.lower().startswith("content-type:"):
+                content_type = line.split(":", 1)[1].strip()
+
+        if field_name:
+            if filename:
+                # File field
+                form_data[field_name] = {
+                    "filename": filename,
+                    "content": content,
+                    "content_type": content_type or "application/octet-stream",
+                }
+            else:
+                # Regular field
+                form_data[field_name] = {
+                    "value": content.decode("utf-8", errors="ignore")
+                }
+
+    return form_data
 
 
 def load_auth_config():
@@ -44,32 +123,31 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             temp_path = Path(config["paths"]["temp"])
         else:
             temp_path = Path("temp")
-
         self.broll_timing_file = temp_path / "broll_timing.json"
         self.ressources_dir = Path("b-roll/ressources")
         self.ressources_dir.mkdir(exist_ok=True)
         super().__init__(*args, **kwargs)
 
     def check_auth(self):
-        """Vérifier l'authentification HTTP Basic"""
+        """Check HTTP Basic authentication"""
         auth_config = load_auth_config()
 
-        # Si l'auth est désactivée, on passe
+        # If auth is disabled, allow access
         if not auth_config.get("enabled", False):
             return True
 
-        # Récupérer l'en-tête Authorization
+        # Get Authorization header
         auth_header = self.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Basic "):
             return False
 
         try:
-            # Décoder les credentials
-            encoded_credentials = auth_header[6:]  # Enlever "Basic "
+            # Decode credentials
+            encoded_credentials = auth_header[6:]  # Remove "Basic "
             decoded_credentials = base64.b64decode(encoded_credentials).decode("utf-8")
             username, password = decoded_credentials.split(":", 1)
 
-            # Vérifier les credentials
+            # Verify credentials
             correct_username = auth_config.get("username", "admin")
             correct_password = auth_config.get("password", "admin")
 
@@ -82,16 +160,16 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             return False
 
     def send_auth_required(self):
-        """Envoyer une réponse 401 avec demande d'authentification"""
+        """Send 401 response requesting authentication"""
         self.send_response(401)
-        self.send_header("WWW-Authenticate", 'Basic realm="Premontage Server"')
+        self.send_header("WWW-Authenticate", 'Basic realm="Timeline Editing Server"')
         self.send_header("Content-type", "text/html")
         self.end_headers()
         self.wfile.write(b"<h1>401 Unauthorized</h1><p>Authentication required</p>")
 
     def do_GET(self):
-        """Gère les requêtes GET (interface HTML et données JSON)."""
-        # Vérifier l'authentification
+        """Handle GET requests (HTML interface and JSON data)."""
+        # Check authentication
         if not self.check_auth():
             self.send_auth_required()
             return
@@ -108,12 +186,12 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             else:
                 self._send_404()
         except Exception as e:
-            logging.error(f"Erreur GET {self.path}: {e}")
+            logging.error(f"GET error {self.path}: {e}")
             self._send_500()
 
     def do_POST(self):
-        """Gère les requêtes POST (upload d'images, modification timeline)."""
-        # Vérifier l'authentification
+        """Handle POST requests (image upload, timeline modification)."""
+        # Check authentication
         if not self.check_auth():
             self.send_auth_required()
             return
@@ -126,74 +204,76 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             else:
                 self._send_404()
         except Exception as e:
-            logging.error(f"Erreur POST {self.path}: {e}")
+            logging.error(f"POST error {self.path}: {e}")
             self._send_500()
 
     def _serve_interface(self):
-        """Sert l'interface HTML principale."""
-        print(f"DEBUG SERVEUR: _serve_interface() appelée")
+        """Serve the main HTML interface."""
+        logging.debug("DEBUG SERVER: _serve_interface() called")
 
-        # Récupérer le nom du projet depuis le chemin temp
+        # Get project name from temp path
         project_name = "unknown"
         if hasattr(self, "broll_timing_file") and self.broll_timing_file:
-            # Extraire le nom du projet depuis le chemin temp
+            # Extract project name from temp path
             temp_path = self.broll_timing_file.parent
             if temp_path.name == "temp" and temp_path.parent.name != "temp":
                 project_name = temp_path.parent.name
 
-        print(f"DEBUG SERVEUR: Nom du projet détecté: {project_name}")
+        logging.debug(f"DEBUG SERVER: Detected project name: {project_name}")
 
-        # Lire le fichier HTML et remplacer le nom du projet
+        # Read HTML file and replace project name
         interface_path = Path(__file__).parent / "interface.html"
-        print(f"DEBUG SERVEUR: Chemin du fichier HTML: {interface_path}")
+        logging.debug(f"DEBUG SERVER: HTML file path: {interface_path}")
 
         if not interface_path.exists():
-            print(f"DEBUG SERVEUR: ERREUR - Fichier HTML non trouvé: {interface_path}")
+            logging.debug(
+                f"DEBUG SERVER: ERROR - HTML file not found: {interface_path}"
+            )
             self._send_404()
             return
 
-        print(f"DEBUG SERVEUR: Fichier HTML trouvé, lecture en cours...")
+        logging.debug("DEBUG SERVER: HTML file found, reading...")
         with open(interface_path, "r", encoding="utf-8") as f:
             html_content = f.read()
 
-        print(f"DEBUG SERVEUR: HTML lu, taille: {len(html_content)} caractères")
+        logging.debug(f"DEBUG SERVER: HTML read, size: {len(html_content)} characters")
         html_content = html_content.replace("{{PROJECT_NAME}}", project_name)
-        print(f"DEBUG SERVEUR: Remplacement PROJECT_NAME effectué")
+        logging.debug("DEBUG SERVER: PROJECT_NAME replacement done")
 
         self._send_response(200, html_content, "text/html")
-        print(f"DEBUG SERVEUR: Interface HTML envoyée")
+        logging.debug("DEBUG SERVER: HTML interface sent")
 
     def _serve_timeline_data(self):
-        """Sert les données de timeline en JSON."""
-        print(f"DEBUG SERVEUR: _serve_timeline_data() appelée")
-        print(f"DEBUG SERVEUR: Chemin broll_timing.json: {self.broll_timing_file}")
+        """Serve timeline data as JSON."""
+        logging.debug("DEBUG SERVER: _serve_timeline_data() called")
+        logging.debug(f"DEBUG SERVER: broll_timing.json path: {self.broll_timing_file}")
 
         if not self.broll_timing_file.exists():
-            print(f"DEBUG SERVEUR: ERREUR - broll_timing.json non trouvé")
+            logging.debug("DEBUG SERVER: ERROR - broll_timing.json not found")
             self._send_response(
                 404, '{"error": "broll_timing.json not found"}', "application/json"
             )
             return
 
-        print(f"DEBUG SERVEUR: broll_timing.json trouvé, lecture en cours...")
+        logging.debug("DEBUG SERVER: broll_timing.json found, reading...")
         with open(self.broll_timing_file, "r", encoding="utf-8") as f:
             timeline_data = json.load(f)
 
-        print(f"DEBUG SERVEUR: Timeline chargée, {len(timeline_data)} éléments")
+        logging.debug(f"DEBUG SERVER: Timeline loaded, {len(timeline_data)} elements")
         response_data = json.dumps(timeline_data, indent=2)
-        print(
-            f"DEBUG SERVEUR: Réponse JSON préparée, taille: {len(response_data)} caractères"
+        logging.debug(
+            f"DEBUG SERVER: JSON response prepared, size: {len(response_data)} characters"
         )
 
         self._send_response(200, response_data, "application/json")
-        print(f"DEBUG SERVEUR: Timeline JSON envoyée")
+        logging.debug("DEBUG SERVER: Timeline JSON sent")
 
     def _serve_broll_file(self):
-        """Sert les fichiers B-roll pour prévisualisation."""
-        file_path = Path(self.path[1:])  # Enlever le '/' initial
+        """Serve B-roll files for preview."""
+        file_path = Path(self.path[1:])  # Remove initial '/'
 
         if file_path.exists():
-            # Déterminer le type MIME
+            # Determine MIME type
             if file_path.suffix.lower() in [".jpg", ".jpeg"]:
                 content_type = "image/jpeg"
             elif file_path.suffix.lower() == ".png":
@@ -210,18 +290,18 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", content_type)
-            self.send_header("Content-length", len(data))
+            self.send_header("Content-length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
         else:
             self._send_404()
 
     def _serve_project_file(self):
-        """Sert les fichiers du dossier projects pour prévisualisation."""
-        file_path = Path(self.path[1:])  # Enlever le '/' initial
+        """Serve files from projects folder for preview."""
+        file_path = Path(self.path[1:])  # Remove initial '/'
 
         if file_path.exists():
-            # Déterminer le type MIME
+            # Determine MIME type
             if file_path.suffix.lower() in [".jpg", ".jpeg"]:
                 content_type = "image/jpeg"
             elif file_path.suffix.lower() == ".png":
@@ -242,52 +322,45 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", content_type)
-            self.send_header("Content-length", len(data))
+            self.send_header("Content-length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
         else:
             self._send_404()
 
     def _handle_upload(self):
-        """Gère l'upload d'images pour ajouter comme overlay sur une B-roll."""
+        """Handle image uploads to add as overlay on a B-roll."""
         try:
-            # Parser les données multipart avec cgi.FieldStorage (plus robuste)
-            form = cgi.FieldStorage(
-                fp=self.rfile,
-                headers=self.headers,
-                environ={
-                    "REQUEST_METHOD": "POST",
-                    "CONTENT_TYPE": self.headers["Content-Type"],
-                },
-            )
+            # Parse multipart data using modern approach (replaces deprecated cgi module)
+            form = parse_multipart_form(self.rfile, self.headers)
 
-            # Récupérer le fichier et l'index
+            # Get file and index
             if "file" not in form or "broll_index" not in form:
-                self._send_400("Fichier ou index manquant")
+                self._send_400("Missing file or index")
                 return
 
             file_item = form["file"]
-            broll_index = int(form["broll_index"].value)
+            broll_index = int(form["broll_index"]["value"])
 
-            if not file_item.filename:
-                self._send_400("Aucun fichier sélectionné")
+            if not file_item.get("filename"):
+                self._send_400("No file selected")
                 return
 
-            # Sauvegarder l'image dans b-roll/ressources/
+            # Save image to b-roll/ressources/
             timestamp = int(time.time())
-            file_ext = Path(file_item.filename).suffix
+            file_ext = Path(file_item["filename"]).suffix
             new_filename = f"uploaded_{timestamp}_{broll_index}{file_ext}"
             save_path = self.ressources_dir / new_filename
 
             with open(save_path, "wb") as f:
-                f.write(file_item.file.read())
+                f.write(file_item["content"])
 
-            # Mettre à jour broll_timing.json
+            # Update broll_timing.json
             with open(self.broll_timing_file, "r", encoding="utf-8") as f:
                 timeline_data = json.load(f)
 
             if 0 <= broll_index < len(timeline_data):
-                # Ajouter le champ image SANS remplacer la broll
+                # Add image field WITHOUT replacing the broll
                 timeline_data[broll_index]["image"] = f"ressources/{new_filename}"
 
                 with open(self.broll_timing_file, "w", encoding="utf-8") as f:
@@ -295,41 +368,41 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
 
                 response = {
                     "success": True,
-                    "message": f"Image ajoutée par-dessus la B-roll {broll_index}",
+                    "message": f"Image added over B-roll {broll_index}",
                     "new_path": f"ressources/{new_filename}",
                 }
                 self._send_response(200, json.dumps(response), "application/json")
             else:
-                self._send_400("Index de B-roll invalide")
+                self._send_400("Invalid B-roll index")
 
         except Exception as e:
-            logging.error(f"Erreur upload: {e}")
+            logging.error(f"Upload error: {e}")
             self._send_500()
 
     def _handle_timeline_update(self):
-        """Gère les mises à jour de la timeline."""
+        """Handle timeline updates."""
         try:
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode("utf-8"))
 
-            # Sauvegarder la timeline modifiée
+            # Save modified timeline
             with open(self.broll_timing_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
-            response = {"success": True, "message": "Timeline mise à jour"}
+            response = {"success": True, "message": "Timeline updated"}
             self._send_response(200, json.dumps(response), "application/json")
 
         except Exception as e:
-            logging.error(f"Erreur mise à jour timeline: {e}")
+            logging.error(f"Timeline update error: {e}")
             self._send_500()
 
     def _send_response(self, code, data, content_type):
-        """Envoie une réponse HTTP."""
+        """Send HTTP response."""
         self.send_response(code)
         self.send_header("Content-type", content_type)
         self.send_header(
-            "Content-length", len(data.encode() if isinstance(data, str) else data)
+            "Content-length", str(len(data.encode() if isinstance(data, str) else data))
         )
         self.end_headers()
 
@@ -339,31 +412,31 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             self.wfile.write(data)
 
     def _send_404(self):
-        """Envoie une erreur 404."""
+        """Send 404 error."""
         self._send_response(404, "Not Found", "text/plain")
 
     def _send_400(self, message):
-        """Envoie une erreur 400."""
+        """Send 400 error."""
         self._send_response(400, message, "text/plain")
 
     def _send_500(self):
-        """Envoie une erreur 500."""
+        """Send 500 error."""
         self._send_response(500, "Internal Server Error", "text/plain")
 
     def log_message(self, format, *args):
-        """Supprime les logs automatiques du serveur."""
+        """Suppress automatic server logs."""
         pass
 
 
 def start_premontage_server(config=None, port=47393):
     """
-    Démarre le serveur de prémontage.
+    Start the timeline editing server.
 
     Args:
-        config (dict): Configuration du projet (pour le chemin temp)
-        port (int): Port du serveur (défaut: 47393)
+        config (dict): Project configuration (for temp path)
+        port (int): Server port (default: 47393)
     """
-    # Déterminer le chemin du fichier broll_timing.json
+    # Determine path to broll_timing.json file
     if config and "paths" in config and "temp" in config["paths"]:
         temp_path = Path(config["paths"]["temp"])
     else:
@@ -372,14 +445,14 @@ def start_premontage_server(config=None, port=47393):
     broll_timing_file = temp_path / "broll_timing.json"
 
     if not broll_timing_file.exists():
-        print(f"❌ Erreur: {broll_timing_file} non trouvé")
-        print(
-            "   Exécutez d'abord: python exponential_video.py --vectorbroll NOM_PROJET"
+        logging.error(f"❌ Error: {broll_timing_file} not found")
+        logging.debug(
+            "   First run: python editing_server/server.py (with proper broll_timing.json)"
         )
         return False
 
     try:
-        # Créer le dossier ressources
+        # Create resources folder
         ressources_dir = Path("b-roll/ressources")
         ressources_dir.mkdir(exist_ok=True)
 
@@ -391,9 +464,9 @@ def start_premontage_server(config=None, port=47393):
             ),
         )
 
-        print(f"🎬 Serveur de prémontage démarré sur http://0.0.0.0:{port}")
+        logging.info(f"🎬 Timeline editing server started on http://0.0.0.0:{port}")
 
-        # Afficher l'IP publique si disponible
+        # Display public IP if available
         try:
             import requests
 
@@ -404,47 +477,49 @@ def start_premontage_server(config=None, port=47393):
                 data = response.json()
                 public_ip = data.get("ip")
                 if public_ip:
-                    print(
-                        f"🌐 Accessible via: http://localhost:{port} (local) ou http://{public_ip}:{port} (externe)"
+                    logging.info(
+                        f"🌐 Access via: http://localhost:{port} (local) or http://{public_ip}:{port} (external)"
                     )
                 else:
-                    print(
-                        f"🌐 Accessible via: http://localhost:{port} (local) ou http://votre-ip:{port} (externe)"
+                    logging.info(
+                        f"🌐 Access via: http://localhost:{port} (local) or http://your-ip:{port} (external)"
                     )
             else:
-                print(
-                    f"🌐 Accessible via: http://localhost:{port} (local) ou http://votre-ip:{port} (externe)"
+                logging.info(
+                    f"🌐 Access via: http://localhost:{port} (local) or http://your-ip:{port} (external)"
                 )
         except Exception:
-            print(
-                f"🌐 Accessible via: http://localhost:{port} (local) ou http://votre-ip:{port} (externe)"
+            logging.info(
+                f"🌐 Access via: http://localhost:{port} (local) or http://your-ip:{port} (external)"
             )
 
-        # Afficher l'état de l'authentification
+        # Display authentication status
         auth_config = load_auth_config()
         if auth_config.get("enabled", False):
-            print(
-                f"🔒 Authentification: ACTIVÉE (utilisateur: {auth_config.get('username', 'admin')})"
+            logging.info(
+                f"🔒 Authentication: ENABLED (user: {auth_config.get('username', 'admin')})"
             )
-            print("ℹ️  Pour désactiver: config.yml → dashboard.auth.enabled: false")
+            logging.info("ℹ️  To disable: config.yml → dashboard.auth.enabled: false")
         else:
-            print("🔓 Authentification: DÉSACTIVÉE")
-            print("ℹ️  Pour activer: config.yml → dashboard.auth.enabled: true")
+            logging.info("🔓 Authentication: DISABLED")
+            logging.info("ℹ️  To enable: config.yml → dashboard.auth.enabled: true")
 
-        print("📝 Interface d'édition de timeline ouverte dans le navigateur")
-        print("⏹️  Appuyez sur Ctrl+C pour arrêter le serveur")
+        logging.info("📝 Timeline editing interface ready")
+        logging.info("⏹️  Press Ctrl+C to stop the server")
 
-        # L'ouverture du navigateur est maintenant gérée par le dashboard
-        print("🌐 Interface accessible via le dashboard (bouton 'Open Prémontage')")
+        # Browser opening is now handled by the dashboard
+        logging.info(
+            "🌐 Interface accessible via dashboard (button 'Open Timeline Editor')"
+        )
 
         # Start the server
         server.serve_forever()
 
     except KeyboardInterrupt:
-        print("\n🛑 Server stopped")
+        logging.info("\n🛑 Server stopped")
         return True
     except Exception as e:
-        print(f"❌ Error starting server: {e}")
+        logging.info(f"❌ Error starting server: {e}")
         return False
 
 
@@ -460,5 +535,37 @@ def start_timeline_server(config=None, port=47393):
 
 
 if __name__ == "__main__":
-    start_timeline_server()
-    start_premontage_server()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Start the timeline editing server")
+    parser.add_argument(
+        "--project", type=str, help="Project name (looks in projects/<name>/temp/)"
+    )
+    parser.add_argument(
+        "--temp",
+        type=str,
+        help="Direct path to temp directory containing broll_timing.json",
+    )
+    parser.add_argument(
+        "--port", type=int, default=47393, help="Server port (default: 47393)"
+    )
+
+    args = parser.parse_args()
+
+    config = None
+    if args.project:
+        # Use project-specific temp directory
+        config = {"paths": {"temp": f"projects/{args.project}/temp"}}
+        logging.info(f"📁 Using project: {args.project}")
+    elif args.temp:
+        # Use custom temp path
+        config = {"paths": {"temp": args.temp}}
+        logging.info(f"📁 Using temp directory: {args.temp}")
+    else:
+        # Default to root temp directory
+        logging.info("📁 Using default temp directory: temp/")
+        logging.info(
+            "💡 Tip: Use --project <name> or --temp <path> to specify a different location"
+        )
+
+    start_premontage_server(config=config, port=args.port)
