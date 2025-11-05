@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Serveur web pour l'interface de prémontage des B-rolls.
-Permet d'éditer visuellement broll_timing.json avec upload d'images.
+Timeline Editing Server for StoryForge
+Visual interface for editing broll_timing.json with B-roll selection and image upload.
 
-Usage: python exponential_video.py --premontage
+Usage: python editing_server/server.py
 """
 
 import os
@@ -22,11 +22,11 @@ import time
 
 
 def load_auth_config():
-    """Charger la configuration d'authentification depuis config.yml"""
-    # Aller chercher config.yml dans le répertoire parent (racine du projet)
+    """Load authentication configuration from config.yml"""
+    # Get config.yml from project root
     current_dir = Path(
         __file__
-    ).parent.parent.parent  # src/premontage/server.py -> racine
+    ).parent.parent  # editing_server/server.py -> project root
     config_file = current_dir / "config.yml"
     if config_file.exists():
         with open(config_file, "r", encoding="utf-8") as f:
@@ -35,23 +35,18 @@ def load_auth_config():
     return {}
 
 
-class PremontageHandler(BaseHTTPRequestHandler):
-    """Gestionnaire HTTP pour l'interface de prémontage."""
+class TimelineEditingHandler(BaseHTTPRequestHandler):
+    """HTTP handler for the timeline editing interface."""
 
     def __init__(self, *args, config=None, **kwargs):
-        # Déterminer le chemin du fichier broll_timing.json
-        # Le serveur legacy doit pointer vers le répertoire racine du projet
-        project_root = Path(
-            __file__
-        ).parent.parent.parent  # backend/legacy_server/server.py -> project root
-
+        # Determine the path to broll_timing.json
         if config and "paths" in config and "temp" in config["paths"]:
             temp_path = Path(config["paths"]["temp"])
         else:
-            temp_path = project_root / "temp"
+            temp_path = Path("temp")
 
         self.broll_timing_file = temp_path / "broll_timing.json"
-        self.ressources_dir = project_root / "b-roll" / "ressources"
+        self.ressources_dir = Path("b-roll/ressources")
         self.ressources_dir.mkdir(exist_ok=True)
         super().__init__(*args, **kwargs)
 
@@ -195,10 +190,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
     def _serve_broll_file(self):
         """Sert les fichiers B-roll pour prévisualisation."""
-        # Construire le chemin relatif au projet root
-        project_root = Path(__file__).parent.parent.parent
-        relative_path = self.path[1:]  # Enlever le '/' initial
-        file_path = project_root / relative_path
+        file_path = Path(self.path[1:])  # Enlever le '/' initial
 
         if file_path.exists():
             # Déterminer le type MIME
@@ -218,7 +210,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", content_type)
-            self.send_header("Content-length", str(len(data)))
+            self.send_header("Content-length", len(data))
             self.end_headers()
             self.wfile.write(data)
         else:
@@ -226,10 +218,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
     def _serve_project_file(self):
         """Sert les fichiers du dossier projects pour prévisualisation."""
-        # Construire le chemin relatif au projet root
-        project_root = Path(__file__).parent.parent.parent
-        relative_path = self.path[1:]  # Enlever le '/' initial
-        file_path = project_root / relative_path
+        file_path = Path(self.path[1:])  # Enlever le '/' initial
 
         if file_path.exists():
             # Déterminer le type MIME
@@ -253,7 +242,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", content_type)
-            self.send_header("Content-length", str(len(data)))
+            self.send_header("Content-length", len(data))
             self.end_headers()
             self.wfile.write(data)
         else:
@@ -340,7 +329,7 @@ class PremontageHandler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-type", content_type)
         self.send_header(
-            "Content-length", str(len(data.encode() if isinstance(data, str) else data))
+            "Content-length", len(data.encode() if isinstance(data, str) else data)
         )
         self.end_headers()
 
@@ -394,10 +383,12 @@ def start_premontage_server(config=None, port=47393):
         ressources_dir = Path("b-roll/ressources")
         ressources_dir.mkdir(exist_ok=True)
 
-        # Démarrer le serveur
+        # Start the server
         server = HTTPServer(
             ("0.0.0.0", port),
-            lambda *args, **kwargs: PremontageHandler(*args, config=config, **kwargs),
+            lambda *args, **kwargs: TimelineEditingHandler(
+                *args, config=config, **kwargs
+            ),
         )
 
         print(f"🎬 Serveur de prémontage démarré sur http://0.0.0.0:{port}")
@@ -446,16 +437,28 @@ def start_premontage_server(config=None, port=47393):
         # L'ouverture du navigateur est maintenant gérée par le dashboard
         print("🌐 Interface accessible via le dashboard (bouton 'Open Prémontage')")
 
-        # Lancer le serveur
+        # Start the server
         server.serve_forever()
 
     except KeyboardInterrupt:
-        print("\n🛑 Serveur arrêté")
+        print("\n🛑 Server stopped")
         return True
     except Exception as e:
-        print(f"❌ Erreur lors du démarrage du serveur: {e}")
+        print(f"❌ Error starting server: {e}")
         return False
 
 
+def start_timeline_server(config=None, port=47393):
+    """
+    Start the timeline editing server.
+
+    Args:
+        config (dict): Project configuration (for temp path)
+        port (int): Server port (default: 47393)
+    """
+    return start_premontage_server(config, port)
+
+
 if __name__ == "__main__":
+    start_timeline_server()
     start_premontage_server()
