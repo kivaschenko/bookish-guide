@@ -27,7 +27,7 @@ python3 setup.py
 python generate_video.py --input "Today I'll share 3 tips for better sleep..." --output "sleep-tips"
 
 # Or use the web editor:
-python launcher.py web
+python editing_server/server.py
 ```
 
 ### 3. That's it! 
@@ -43,7 +43,7 @@ python generate_video.py --input "Your video content..." --output "my-video"
 
 **Web Interface (visual editing):**
 ```bash
-python launcher.py web
+python editing_server/server.py
 # Opens browser interface for timeline editing
 ```
 

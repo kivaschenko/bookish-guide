@@ -4,7 +4,6 @@ Create basic B-roll timing for English audio files
 """
 
 import json
-import os
 import random
 from pathlib import Path
 

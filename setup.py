@@ -161,10 +161,10 @@ def main():
     print("\nNext steps:")
     print("1. Edit config.yml and add your API keys")
     print("2. Add B-roll videos to the b-roll/ directory")
-    print("3. Run: python launcher.py --help")
+    print("3. Start creating videos!")
     print("\nQuick start:")
-    print("   python launcher.py web          # Start web interface")
-    print('   python launcher.py video --input "Your text" --output "my-video"')
+    print("   python editing_server/server.py               # Start web interface")
+    print('   python generate_video.py --input "Your text" --output "my-video"')
 
     return True
 

@@ -50,54 +50,172 @@ def parse_multipart_form(rfile, headers):
     boundary_bytes = f"--{boundary}".encode()
     parts = body.split(boundary_bytes)
 
-    form_data = {}
+    result = {}
 
-    for part in parts:
-        if not part or part == b"--\r\n" or part == b"--":
+    for part in parts[1:-1]:  # Skip first and last empty parts
+        if not part.strip():
             continue
 
         # Split headers and content
-        if b"\r\n\r\n" not in part:
+        if b"\r\n\r\n" in part:
+            header_section, content = part.split(b"\r\n\r\n", 1)
+        else:
             continue
-
-        header_section, content = part.split(b"\r\n\r\n", 1)
-
-        # Remove trailing \r\n
-        content = content.rstrip(b"\r\n")
 
         # Parse headers
         headers_text = header_section.decode("utf-8", errors="ignore")
         field_name = None
         filename = None
-        content_type = None
+        content_type_field = None
 
         for line in headers_text.split("\r\n"):
-            if line.lower().startswith("content-disposition:"):
-                # Extract field name and filename
-                for item in line.split(";"):
-                    item = item.strip()
-                    if 'name="' in item:
-                        field_name = item.split('name="')[1].split('"')[0]
-                    if 'filename="' in item:
-                        filename = item.split('filename="')[1].split('"')[0]
-            elif line.lower().startswith("content-type:"):
-                content_type = line.split(":", 1)[1].strip()
+            if line.startswith("Content-Disposition:"):
+                # Extract name and filename
+                if 'name="' in line:
+                    start = line.find('name="') + 6
+                    end = line.find('"', start)
+                    field_name = line[start:end]
+                if 'filename="' in line:
+                    start = line.find('filename="') + 10
+                    end = line.find('"', start)
+                    filename = line[start:end]
+            elif line.startswith("Content-Type:"):
+                content_type_field = line.split(":", 1)[1].strip()
 
         if field_name:
-            if filename:
-                # File field
-                form_data[field_name] = {
+            if filename:  # File field
+                result[field_name] = {
                     "filename": filename,
-                    "content": content,
-                    "content_type": content_type or "application/octet-stream",
+                    "content": content.rstrip(b"\r\n"),
+                    "content_type": content_type_field,
                 }
-            else:
-                # Regular field
-                form_data[field_name] = {
-                    "value": content.decode("utf-8", errors="ignore")
+            else:  # Regular field
+                result[field_name] = {
+                    "value": content.rstrip(b"\r\n").decode("utf-8", errors="ignore")
                 }
 
-    return form_data
+    return result
+
+
+def get_file_hash(file_path):
+    """Get MD5 hash of a file for change detection."""
+    import hashlib
+
+    if not file_path.exists():
+        return None
+    try:
+        with open(file_path, "rb") as f:
+            return hashlib.md5(f.read()).hexdigest()
+    except Exception as e:
+        logging.warning(f"Could not calculate hash for {file_path}: {e}")
+        return None
+
+
+def log_file_change(
+    file_path, operation_type, details=None, before_content=None, after_content=None
+):
+    """
+    Log detailed file change information.
+
+    Args:
+        file_path (Path): Path to the file that changed
+        operation_type (str): Type of operation (read, write, upload, selection_change, etc.)
+        details (dict): Additional details about the operation
+        before_content (dict): Content before the change
+        after_content (dict): Content after the change
+    """
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+
+    log_message = f"\n{'=' * 80}\n"
+    log_message += "📝 BROLL_TIMING.JSON CHANGE DETECTED\n"
+    log_message += f"🕒 Timestamp: {timestamp}\n"
+    log_message += f"📁 File: {file_path}\n"
+    log_message += f"🔧 Operation: {operation_type}\n"
+
+    if details:
+        log_message += "📋 Details:\n"
+        for key, value in details.items():
+            log_message += f"   • {key}: {value}\n"
+
+    # Log content differences if provided
+    if before_content and after_content:
+        log_message += "🔄 Content Changes:\n"
+
+        # Handle both array format and rushes format
+        if isinstance(before_content, list) and isinstance(after_content, list):
+            # Array format - direct comparison
+            for i, (before_item, after_item) in enumerate(
+                zip(before_content, after_content)
+            ):
+                changes = []
+
+                # Check for selection changes
+                before_selection = before_item.get("selected_broll", "broll")
+                after_selection = after_item.get("selected_broll", "broll")
+                if before_selection != after_selection:
+                    changes.append(
+                        f"selected_broll: {before_selection} → {after_selection}"
+                    )
+
+                # Check for image overlay changes
+                before_image = before_item.get("image")
+                after_image = after_item.get("image")
+                if before_image != after_image:
+                    changes.append(f"image: {before_image} → {after_image}")
+
+                if changes:
+                    phrase = before_item.get("phrase", f"item_{i}")[:50]
+                    log_message += (
+                        f"   • Item[{i}] '{phrase}...': {', '.join(changes)}\n"
+                    )
+
+        # Check for selection changes in rushes format
+        elif (
+            isinstance(before_content, dict)
+            and isinstance(after_content, dict)
+            and "rushes" in before_content
+            and "rushes" in after_content
+        ):
+            for rush_id in before_content.get("rushes", {}):
+                if rush_id in after_content.get("rushes", {}):
+                    before_rush = before_content["rushes"][rush_id]
+                    after_rush = after_content["rushes"][rush_id]
+
+                    # Check for broll changes
+                    before_brolls = before_rush.get("brolls", [])
+                    after_brolls = after_rush.get("brolls", [])
+
+                    for i, (before_broll, after_broll) in enumerate(
+                        zip(before_brolls, after_brolls)
+                    ):
+                        changes = []
+
+                        # Check for selection changes
+                        before_selection = before_broll.get("selected_broll", "broll")
+                        after_selection = after_broll.get("selected_broll", "broll")
+                        if before_selection != after_selection:
+                            changes.append(
+                                f"selected_broll: {before_selection} → {after_selection}"
+                            )
+
+                        # Check for image overlay changes
+                        before_image = before_broll.get("image")
+                        after_image = after_broll.get("image")
+                        if before_image != after_image:
+                            changes.append(f"image: {before_image} → {after_image}")
+
+                        if changes:
+                            log_message += (
+                                f"   • {rush_id} broll[{i}]: {', '.join(changes)}\n"
+                            )
+
+    log_message += f"{'=' * 80}\n"
+
+    logging.info(log_message)
+
+    log_message += f"{'=' * 80}\n"
+
+    logging.info(log_message)
 
 
 def load_auth_config():
@@ -126,7 +244,32 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
         self.broll_timing_file = temp_path / "broll_timing.json"
         self.ressources_dir = Path("b-roll/ressources")
         self.ressources_dir.mkdir(exist_ok=True)
+
+        # Store initial file state for change tracking
+        self.last_known_hash = get_file_hash(self.broll_timing_file)
+        if self.last_known_hash:
+            logging.info(
+                f"🔍 MONITORING: Initial broll_timing.json hash: {self.last_known_hash[:8]}..."
+            )
+
         super().__init__(*args, **kwargs)
+
+    def _check_file_external_changes(self):
+        """Check if the broll_timing.json file was changed externally."""
+        current_hash = get_file_hash(self.broll_timing_file)
+        if current_hash != self.last_known_hash:
+            log_file_change(
+                self.broll_timing_file,
+                "EXTERNAL_CHANGE_DETECTED",
+                details={
+                    "previous_hash": self.last_known_hash,
+                    "current_hash": current_hash,
+                    "detection_source": "server_file_monitoring",
+                },
+            )
+            self.last_known_hash = current_hash
+            return True
+        return False
 
     def check_auth(self):
         """Check HTTP Basic authentication"""
@@ -246,6 +389,9 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
         logging.debug("SERVER: _serve_timeline_data() called")
         logging.debug(f"SERVER: broll_timing.json path: {self.broll_timing_file}")
 
+        # Check for external file changes before serving
+        self._check_file_external_changes()
+
         if not self.broll_timing_file.exists():
             logging.debug("SERVER: ERROR - broll_timing.json not found")
             self._send_response(
@@ -254,6 +400,14 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             return
 
         logging.debug("SERVER: broll_timing.json found, reading...")
+
+        # Log file read operation
+        log_file_change(
+            self.broll_timing_file,
+            "READ",
+            details={"request_source": "web_interface", "endpoint": "/api/timeline"},
+        )
+
         with open(self.broll_timing_file, "r", encoding="utf-8") as f:
             timeline_data = json.load(f)
 
@@ -354,15 +508,37 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
                 f.write(file_item["content"])
 
             # Update broll_timing.json
+            # Read current content for logging
             with open(self.broll_timing_file, "r", encoding="utf-8") as f:
-                timeline_data = json.load(f)
+                before_content = json.load(f)
+
+            timeline_data = before_content.copy()
 
             if 0 <= broll_index < len(timeline_data):
                 # Add image field WITHOUT replacing the broll
                 timeline_data[broll_index]["image"] = f"ressources/{new_filename}"
 
+                # Write updated content
                 with open(self.broll_timing_file, "w", encoding="utf-8") as f:
                     json.dump(timeline_data, f, indent=2, ensure_ascii=False)
+
+                # Update our tracking hash
+                self.last_known_hash = get_file_hash(self.broll_timing_file)
+
+                # Log the file change with details
+                log_file_change(
+                    self.broll_timing_file,
+                    "IMAGE_UPLOAD",
+                    details={
+                        "broll_index": broll_index,
+                        "uploaded_filename": file_item["filename"],
+                        "saved_as": new_filename,
+                        "image_path": f"ressources/{new_filename}",
+                        "user_agent": self.headers.get("User-Agent", "unknown"),
+                    },
+                    before_content=before_content,
+                    after_content=timeline_data,
+                )
 
                 response = {
                     "success": True,
@@ -384,9 +560,45 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode("utf-8"))
 
+            # Read current content for comparison and hash checking
+            before_content = {}
+            before_hash = get_file_hash(self.broll_timing_file)
+            if self.broll_timing_file.exists():
+                with open(self.broll_timing_file, "r", encoding="utf-8") as f:
+                    before_content = json.load(f)
+
             # Save modified timeline
             with open(self.broll_timing_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
+
+            # Get after hash to confirm changes
+            after_hash = get_file_hash(self.broll_timing_file)
+            self.last_known_hash = after_hash  # Update our tracking
+
+            # Log the change with detailed analysis (only if file actually changed)
+            if before_hash != after_hash:
+                log_file_change(
+                    self.broll_timing_file,
+                    "BROLL_SELECTION_CHANGE",
+                    details={
+                        "update_source": "web_interface",
+                        "user_agent": self.headers.get("User-Agent", "unknown"),
+                        "content_length": content_length,
+                        "update_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "before_hash": before_hash,
+                        "after_hash": after_hash,
+                        "file_size_before": len(str(before_content))
+                        if before_content
+                        else 0,
+                        "file_size_after": len(str(data)),
+                    },
+                    before_content=before_content,
+                    after_content=data,
+                )
+            else:
+                logging.debug(
+                    "BROLL_TIMING.JSON: No actual changes detected (same file hash)"
+                )
 
             response = {"success": True, "message": "Timeline updated"}
             self._send_response(200, json.dumps(response), "application/json")

@@ -33,7 +33,7 @@ def convert_timing_format(input_file, output_file):
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(rushes_format, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ Converted successfully!")
+    print("✅ Converted successfully!")
     print(f"📁 Output saved to: {output_file}")
 
     # Show structure
