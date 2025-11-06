@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Éditeur de Timeline B-rolls</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .timeline {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .broll-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .broll-item:hover {
+            border-color: #007AFF;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            box-shadow: 0 4px 16px rgba(0,122,255,0.15);
+            transform: translateY(-1px);
+        }
+        .broll-preview {
+            width: 240px;
+            height: 136px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+            background: #f1f3f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+        }
+        .broll-info {
+            flex: 1;
+            position: relative;
+        }
+        .broll-timing {
+            font-weight: 600;
+            color: #007AFF;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .broll-text {
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 6px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            font-weight: 400;
+        }
+        .broll-file {
+            color: #6c757d;
+            font-size: 11px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            background: rgba(108, 117, 125, 0.1);
+            padding: 4px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .drop-zone {
+            width: 240px;
+            height: 136px;
+            border: 2px dashed #007AFF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #007AFF;
+            font-size: 11px;
+            margin-left: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0,122,255,0.02);
+        }
+        .drop-zone:hover {
+            background: rgba(0,122,255,0.08);
+            border-color: #0056b3;
+            transform: scale(1.02);
+        }
+        
+        /* Effet de survol pour les thumbnails B-roll */
+        .broll-thumbnail {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .broll-thumbnail:hover {
+            transform: scale(1.02);
+        }
+        
+        .broll-thumbnail.zoomed {
+            transform: scale(2.5);
+            z-index: 99999;
+            position: fixed !important;
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 3px solid #007AFF;
+            border-radius: 8px;
+        }
+        
+        .broll-zoom-label {
+            position: fixed;
+            z-index: 100000;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            max-width: 400px;
+            text-align: center;
+            word-wrap: break-word;
+            pointer-events: none;
+        }
+        
+        .drop-zone.dragover {
+            background: #007AFF;
+            color: white;
+            transform: scale(1.05);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .preview-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        .preview-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+        .preview-button.paused {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        .preview-button.paused:hover {
+            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+        }
+        .broll-item.active {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
+        }
+        .audio-preview-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        .audio-preview-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,122,255,0.4);
+        }
+        .audio-preview-btn.paused {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+        }
+        .audio-preview-btn.paused:hover {
+            box-shadow: 0 6px 16px rgba(40,167,69,0.4);
+        }
+        .broll-item.playing-audio {
+            border-color: #dc3545 !important;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%) !important;
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2) !important;
+        }
+        .rush-group-header.playing-audio-group > div {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        .rush-group-header > div {
+            background: #6c757d !important;
+            color: white !important;
+        }
+        
+        /* Style pour les b-rolls en doublon */
+        .broll-duplicate-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(220, 53, 69, 0.6);
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="headerTitle">🎬 Éditeur de Timeline B-rolls</h1>
+        <p>Glissez-déposez des images pour remplacer les B-rolls. Les changements sont sauvegardés automatiquement.</p>
+    </div>
+    
+    <div class="status" id="status"></div>
+    
+    <div class="loading" id="loading">
+        <p>⏳ Chargement de la timeline...</p>
+    </div>
+    
+    <div class="timeline" id="timeline">
+        <!-- Timeline générée dynamiquement -->
+    </div>
+
+    <button id="audioPreviewBtn" class="audio-preview-btn">
+        🎵 Prévisualiser l'audio
+    </button>
+
+    <script>
+        console.log('DEBUG JS: Script chargé');
+        
+        // Variables globales pour la prévisualisation audio
+        let audioPreview = null;
+        let currentAudioIndex = 0; // index du bullet courant (global)
+        let isPlaying = false;
+        let timelineData = [];
+        let projectName = "{{PROJECT_NAME}}"; // Sera remplacé par le serveur
+        let autoScrollInterval = null; // Pour le scroll automatique
+
+        
+        console.log('DEBUG JS: Variables globales initialisées');
+        console.log('DEBUG JS: projectName =', projectName);
+        
+        // Mettre à jour le titre avec le nom du projet
+        function updateHeaderTitle() {
+            const headerTitle = document.getElementById('headerTitle');
+            if (headerTitle && projectName && projectName !== '{{PROJECT_NAME}}') {
+                headerTitle.textContent = `🎬 Éditeur de Timeline B-rolls - ${projectName}`;
+            }
+        }
+
+        // Gestionnaire du bouton de prévisualisation audio
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioBtn = document.getElementById('audioPreviewBtn');
+            if (!audioBtn) return;
+
+            let currentAudio = null;
+
+            audioBtn.addEventListener('click', function() {
+                if (!isPlaying) {
+                    playCurrentAudio();
+                } else {
+                    pauseCurrentAudio();
+                }
+            });
+
+            function playCurrentAudio() {
+                console.log('=== PLAY CURRENT AUDIO ===');
+                console.log('DEBUG: playCurrentAudio called with index:', currentAudioIndex);
+                console.log('DEBUG: currentAudio exists:', !!currentAudio);
+                
+                if (currentAudio) {
+                    console.log('DEBUG: Resuming existing audio');
+                    currentAudio.play();
+                    isPlaying = true;
+                    audioBtn.textContent = "⏸️ Pause de l audio";
+                    audioBtn.classList.add('paused');
+                    highlightGroupHeader(currentAudioIndex, true);
+                    return;
+                }
+                if (!timelineData || timelineData.length === 0) return;
+                if (currentAudioIndex >= timelineData.length) {
+                    currentAudioIndex = 0;
+                }
+                const bulletNum = (currentAudioIndex+1).toString().padStart(2, '0');
+                const rushName = 'bullet' + bulletNum + '.mp3'; // Générer le nom du rush basé sur l'index
+                const audioPath = '/projects/' + projectName + '/temp/audio/bullet' + bulletNum + '.mp3';
+                console.log('DEBUG: Creating new audio for index:', currentAudioIndex, 'bullet:', bulletNum);
+                console.log('DEBUG: Rush name:', rushName);
+                console.log('DEBUG: Audio path:', audioPath);
+                currentAudio = new Audio(audioPath);
+                currentAudio.playbackRate = 1.5; // Vitesse de lecture à 1.5x
+                currentAudio.play().then(() => {
+                    console.log('DEBUG: Audio play started successfully');
+                    isPlaying = true;
+                    audioBtn.textContent = "⏸️ Pause de l audio";
+                    audioBtn.classList.add('paused');
+                    // Appliquer la surbrillance après un petit délai pour s'assurer que le DOM est prêt
+                    setTimeout(() => {
+                        console.log('DEBUG: Applying highlight after timeout');
+                        highlightGroupHeader(currentAudioIndex, true);
+                    }, 100);
+                });
+                currentAudio.onended = function() {
+                    console.log('=== TRANSITION AUDIO ===');
+                    console.log('DEBUG: Audio ended, currentAudioIndex before increment:', currentAudioIndex);
+                    
+                    currentAudio = null;
+                    currentAudioIndex++;
+                    console.log('DEBUG: Audio ended, currentAudioIndex after increment:', currentAudioIndex);
+                    
+                    if (currentAudioIndex < timelineData.length) {
+                        console.log('DEBUG: Playing next audio, index:', currentAudioIndex);
+                        playCurrentAudio();
+                    } else {
+                        console.log('DEBUG: Reached end of timeline');
+                        isPlaying = false;
+                        audioBtn.textContent = "🎵 Prévisualiser l audio";
+                        audioBtn.classList.remove('paused');
+                        highlightGroupHeader(currentAudioIndex, false);
+                        currentAudioIndex = 0;
+                    }
+                    console.log('=== FIN TRANSITION ===');
+                };
+            }
+
+            function pauseCurrentAudio() {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    isPlaying = false;
+                    audioBtn.textContent = "🎵 Prévisualiser l audio";
+                    audioBtn.classList.remove('paused');
+                    highlightGroupHeader(currentAudioIndex, false);
+                }
+            }
+        });
+
+        // Chargement initial de la timeline
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DEBUG: DOMContentLoaded - appel loadTimeline');
+            updateHeaderTitle(); // Mettre à jour le titre avec le nom du projet
+            loadTimeline();
+        });
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const tenths = Math.floor((seconds % 1) * 10);
+            return `${minutes}:${secs.toString().padStart(2, '0')}.${tenths}`;
+        }
+
+        // Fonction pour basculer le zoom d'une thumbnail B-roll
+        function toggleBrollZoom(imgElement) {
+            const thumbnail = imgElement.closest('.broll-thumbnail');
+            
+            if (thumbnail.classList.contains('zoomed')) {
+                // Désactiver le zoom
+                thumbnail.classList.remove('zoomed');
+                // Supprimer le label s'il existe
+                const existingLabel = document.querySelector('.broll-zoom-label');
+                if (existingLabel) {
+                    existingLabel.remove();
+                }
+            } else {
+                // Désactiver tous les autres zooms d'abord
+                const allThumbnails = document.querySelectorAll('.broll-thumbnail.zoomed');
+                allThumbnails.forEach(thumb => thumb.classList.remove('zoomed'));
+                
+                // Supprimer les labels existants
+                const existingLabels = document.querySelectorAll('.broll-zoom-label');
+                existingLabels.forEach(label => label.remove());
+                
+                // Activer le zoom sur cette thumbnail
+                thumbnail.classList.add('zoomed');
+                
+                // Créer et positionner le label avec le nom du fichier
+                const imgSrc = imgElement.src;
+                const fileName = imgSrc.split('/').pop().split('.')[0]; // Enlever l'extension
+                
+                const label = document.createElement('div');
+                label.className = 'broll-zoom-label';
+                label.textContent = fileName;
+                
+                // Calculer la position
+                const rect = imgElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                // Positionner le label au-dessus de l'image zoomée
+                label.style.left = (centerX - 200) + 'px'; // Centrer le label (max-width 400px / 2)
+                label.style.top = (centerY - rect.height * 2.5 / 2 - 50) + 'px'; // Au-dessus de l'image zoomée
+                
+                document.body.appendChild(label);
+            }
+        }
+
+        async function loadTimeline() {
+            console.log('DEBUG JS: loadTimeline() appelée');
+            try {
+                console.log('DEBUG JS: Affichage du loading');
+                document.getElementById('loading').style.display = 'block';
+                
+                console.log('DEBUG JS: Fetch /api/timeline');
+                const response = await fetch('/api/timeline');
+                console.log('DEBUG JS: Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Impossible de charger broll_timing.json');
+                }
+                
+                console.log('DEBUG JS: Parsing JSON');
+                timelineData = await response.json();
+                console.log('DEBUG JS: Data reçue:', timelineData);
+                window.timelineData = timelineData; // Stocker globalement
+                
+                console.log('DEBUG JS: Appel displayTimeline');
+                displayTimeline(timelineData);
+                
+                // Appliquer la surbrillance après le rechargement de la timeline
+                highlightGroupHeader(currentAudioIndex, isPlaying);
+                
+                // Marquer les doublons initiaux
+                updateDuplicateHighlights();
+                
+                console.log('DEBUG JS: Masquage du loading');
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.log('DEBUG JS: Erreur dans loadTimeline:', error);
+                showStatus('Erreur: ' + error.message, 'error');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayTimeline(timelineData) {
+            console.log('DEBUG: displayTimeline() appelée avec:', timelineData);
+            const timelineEl = document.getElementById('timeline');
+            console.log('DEBUG: Element timeline trouvé:', timelineEl);
+            timelineEl.innerHTML = '';
+
+            // Grouper les B-rolls par rush audio
+            const groups = {};
+            console.log('DEBUG: Groupement des items');
+            timelineData.forEach((item, index) => {
+                const rushName = item.rush || 'unknown';
+                if (!groups[rushName]) {
+                    groups[rushName] = [];
+                }
+                groups[rushName].push({...item, originalIndex: index});
+            });
+            console.log('DEBUG: Groupes créés:', groups);
+
+            // Créer les groupes visuels
+            console.log('DEBUG: Création des groupes visuels');
+            Object.keys(groups).forEach(rushName => {
+                // Créer le header du groupe
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'rush-group-header';
+                groupHeader.setAttribute('data-rush', rushName);
+                groupHeader.id = rushName; // Ajouter l'id sur le header du groupe
+                groupHeader.innerHTML = `
+                    <div style="background: #007AFF; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
+                        <span>🎵 ${rushName}</span>
+                        <span style="font-size: 12px; opacity: 0.8;">${groups[rushName].length} B-roll(s)</span>
+                    </div>
+                `;
+                timelineEl.appendChild(groupHeader);
+
+                // Créer le conteneur du groupe
+                const groupContainer = document.createElement('div');
+                groupContainer.className = 'rush-group-container';
+                groupContainer.style.cssText = 'border: 2px solid #007AFF; border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; background: #f8f9ff;';
+
+                // Ajouter les B-rolls du groupe
+                groups[rushName].forEach((item, groupIndex) => {
+                    const brollEl = createBrollElement(item, item.originalIndex, rushName);
+                    groupContainer.appendChild(brollEl);
+                });
+
+                timelineEl.appendChild(groupContainer);
+                console.log('DEBUG: Groupe créé:', rushName, `(${groups[rushName].length} B-rolls)`);
+            });
+        }
+
+        function createBrollElement(item, index, rushName) {
+            const div = document.createElement('div');
+            div.className = 'broll-item';
+            
+            // Préparer les trois B-rolls
+            const broll1 = item.broll;
+            const broll2 = item.broll2;
+            const broll3 = item.broll3;
+            
+            // Générer les chemins des images de prévisualisation
+            const broll1Name = broll1.split('/').pop();
+            const broll1BaseName = broll1Name.replace(/\.(mp4|mov)$/i, '');
+            const broll1PreviewSrc = `/b-roll/${broll1BaseName}.jpg`;
+            
+            let broll2Preview = '';
+            if (broll2) {
+                const broll2Name = broll2.split('/').pop();
+                const broll2BaseName = broll2Name.replace(/\.(mp4|mov)$/i, '');
+                const broll2PreviewSrc = `/b-roll/${broll2BaseName}.jpg`;
+                broll2Preview = `
+                    <div style="margin-left: 8px; text-align: center; position: relative;">
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                            <input type="radio" name="broll_choice_${index}" value="broll2" id="broll2_${index}" ${item.selected_broll === 'broll2' ? 'checked' : ''} style="margin: 0; margin-right: 6px;">
+                            <label for="broll2_${index}" style="font-size: 12px; color: #6c757d; font-weight: 500; margin: 0; cursor: pointer;">Alternative</label>
+                        </div>
+                                            <div style="position: relative; display: inline-block;" class="broll-thumbnail">
+                        <img src="${broll2PreviewSrc}" width="240" height="136" style="object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6; box-shadow: 0 2px 6px rgba(0,0,0,0.1);" 
+                             title="${broll2Name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                             onclick="toggleBrollZoom(this)">
+                        <div style="display: none; width: 240px; height: 136px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; align-items: center; justify-content: center; color: #6c757d; font-size: 11px; border: 2px solid #dee2e6;">🎥 Vidéo</div>
+                    </div>
+                        <div style="font-size: 6px; color: #6c757d; margin-top: 2px; font-family: monospace; word-break: break-all; max-width: 240px;">${broll2Name}</div>
+                    </div>
+                `;
+            }
+
+            let broll3Preview = '';
+            if (broll3) {
+                const broll3Name = broll3.split('/').pop();
+                const broll3BaseName = broll3Name.replace(/\.(mp4|mov)$/i, '');
+                const broll3PreviewSrc = `/b-roll/${broll3BaseName}.jpg`;
+                broll3Preview = `
+                    <div style="margin-left: 8px; text-align: center; position: relative;">
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                            <input type="radio" name="broll_choice_${index}" value="broll3" id="broll3_${index}" ${item.selected_broll === 'broll3' ? 'checked' : ''} style="margin: 0; margin-right: 6px;">
+                            <label for="broll3_${index}" style="font-size: 12px; color: #6c757d; font-weight: 500; margin: 0; cursor: pointer;">Alternative 2</label>
+                        </div>
+                        <div style="position: relative; display: inline-block;" class="broll-thumbnail">
+                            <img src="${broll3PreviewSrc}" width="240" height="136" style="object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6; box-shadow: 0 2px 6px rgba(0,0,0,0.1);" 
+                                 title="${broll3Name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                 onclick="toggleBrollZoom(this)">
+                            <div style="display: none; width: 240px; height: 136px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; align-items: center; justify-content: center; color: #6c757d; font-size: 11px; border: 2px solid #dee2e6;">🎥 Vidéo</div>
+                        </div>
+                        <div style="font-size: 6px; color: #6c757d; margin-top: 2px; font-family: monospace; word-break: break-all; max-width: 240px;">${broll3Name}</div>
+                    </div>
+                `;
+            }
+            
+            // Affichage de la B-roll principale avec sa vraie preview
+            const broll1Preview = `
+                <div style="text-align: center; position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                        <input type="radio" name="broll_choice_${index}" value="broll" id="broll_${index}" ${item.selected_broll === 'broll' || !item.selected_broll ? 'checked' : ''} style="margin: 0; margin-right: 6px;">
+                        <label for="broll_${index}" style="font-size: 12px; color: #007AFF; font-weight: 600; margin: 0; cursor: pointer;">Principale</label>
+                    </div>
+                    <div style="position: relative; display: inline-block;" class="broll-thumbnail">
+                        <img src="${broll1PreviewSrc}" width="240" height="136" style="object-fit: cover; border-radius: 8px; border: 2px solid #007AFF; box-shadow: 0 2px 8px rgba(0,122,255,0.2);" 
+                             title="${broll1Name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                             onclick="toggleBrollZoom(this)">
+                        <div style="display: none; width: 240px; height: 136px; background: linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%); border-radius: 8px; align-items: center; justify-content: center; color: #666; font-size: 11px; border: 2px solid #007AFF;">🎥 Vidéo</div>
+                    </div>
+                    <div style="font-size: 6px; color: #6c757d; margin-top: 2px; font-family: monospace; word-break: break-all; max-width: 240px;">${broll1Name}</div>
+                </div>
+            `;
+            
+            const hasOverlay = item.image;
+            
+            div.innerHTML = `
+                <div style="display: flex; align-items: flex-start;" data-index="${index}">
+                    ${broll1Preview}
+                    ${broll2Preview}
+                    ${broll3Preview}
+                    <div class="drop-zone" data-index="${index}" style="margin-left: 8px; margin-right: 15px; margin-top: 22px; position: relative; width: 160px; height: 96px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border: 2px dashed #007AFF; border-radius: 6px; overflow: hidden; cursor: pointer;">
+                        ${hasOverlay ? `
+                            <img src="/b-roll/${item.image}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
+                            <div style="position: absolute; bottom: 4px; right: 4px; z-index: 2; background: rgba(0,0,0,0.6); color: #fff; border-radius: 3px; padding: 2px 6px; font-size: 11px;">Changer</div>
+                        ` : `
+                            <div style="z-index: 2; color: #007AFF; font-size: 13px;">🖼️ Ajouter</div>
+                        `}
+                    </div>
+                </div>
+                <div class="broll-info">
+                    <div class="broll-timing">
+                        ${formatTime(item.start_time)} → ${formatTime(item.end_time)} 
+                        <span style="color: #6c757d; font-size: 12px; font-weight: 400;">(${(item.end_time - item.start_time).toFixed(1)}s)</span>
+                        <br><span style="color: #adb5bd; font-size: 10px; font-family: 'SF Mono', Monaco, monospace;">${item.start_time.toFixed(3)}s → ${item.end_time.toFixed(3)}s</span>
+                    </div>
+                    <div class="broll-text">"${item.phrase}"</div>
+                </div>
+                ${hasOverlay ? `<button onclick="removeOverlay(${index})" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 10px;">🗑️ Supprimer</button>` : ''}
+            `;
+
+            // Ajouter les événements de drag & drop
+            const dropZone = div.querySelector('.drop-zone');
+            setupDropZone(dropZone, index);
+
+            // Ajouter les événements de changement de sélection pour détecter les doublons et sauvegarder
+            const radioButtons = div.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (radio.checked) {
+                        updateDuplicateHighlights();
+                        saveBrollSelection(index, radio.value);
+                    }
+                });
+            });
+
+            return div;
+        }
+
+        function setupDropZone(dropZone, brollIndex) {
+            // Empêcher le comportement par défaut
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Effets visuels
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            // Gestion du drop
+            dropZone.addEventListener('drop', handleDrop, false);
+            dropZone.addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => handleFileSelect(e.target.files[0], brollIndex);
+                input.click();
+            });
+
+            function handleDrop(e) {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0], brollIndex);
+                }
+            }
+        }
+
+        async function handleFileSelect(file, brollIndex) {
+            if (!file.type.startsWith('image/')) {
+                showStatus('Seules les images sont acceptées', 'error');
+                return;
+            }
+
+            try {
+                showStatus('⏳ Upload en cours...', 'info');
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('broll_index', brollIndex);
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l upload');
+                }
+
+                const result = await response.json();
+                showStatus(result.message, 'success');
+
+                // Recharger la timeline
+                setTimeout(loadTimeline, 1000);
+
+            } catch (error) {
+                showStatus('Erreur: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        async function removeOverlay(brollIndex) {
+            try {
+                const response = await fetch('/api/timeline');
+                const timelineData = await response.json();
+                
+                if (timelineData[brollIndex] && timelineData[brollIndex].image) {
+                    delete timelineData[brollIndex].image;
+                    
+                    const updateResponse = await fetch('/api/update_timeline', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(timelineData)
+                    });
+                    
+                    if (updateResponse.ok) {
+                        showStatus('Image supprimée', 'success');
+                        loadTimeline(); // Recharger
+                    }
+                }
+            } catch (error) {
+                showStatus('Erreur: ' + error.message, 'error');
+            }
+        }
+
+        function scrollToBullet(index) {
+            const bulletNum = (index + 1).toString().padStart(2, '0');
+            const rushName = `bullet${bulletNum}.mp3`;
+            window.location.hash = rushName;
+        }
+
+        function startAutoScroll() {
+            // Arrêter l'auto-scroll précédent s'il existe
+            stopAutoScroll();
+            
+            // Démarrer un nouvel auto-scroll
+            autoScrollInterval = setInterval(() => {
+                window.scrollBy({
+                    top: 1,
+                    behavior: 'smooth'
+                });
+            }, 50); // Ajuster cette valeur pour changer la vitesse de scroll
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+            }
+        }
+
+
+
+        function highlightGroupHeader(bulletIndex, isPlaying) {
+            // Générer le nom du rush basé sur l'index
+            if (!timelineData || bulletIndex >= timelineData.length) return;
+            const bulletNum = (bulletIndex + 1).toString().padStart(2, '0');
+            const rushName = 'bullet' + bulletNum + '.mp3';
+            console.log('DEBUG: Highlighting group for rush:', rushName, 'isPlaying:', isPlaying);
+            
+            // Chercher tous les headers et d'abord tous les nettoyer
+            const headers = document.querySelectorAll('.rush-group-header');
+            headers.forEach(header => {
+                header.classList.remove('playing-audio-group');
+            });
+            
+            // Puis mettre en surbrillance le bon header si on joue
+            if (isPlaying) {
+                headers.forEach(header => {
+                    const headerRush = header.getAttribute('data-rush');
+                    if (headerRush === rushName) {
+                        header.classList.add('playing-audio-group');
+                        console.log('DEBUG: Added playing-audio-group to header for:', rushName);
+                    }
+                });
+                
+                // Scroll instantané vers le bullet actif
+                scrollToBullet(bulletIndex);
+            }
+        }
+
+        async function saveBrollSelection(brollIndex, selectedBrollType) {
+            try {
+                // Récupérer les données actuelles
+                const response = await fetch('/api/timeline');
+                const timelineData = await response.json();
+                
+                console.log(`DEBUG: Sauvegarde pour index ${brollIndex}, type ${selectedBrollType}`);
+                console.log(`DEBUG: Tableau contient ${timelineData.length} éléments`);
+                
+                if (brollIndex >= 0 && brollIndex < timelineData.length && timelineData[brollIndex]) {
+                    const currentEntry = timelineData[brollIndex];
+                    console.log(`DEBUG: Modification de l'entrée: rush=${currentEntry.rush}, phrase_id=${currentEntry.phrase_id}`);
+                    
+                    // Sauvegarder le type de b-roll sélectionné
+                    timelineData[brollIndex].selected_broll = selectedBrollType;
+                    
+                    // Envoyer les modifications
+                    const updateResponse = await fetch('/api/update_timeline', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(timelineData)
+                    });
+                    
+                    if (updateResponse.ok) {
+                        console.log(`✅ B-roll sélectionnée sauvegardée: ${selectedBrollType} pour l'index ${brollIndex}`);
+                    } else {
+                        console.error('❌ Erreur lors de la sauvegarde sur le serveur');
+                    }
+                } else {
+                    console.error(`❌ Index invalide: ${brollIndex} (max: ${timelineData.length - 1})`);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde de la sélection:', error);
+            }
+        }
+
+        function updateDuplicateHighlights() {
+            // Supprimer tous les overlays de doublons existants
+            document.querySelectorAll('.broll-duplicate-overlay').forEach(overlay => {
+                overlay.remove();
+            });
+
+            // Collecter toutes les b-rolls sélectionnées
+            const selectedBrolls = new Set();
+            const radioButtons = document.querySelectorAll('input[type="radio"]:checked');
+            
+            radioButtons.forEach(radio => {
+                const brollItem = radio.closest('[data-index]');
+                if (brollItem) {
+                    const brollIndex = brollItem.getAttribute('data-index');
+                    const brollType = radio.value; // broll1, broll2, ou broll3
+                    
+                    // Récupérer le nom du fichier b-roll depuis les données
+                    if (timelineData[brollIndex]) {
+                        let brollFilename = null;
+                        if (brollType === 'broll' && timelineData[brollIndex].broll) {
+                            brollFilename = timelineData[brollIndex].broll;
+                        } else if (brollType === 'broll2' && timelineData[brollIndex].broll2) {
+                            brollFilename = timelineData[brollIndex].broll2;
+                        } else if (brollType === 'broll3' && timelineData[brollIndex].broll3) {
+                            brollFilename = timelineData[brollIndex].broll3;
+                        }
+                        
+                        if (brollFilename) {
+                            selectedBrolls.add(brollFilename);
+                        }
+                    }
+                }
+            });
+
+            // Marquer toutes les occurrences de b-rolls sélectionnées
+            selectedBrolls.forEach(selectedBroll => {
+                const allBrollItems = document.querySelectorAll('[data-index]');
+                
+                allBrollItems.forEach(brollItem => {
+                    const brollIndex = brollItem.getAttribute('data-index');
+                    if (timelineData[brollIndex]) {
+                        const item = timelineData[brollIndex];
+                        
+                        // Vérifier si cette b-roll est sélectionnée dans cet item
+                        const radioButtons = brollItem.querySelectorAll('input[type="radio"]');
+                        let isSelectedInThisItem = false;
+                        let selectedRadio = null;
+                        
+                        radioButtons.forEach(radio => {
+                            if (radio.checked) {
+                                selectedRadio = radio;
+                                const brollType = radio.value;
+                                if ((brollType === 'broll' && item.broll === selectedBroll) ||
+                                    (brollType === 'broll2' && item.broll2 === selectedBroll) ||
+                                    (brollType === 'broll3' && item.broll3 === selectedBroll)) {
+                                    isSelectedInThisItem = true;
+                                }
+                            }
+                        });
+
+                        // Si cette b-roll est sélectionnée ailleurs mais pas ici, la marquer en rouge
+                        if (!isSelectedInThisItem) {
+                            // Chercher les images correspondantes
+                            const images = brollItem.querySelectorAll('img');
+                            images.forEach((img, imgIndex) => {
+                                const brollType = imgIndex === 0 ? 'broll' : imgIndex === 1 ? 'broll2' : 'broll3';
+                                let itemBroll = null;
+                                
+                                if (brollType === 'broll' && item.broll) {
+                                    itemBroll = item.broll;
+                                } else if (brollType === 'broll2' && item.broll2) {
+                                    itemBroll = item.broll2;
+                                } else if (brollType === 'broll3' && item.broll3) {
+                                    itemBroll = item.broll3;
+                                }
+                                
+                                if (itemBroll === selectedBroll) {
+                                    // Ajouter l'overlay rouge seulement si ce n'est pas une zone d'overlay
+                                    const container = img.closest('div[style*="position: relative"]');
+                                    const isOverlayZone = container && container.classList.contains('drop-zone');
+                                    if (container && !isOverlayZone && !container.querySelector('.broll-duplicate-overlay')) {
+                                        const overlay = document.createElement('div');
+                                        overlay.className = 'broll-duplicate-overlay';
+                                        container.appendChild(overlay);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html> 

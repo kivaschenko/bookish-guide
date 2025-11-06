@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video Pipeline Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏩</text></svg>">
+  <style>
+    :root{
+      --bg:#f7f7fb;--panel:#ffffff;--muted:#6b7280;--text:#111827;--primary:#2563eb;--primary-600:#1d4ed8;--ok:#059669;--warn:#eab308;--bad:#dc2626;--chip:#eef2ff;--border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+    header{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--border);z-index:10}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    h1{margin:0;font-size:22px}
+    .sub{color:var(--muted);font-size:13px}
+    /* layout */
+    .grid{display:grid;gap:16px}
+    @media (min-width:1000px){
+      .grid-cols-2{grid-template-columns:1.3fr 1fr}
+    }
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+    .card h2{margin:0 0 10px 0;font-size:18px}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .spacer{flex:1}
+    .pill{background:var(--chip);color:var(--primary-600);padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid #dbeafe}
+    /* inputs */
+    select,button,input[type=text]{border:1px solid var(--border);border-radius:10px;padding:9px 12px;background:#fff;color:var(--text);font-size:14px}
+    label{display:flex;align-items:center;gap:8px;cursor:pointer}
+    input[type=checkbox]{width:16px;height:16px}
+    button{cursor:pointer}
+    .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-600)}
+    .btn-ghost{background:#fff}
+    /* table */
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px;text-align:left}
+    th{color:var(--muted);font-weight:600}
+    tr:hover td{background:#fafafc}
+    .status{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px}
+    .status.running{background:#fffbeb;border-color:#fbbf24}
+    .status.queued{background:#fffbeb;border-color:#fde68a}
+    .status.done{background:#ecfdf5;border-color:#a7f3d0}
+    .status.fail{background:#fef2f2;border-color:#fecaca}
+    /* console */
+    .console{height:220px;overflow:auto;background:#0b1020;color:#d1d5db;border-radius:12px;border:1px solid #0f172a;padding:12px;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:12px}
+    .console .time{color:#9ca3af}
+    .tag{font-size:11px;padding:1px 6px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--muted)}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--border);margin-bottom:10px}
+    .tab{padding:8px 12px;border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0;background:#f9fafb;cursor:pointer;font-size:13px}
+    .tab.active{background:#fff;color:var(--primary-600);}
+    .textarea{width:100%;height:180px;border:1px solid var(--border);border-radius:10px;padding:10px;background:#fff;font-family:system-ui, sans-serif;color:var(--text);resize:vertical}
+    .kbd{font-family:monospace;background:#f3f4f6;border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-size:12px}
+    .hint{font-size:12px;color:var(--muted)}
+    .badge{border:1px dashed var(--border);padding:6px 8px;border-radius:8px;font-size:12px;color:var(--muted)}
+    .disabled{color:#9ca3af;text-decoration:line-through}
+    .disabled input[type=checkbox]{filter:grayscale(1);opacity:0.5}
+    /* Modal styles */
+    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
+    .modal-content{background:var(--panel);margin:2% auto;padding:20px;border-radius:16px;width:90%;max-width:800px;max-height:90vh;overflow:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px}
+    .modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+    .modal-close:hover{color:var(--text)}
+    .status.clickable{cursor:pointer}
+    .status.clickable:hover{opacity:0.8}
+    .stop-btn{background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:4px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px}
+    .stop-btn:hover{background:#fee2e2;color:#991b1b}
+    .stop-btn:disabled{color:#9ca3af;cursor:not-allowed}
+    .stop-btn:disabled:hover{background:none}
+    /* Mode Admin */
+    .admin-only{display:none}
+    .admin-mode .admin-only{display:block}
+    .admin-mode .admin-only.inline{display:inline}
+    .admin-mode .admin-only.flex{display:flex}
+    .admin-mode th.admin-only, .admin-mode td.admin-only{display:table-cell}
+    .user-only{display:block}
+    .admin-mode .user-only{display:none}
+    #adminToggle.admin-active{background:#10b981;color:white}
+    /* Indicateurs d'étapes */
+    .step-indicator{display:flex;align-items:center;gap:4px;font-size:14px}
+    .step-number{font-weight:600;color:#374151}
+    .step-status{font-size:16px}
+    .step-label{color:#6b7280;font-size:12px}
+    .step-checker{transition:all 0.3s ease}
+    /* Modal masqué par défaut */
+    #taskLogsModal{display:none !important}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row">
+      <div>
+        <h1>Video Pipeline Dashboard</h1>
+
+      </div>
+      <div class="spacer"></div>
+      <button class="pill" id="adminToggle" onclick="toggleAdminMode()">Dev</button>
+    </div>
+  </header>
+
+  <main class="wrap" style="margin-top:16px;">
+    
+    <!-- PROJECT CREATION SECTION -->
+    <section class="card" style="margin-bottom:16px">
+      <h2>0) Création de Projet</h2>
+      <div style="margin-top:12px">
+        <div class="muted" style="font-size:12px;margin-bottom:6px">Nom du projet</div>
+        <input type="text" id="projectNameInput" class="input" placeholder="ex: mon-projet-video" style="width:300px">
+      </div>
+      <div style="margin-top:12px">
+        <div class="muted" style="font-size:12px;margin-bottom:6px">Texte d'entrée</div>
+        <textarea id="inputText" class="textarea" placeholder="Collez votre texte ici pour créer le projet..."></textarea>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn-primary" id="createProjectBtn">📁 Créer Projet</button>
+      </div>
+      <div id="createProjectStatus" style="margin-top:12px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;display:none">
+        <div style="font-size:12px;color:#64748b;margin-bottom:6px">Status:</div>
+        <div id="createProjectProgress" style="font-size:13px;color:#374151"></div>
+      </div>
+    </section>
+    
+    <!-- PROJECT & STEPS SECTION -->
+    <section class="card" style="margin-bottom:16px">
+      <h2>1) Projet & Étapes</h2>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Dossier projet</div>
+          <select id="projectSelect"></select>
+        </div>
+        <div class="spacer"></div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <label><input type="checkbox" class="step" value="script" checked /> 1. script</label>
+          <select id="languageSelect" class="input" style="width:200px">
+            <option value="french">Français 🇫🇷</option>
+            <option value="english">English 🇬🇧</option>
+            <option value="german">Allemand 🇩🇪</option>
+            <option value="italian">Italien 🇮🇹</option>
+            <option value="spanish">Espagnol 🇪🇸</option>
+            <option value="dutch">Néerlandais 🇳🇱</option>
+            <option value="swedish">Suédois 🇸🇪</option>
+            <option value="norwegian">Norvégien 🇳🇴</option>
+            <option value="danish">Danois 🇩🇰</option>
+            <option value="finnish">Finnois 🇫🇮</option>
+            <option value="polish">Polonais 🇵🇱</option>
+          </select>
+        </div>
+        
+        <hr style="margin:8px 0;border:none;border-top:1px solid #e2e8f0">
+        
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <label class="admin-only"><input type="checkbox" class="step" value="audio" checked /> 2. audio</label>
+          <select id="audioMode" class="admin-only" style="width:200px">
+            <option value="gemini_tts">Gemini TTS (-ag)</option>
+            <option value="openai_tts">OpenAI TTS (-a)</option>
+            <option value="heygen">Heygen (-r)</option>
+          </select>
+        </div>
+        
+        <hr style="margin:8px 0;border:none;border-top:1px solid #e2e8f0">
+        
+        <label class="admin-only"><input type="checkbox" class="step" value="vectorbroll" checked /> 3. vectorbroll</label>
+        
+        <hr style="margin:8px 0;border:none;border-top:1px solid #e2e8f0">
+        
+        <label><input type="checkbox" class="step" value="premontage" checked /> 4. prémontage</label>
+        
+        <hr style="margin:8px 0;border:none;border-top:1px solid #e2e8f0">
+        
+        <label class="admin-only"><input type="checkbox" class="step" value="compile" /> 5. compilation finale (-m)</label>
+      </div>
+      
+
+      <div class="row" style="margin-top:14px">
+        <div class="spacer"></div>
+        <button class="btn-primary" id="launchBtn">Lancer le pipeline</button>
+      </div>
+      
+      <div class="row" style="margin-top:10px">
+        <div class="spacer"></div>
+        <a href="#" id="openPremontageBtn" style="color: #007AFF; text-decoration: none; font-size: 14px; transition: color 0.2s ease;" onmouseover="this.style.color='#0056b3'" onmouseout="this.style.color='#007AFF'">🎬 Open Prémontage</a>
+      </div>
+
+      <div class="admin-only" style="margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px">
+        <label class="disabled admin-only"><input type="checkbox" class="step" value="get_ori" /> Get ORI</label>
+        <label class="disabled admin-only"><input id="useBroll" type="checkbox" checked title="Utilise les sélections sauvegardées pour -m"/> Use saved B-roll selections (--usebroll)</label>
+      </div>
+
+      <div class="badge admin-only" style="margin-top:10px">Interface découplée • Exécution via CLI • Logs en temps réel</div>
+      <p class="hint admin-only" style="margin-top:10px">Une seule tâche à la fois. Les nouvelles tâches sont mises en file d'attente.</p>
+      
+      <!-- Vérification des étapes -->
+      <div class="step-checker" style="margin-top:16px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">État des étapes :</div>
+        <div class="step-indicators" style="display:flex;gap:16px;align-items:center">
+          <div class="step-indicator" data-step="1">
+            <span class="step-number">1.</span>
+            <span class="step-status">❌</span>
+            <span class="step-label">Script</span>
+          </div>
+          <div class="step-indicator" data-step="2">
+            <span class="step-number">2.</span>
+            <span class="step-status">❌</span>
+            <span class="step-label">Audio</span>
+          </div>
+          <div class="step-indicator" data-step="3">
+            <span class="step-number">3.</span>
+            <span class="step-status">❌</span>
+            <span class="step-label">B-roll</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Message pour utilisateurs normaux -->
+      <div class="user-only" style="margin-top:20px;padding:16px;background:#f0f9ff;border:1px solid #0ea5e9;border-radius:8px;text-align:center">
+        <h3 style="margin:0 0 8px 0;color:#0369a1">🎬 Interface Prémontage</h3>
+        <p style="margin:0;color:#0c4a6e">Sélectionnez un projet et lancez le prémontage pour commencer le travail sur les B-rolls.</p>
+      </div>
+    </section>
+
+    <!-- SCRIPTS OVERVIEW SECTION -->
+    <section class="card admin-only" style="margin-bottom:16px">
+      <h2>2) Aperçu Scripts I1–I3</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="input">Input</button>
+        <button class="tab" data-tab="ori">ORI</button>
+        <button class="tab" data-tab="i1">I1 – Paraphrase</button>
+        <button class="tab" data-tab="i2">I2 – Voice-over fix</button>
+        <button class="tab" data-tab="i3">I3 – Length check</button>
+      </div>
+      <div id="pane-input">
+        <div class="row" style="margin-bottom:8px"><span class="tag" id="inputCount">Mots: 0</span><div class="spacer"></div><button class="btn-ghost" onclick="refreshScript('input')">Actualiser</button></div>
+        <textarea class="textarea" id="txt-input" readonly placeholder="Texte d'entrée du projet (lecture seule)"></textarea>
+      </div>
+      <div id="pane-ori" style="display:none">
+        <div class="row" style="margin-bottom:8px"><span class="tag" id="oriCount">Mots: 0</span><div class="spacer"></div><button class="btn-ghost" onclick="refreshScript('ori')">Actualiser</button></div>
+        <textarea class="textarea" id="txt-ori" readonly placeholder="Transcript original (lecture seule)"></textarea>
+      </div>
+      <div id="pane-i1" style="display:none">
+        <div class="row" style="margin-bottom:8px"><span class="tag" id="i1Count">Mots: 0</span><div class="spacer"></div><button class="btn-ghost" onclick="refreshScript('i1')">Actualiser</button></div>
+        <textarea class="textarea" id="txt-i1" readonly placeholder="Contenu I1 (lecture seule)"></textarea>
+      </div>
+      <div id="pane-i2" style="display:none">
+        <div class="row" style="margin-bottom:8px"><span class="tag" id="i2Count">Mots: 0</span><div class="spacer"></div><button class="btn-ghost" onclick="refreshScript('i2')">Actualiser</button></div>
+        <textarea class="textarea" id="txt-i2" readonly placeholder="Contenu I2 (lecture seule)"></textarea>
+      </div>
+      <div id="pane-i3" style="display:none">
+        <div class="row" style="margin-bottom:8px"><span class="tag" id="i3Count">Mots: 0</span><div class="spacer"></div><button class="btn-ghost" onclick="refreshScript('i3')">Actualiser</button></div>
+        <textarea class="textarea" id="txt-i3" readonly placeholder="Contenu I3 (lecture seule)"></textarea>
+      </div>
+    </section>
+
+    <!-- TASKS -->
+    <section class="card admin-only" style="grid-column:1/-1">
+      <div class="row">
+        <h2>3) Tâches & File d'attente</h2>
+        <div class="spacer"></div>
+        <button class="btn-ghost admin-only" id="killProcessBtn" style="background:#dc2626;color:white;margin-right:8px">🔪 kill exponential_video</button>
+        <button class="btn-ghost admin-only" id="showProcessesBtn" style="background:#0ea5e9;color:white;margin-right:8px">🔎 Show processes</button>
+        <button class="btn-ghost admin-only" id="killPremontageBtn" style="background:#ef4444;color:white;margin-right:8px">🔪 kill premontage</button>
+        <button class="btn-ghost" id="clearDoneBtn">Effacer terminées</button>
+      </div>
+      <div style="overflow:auto">
+        <table id="taskTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Projet</th>
+              <th class="admin-only">Étapes</th>
+              <th class="admin-only">Mode</th>
+              <th>Statut</th>
+              <th>Début</th>
+              <th>Durée</th>
+              <th class="admin-only">Commande</th>
+              <th class="admin-only">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CONSOLE -->
+    <section class="card admin-only">
+      <div class="row">
+        <h2>4) Console en temps réel</h2>
+      </div>
+      <div class="console" id="console"></div>
+    </section>
+  </main>
+
+  <!-- Modal pour les logs détaillés -->
+  <div id="taskLogsModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Logs de la tâche</h2>
+        <button class="modal-close" onclick="closeTaskLogsModal()">&times;</button>
+      </div>
+      <div>
+        <div class="row" style="margin-bottom:12px">
+          <div><strong>Projet:</strong> <span id="modalProject">-</span></div>
+          <div><strong>Statut:</strong> <span id="modalStatus">-</span></div>
+          <div><strong>Commande courante:</strong> <span id="modalCurrentCmd">-</span></div>
+        </div>
+        <div style="margin-bottom:12px">
+          <strong>Commandes exécutées:</strong>
+          <div id="modalCommands" class="console" style="height:120px;margin-top:8px"></div>
+        </div>
+        <div>
+          <strong>Logs détaillés:</strong>
+          <div id="modalLogs" class="console" style="height:300px;margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
