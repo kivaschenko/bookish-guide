@@ -41,12 +41,12 @@ log*.txt
 *.flac
 
 # Project specific
-# projects/*
+projects/*
 b-roll/*
 heygen/*
 assets/*
 source/*
-# temp/*
+temp/*
 
 # Environment files
 .env
