@@ -67,3 +67,6 @@ node_modules/
 # SQLite database
 *.sqlite3
 storyforge.db
+
+# Additional ignores
+legacy_code_and_examples/
