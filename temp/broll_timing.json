@@ -1,0 +1,89 @@
+{
+  "rushes": {
+    "rush1": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush2": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush3": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush4": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush5": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush6": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush7": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush8": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush9": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush10": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush11": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush12": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush13": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush14": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    },
+    "rush15": {
+      "duration": 1.0,
+      "brolls": [],
+      "message": "Rush too short for B-roll placement"
+    }
+  },
+  "metadata": {
+    "selection_mode": "vector",
+    "audio_mode": "gemini_tts",
+    "total_rushes": 15,
+    "b_roll_config": {
+      "duration": 4,
+      "spacing": 0.5,
+      "start_delay": 2.4
+    }
+  }
+}
