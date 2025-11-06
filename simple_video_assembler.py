@@ -59,37 +59,125 @@ def create_video_from_project(project_name, language="english", output_path=None
     if not audio_files:
         raise FileNotFoundError(f"No audio files found in {audio_dir}")
 
+    # Load audio metadata to get proper timing
+    audio_metadata_file = audio_dir / "audio_bullet_metadata.json"
+    audio_metadata = None
+    if audio_metadata_file.exists():
+        with open(audio_metadata_file) as f:
+            audio_metadata = json.load(f)
+
     # 3. Create video timeline
     video_clips = []
     audio_clips = []
     current_time = 0
 
-    for rush_id, rush_data in timing_data["rushes"].items():
-        rush_duration = rush_data["duration"]
-        brolls = rush_data.get("brolls", [])
+    # If we have audio metadata, use bullet-based approach
+    if audio_metadata and "bullets" in audio_metadata:
+        logging.info("Using bullet-based audio timing from metadata")
 
-        # Add audio clip with volume boost
-        audio_file = audio_files[int(rush_id.replace("rush", "")) - 1]
-        audio_clip = AudioFileClip(str(audio_file))
-        # Apply volume boost from config
-        if voice_volume != 1.0:
-            audio_clip = audio_clip.with_volume_scaled(voice_volume)
-        audio_clips.append(audio_clip.with_start(current_time))
+        for bullet in audio_metadata["bullets"]:
+            bullet_number = bullet["bullet_number"]
+            audio_file_name = bullet["audio_file"]
+            duration = bullet["duration"]
 
-        # Add B-roll clips for this rush
-        for broll in brolls:
-            broll_path = Path("b-roll") / broll["video"]
-            if broll_path.exists():
-                # TODO: Check size/dimensions if needed, resize if necessary
-                video_clip = VideoFileClip(str(broll_path))
-                # Trim to specified duration and set timing
-                video_clip = video_clip.subclipped(
-                    0, min(broll["duration"], video_clip.duration)
+            # Find corresponding audio file
+            audio_file = audio_dir / audio_file_name
+            if not audio_file.exists():
+                logging.warning(f"Audio file not found: {audio_file}")
+                continue
+
+            # Add audio clip with volume boost
+            audio_clip = AudioFileClip(str(audio_file))
+            if voice_volume != 1.0:
+                audio_clip = audio_clip.with_volume_scaled(voice_volume)
+            audio_clips.append(audio_clip.with_start(current_time))
+
+            # Look for B-roll clips in corresponding rushes
+            # Try to find rushes that might correspond to this bullet
+            rush_candidates = []
+            for rush_id, rush_data in timing_data["rushes"].items():
+                if rush_data.get("brolls"):
+                    rush_candidates.append((rush_id, rush_data))
+
+            # Distribute available B-roll among audio segments
+            if rush_candidates:
+                # Use modulo to cycle through available B-roll rushes
+                rush_index = (bullet_number - 1) % len(rush_candidates)
+                rush_id, rush_data = rush_candidates[rush_index]
+
+                for broll in rush_data.get("brolls", []):
+                    # Handle both old and new B-roll data structures
+                    if "filename" in broll:
+                        # New structure
+                        broll_filename = broll["filename"]
+                        broll_start = broll["start_time"]
+                        broll_duration = broll["duration"]
+                    else:
+                        # Old structure (fallback)
+                        broll_filename = broll["video"]
+                        broll_start = broll["start"]
+                        broll_duration = broll["duration"]
+
+                    broll_path = Path("b-roll") / broll_filename
+                    if broll_path.exists():
+                        video_clip = VideoFileClip(str(broll_path))
+                        video_clip = video_clip.subclipped(
+                            0, min(broll_duration, video_clip.duration)
+                        )
+                        video_clip = video_clip.with_start(current_time + broll_start)
+                        video_clips.append(video_clip)
+
+            current_time += duration
+    else:
+        # Fallback: use rush-based approach with available audio files
+        logging.info("Using rush-based approach (fallback)")
+
+        for rush_id, rush_data in timing_data["rushes"].items():
+            rush_duration = rush_data["duration"]
+            brolls = rush_data.get("brolls", [])
+
+            # Add audio clip with volume boost - only if we have a corresponding audio file
+            rush_number = int(rush_id.replace("rush", ""))
+            if rush_number <= len(audio_files):
+                audio_file = audio_files[rush_number - 1]
+                audio_clip = AudioFileClip(str(audio_file))
+                # Apply volume boost from config
+                if voice_volume != 1.0:
+                    audio_clip = audio_clip.with_volume_scaled(voice_volume)
+                audio_clips.append(audio_clip.with_start(current_time))
+
+                # Add B-roll clips for this rush
+                for broll in brolls:
+                    # Handle both old and new B-roll data structures
+                    if "filename" in broll:
+                        # New structure
+                        broll_filename = broll["filename"]
+                        broll_start = broll["start_time"]
+                        broll_duration = broll["duration"]
+                    else:
+                        # Old structure (fallback)
+                        broll_filename = broll["video"]
+                        broll_start = broll["start"]
+                        broll_duration = broll["duration"]
+
+                    broll_path = Path("b-roll") / broll_filename
+                    if broll_path.exists():
+                        # TODO: Check size/dimensions if needed, resize if necessary
+                        video_clip = VideoFileClip(str(broll_path))
+                        # Trim to specified duration and set timing
+                        video_clip = video_clip.subclipped(
+                            0, min(broll_duration, video_clip.duration)
+                        )
+                        video_clip = video_clip.with_start(current_time + broll_start)
+                        video_clips.append(video_clip)
+
+                current_time += rush_duration
+            else:
+                logging.warning(
+                    f"No audio file found for {rush_id} (audio files available: {len(audio_files)})"
                 )
-                video_clip = video_clip.with_start(current_time + broll["start"])
-                video_clips.append(video_clip)
-
-        current_time += rush_duration
+                # Skip rushes without corresponding audio files
+                continue
 
     # 4. Combine everything
     if not video_clips:
