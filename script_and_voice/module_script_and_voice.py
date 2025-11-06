@@ -4,7 +4,7 @@ Script and Voice Module - CLI Interface
 Standalone module for script generation and voice synthesis
 
 Usage:
-    python module_script_and_voice.py --project mon-projet --language french --input-file input.txt
+    python module_script_and_voice.py --project mon-projet --language french
     python module_script_and_voice.py --help
 """
 

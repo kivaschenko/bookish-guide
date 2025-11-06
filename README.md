@@ -1,82 +1,76 @@
-# StoryForge - Individual MVP
+# StoryForge - YouTube Content Creator Tool
 
-AI-powered video content generation platform that transforms text into comprehensive multimedia stories with voice narration and intelligent B-roll footage integration.
+Simple AI-powered tool for individual YouTube vloggers to transform text ideas into complete videos with voice narration and B-roll footage.
+
+## 🎬 For YouTube Creators
+
+**Perfect for:** Solo content creators, vloggers, educators who want to quickly turn their ideas into polished videos.
+
+**What it does:** You write your content → AI generates script → AI adds voice → AI selects B-roll → You get a finished video.
 
 ## 🚀 Quick Start
 
-### 1. Installation
+### 1. Setup
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Install and configure
+python3 setup.py
 
-# Configure API keys in config.yml
-cp config.yml.example config.yml
-# Edit config.yml with your API keys (Anthropic, OpenAI, Gemini)
+# Add your API keys to config.yml
+# Add B-roll videos to b-roll/ folder
 ```
 
-### 2. Generate Video
+### 2. Create Your Video
 
 ```bash
-# One-command video generation
-python generate_video.py --input "Your content text here" --output "my-video"
+# Write your content in a text file, then:
+python generate_video.py --input "Today I'll share 3 tips for better sleep..." --output "sleep-tips"
 
-# Or step by step:
-# Step 1: Generate script and voice
-python script_and_voice/module_script_and_voice.py --project my-project --language english --input-file input.txt
-
-# Step 2: Select B-roll footage  
-python -m b_roll.cli match-video --project-name my-project --duration 60
-
-# Step 3: Assemble final video
-python simple_video_assembler.py my-project english
+# Or use the web editor:
+python launcher.py web
 ```
 
-### 3. Web Interface (Timeline Editor)
+### 3. That's it! 
 
+Your video will be in the projects folder, ready to upload to YouTube.
+
+## 📱 Usage Options
+
+**Command Line (fastest):**
 ```bash
-# Start editing server
-
-```bash
-# Start editing server
-python editing_server/server.py
-
-# Open browser to http://localhost:8080
-# Edit B-roll timing and preview video
+python generate_video.py --input "Your video content..." --output "my-video"
 ```
 
-## 📦 Architecture
+**Web Interface (visual editing):**
+```bash
+python launcher.py web
+# Opens browser interface for timeline editing
+```
 
-- **`script_and_voice/`** - Script generation and voice synthesis
-- **`b_roll/`** - AI-powered B-roll video selection
-- **`editing_server/`** - Web interface for timeline editing  
-- **`generate_video.py`** - Main entry point for complete pipeline
-- **`simple_video_assembler.py`** - Final video assembly
-
-## 🎯 MVP Features
-
-✅ Text to script generation (Claude API)  
-✅ Multi-language voice synthesis (Gemini TTS)  
-✅ AI-powered B-roll selection (OpenAI Vision)  
-✅ Video assembly with MoviePy  
-✅ Web timeline editor  
-✅ Standalone module execution  
-
-## 📋 Requirements
+## 🛠 What You Need
 
 - Python 3.8+
-- API Keys: Anthropic (Claude), OpenAI (GPT-4V), Gemini (TTS)
-- B-roll video library in `b-roll/` directory
+- API keys (get free trials):
+  - Anthropic (Claude) - for script writing
+  - OpenAI (GPT-4V) - for B-roll selection  
+  - Gemini - for voice synthesis
+- Some B-roll videos in the `b-roll/` folder
 
-## 🔧 Configuration
+## 🎯 Perfect For
 
-Edit `config.yml`:
+- **Educational content** - Turn your knowledge into videos
+- **Vlogs** - Quick daily/weekly content creation
+- **Reviews** - Product or service review videos
+- **Tutorials** - How-to and guide videos
+- **Commentary** - News or trend commentary
 
-## 📚 Documentation
+## 💡 Pro Tips
 
-- **[Script & Voice Module](script_and_voice/README.md)** - Content generation
-- **[B-roll Intelligence](b_roll/README.md)** - Video selection system
+- Write naturally - the AI will make it flow better
+- Add your own B-roll videos for better relevance
+- Use the web editor to fine-tune timing
+- Supports multiple languages for international audience
 
 ---
 
-**KISS Principle**: Simple, modular architecture. Each component can run independently or as part of the web interface.
+**Keep it simple.** One tool, one purpose: turn your ideas into YouTube videos fast.
