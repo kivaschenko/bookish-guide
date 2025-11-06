@@ -5,24 +5,49 @@ Visual interface for editing B-roll timelines in StoryForge projects.
 ## Features
 
 - Visual timeline editor with drag-and-drop B-roll selection
+- Choose between multiple B-roll alternatives for each segment
 - Image upload functionality for custom overlays  
 - Live audio preview with timeline synchronization
 - Auto-save to `broll_timing.json`
 - Thumbnail zoom for better B-roll inspection
 - HTTP Basic Authentication (optional)
 
-## Usage
+## Quick Start
 
-### Start the server:
+### 1. Prepare Your Data
+
 ```bash
-cd editing_server/
-python server.py
+# Option A: Use an example for testing
+cp "temp/examples/project 9 broll_timing.json" temp/broll_timing.json
+
+# Option B: Use a specific project
+# Ensure your project has: projects/YOUR_PROJECT/temp/broll_timing.json
 ```
 
-### Access the interface:
-- Open http://localhost:47393 in your browser
-- Edit timelines for projects in `temp/broll_timing.json`
-- Upload custom images to `b-roll/ressources/`
+### 2. Start the Server
+
+```bash
+# Using default temp directory (temp/broll_timing.json)
+python editing_server/server.py
+
+# Using a specific project
+python editing_server/server.py --project my-project-06
+
+# Using a custom temp directory path
+python editing_server/server.py --temp projects/my-project-06/temp
+
+# Custom port
+python editing_server/server.py --port 8080
+```
+
+### 3. Access the Interface
+
+Open your browser and navigate to:
+```
+http://localhost:47393
+```
+
+The interface will load your B-roll timeline automatically.
 
 ## Configuration
 
@@ -53,9 +78,13 @@ dashboard:
 
 ## Dependencies
 
-- Python 3.8+
+- Python 3.8+ (Python 3.13+ compatible)
 - PyYAML (for configuration)
 - Standard library only (no external dependencies)
+
+### Python 3.13+ Compatibility
+
+The server has been updated to remove the deprecated `cgi` module, which is slated for removal in Python 3.13. Multipart form data parsing is now handled using a custom implementation that relies only on non-deprecated standard library modules.
 
 ## Port
 

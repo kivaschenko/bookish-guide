@@ -209,7 +209,7 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
 
     def _serve_interface(self):
         """Serve the main HTML interface."""
-        logging.debug("DEBUG SERVER: _serve_interface() called")
+        logging.debug("SERVER: _serve_interface() called")
 
         # Get project name from temp path
         project_name = "unknown"
@@ -219,54 +219,52 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             if temp_path.name == "temp" and temp_path.parent.name != "temp":
                 project_name = temp_path.parent.name
 
-        logging.debug(f"DEBUG SERVER: Detected project name: {project_name}")
+        logging.debug(f"SERVER: Detected project name: {project_name}")
 
         # Read HTML file and replace project name
         interface_path = Path(__file__).parent / "interface.html"
-        logging.debug(f"DEBUG SERVER: HTML file path: {interface_path}")
+        logging.debug(f"SERVER: HTML file path: {interface_path}")
 
         if not interface_path.exists():
-            logging.debug(
-                f"DEBUG SERVER: ERROR - HTML file not found: {interface_path}"
-            )
+            logging.debug(f"SERVER: ERROR - HTML file not found: {interface_path}")
             self._send_404()
             return
 
-        logging.debug("DEBUG SERVER: HTML file found, reading...")
+        logging.debug("SERVER: HTML file found, reading...")
         with open(interface_path, "r", encoding="utf-8") as f:
             html_content = f.read()
 
-        logging.debug(f"DEBUG SERVER: HTML read, size: {len(html_content)} characters")
+        logging.debug(f"SERVER: HTML read, size: {len(html_content)} characters")
         html_content = html_content.replace("{{PROJECT_NAME}}", project_name)
-        logging.debug("DEBUG SERVER: PROJECT_NAME replacement done")
+        logging.debug("SERVER: PROJECT_NAME replacement done")
 
         self._send_response(200, html_content, "text/html")
-        logging.debug("DEBUG SERVER: HTML interface sent")
+        logging.debug("SERVER: HTML interface sent")
 
     def _serve_timeline_data(self):
         """Serve timeline data as JSON."""
-        logging.debug("DEBUG SERVER: _serve_timeline_data() called")
-        logging.debug(f"DEBUG SERVER: broll_timing.json path: {self.broll_timing_file}")
+        logging.debug("SERVER: _serve_timeline_data() called")
+        logging.debug(f"SERVER: broll_timing.json path: {self.broll_timing_file}")
 
         if not self.broll_timing_file.exists():
-            logging.debug("DEBUG SERVER: ERROR - broll_timing.json not found")
+            logging.debug("SERVER: ERROR - broll_timing.json not found")
             self._send_response(
                 404, '{"error": "broll_timing.json not found"}', "application/json"
             )
             return
 
-        logging.debug("DEBUG SERVER: broll_timing.json found, reading...")
+        logging.debug("SERVER: broll_timing.json found, reading...")
         with open(self.broll_timing_file, "r", encoding="utf-8") as f:
             timeline_data = json.load(f)
 
-        logging.debug(f"DEBUG SERVER: Timeline loaded, {len(timeline_data)} elements")
+        logging.debug(f"SERVER: Timeline loaded, {len(timeline_data)} elements")
         response_data = json.dumps(timeline_data, indent=2)
         logging.debug(
-            f"DEBUG SERVER: JSON response prepared, size: {len(response_data)} characters"
+            f"SERVER: JSON response prepared, size: {len(response_data)} characters"
         )
 
         self._send_response(200, response_data, "application/json")
-        logging.debug("DEBUG SERVER: Timeline JSON sent")
+        logging.debug("SERVER: Timeline JSON sent")
 
     def _serve_broll_file(self):
         """Serve B-roll files for preview."""
