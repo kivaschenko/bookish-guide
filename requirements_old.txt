@@ -1,4 +1,14 @@
-# Core API clients
+# Web Framework & API
+fastapi>=0.120.0
+uvicorn>=0.38.0
+aiofiles>=25.1.0
+python-multipart>=0.0.20
+python-dotenv>=1.2.1
+pydantic>=2.12.3
+pydantic-settings>=2.11.0
+pydantic[email]>=2.12.3
+
+# API clients
 anthropic>=0.71.0
 openai>=2.6.0
 google-genai>=1.46.0
@@ -6,7 +16,6 @@ requests>=2.32.5
 
 # Configuration
 pyyaml>=6.0.3
-python-dotenv>=1.2.1
 
 # Machine Learning & AI
 torch>=2.9.0
@@ -28,9 +37,14 @@ psutil>=7.1.1
 moviepy>=2.2.1
 opencv-python>=4.12.0
 
-# Logging
-structlog>=25.5.0
+# Authentication & Security
+bcrypt>=5.0.0
+passlib>=1.7.4
+python-jose>=3.5.0
 
-# Testing (development only)
+# Testing
 pytest>=8.4.2
 pytest-asyncio>=1.2.0
+
+# Logging
+structlog>=25.5.0

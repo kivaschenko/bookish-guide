@@ -1,0 +1,31 @@
+# StoryForge Configuration Template
+# Copy this file to config.yml and fill in your API keys
+
+api:
+  anthropic:
+    api_key: "your-claude-api-key-here"
+    model: "claude-3-5-sonnet-20241022"
+    max_retries: 1
+    temperature: 1
+    max_tokens: 4096
+  
+  openai:
+    api_key: "your-openai-api-key-here"
+    model: "gpt-4o"
+    max_retries: 1
+    temperature: 1
+  
+  gemini:
+    api_key: "your-gemini-api-key-here"
+    use_proxy: true
+    proxy_url: "https://leader-referencement.com/gemini_tts.php"
+
+# Audio configuration
+audio:
+  voice_volume: 1.3
+
+# Paths
+paths:
+  projects: "projects"
+  temp: "temp"
+  broll: "b-roll"

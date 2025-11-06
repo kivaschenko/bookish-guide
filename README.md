@@ -1,92 +1,180 @@
-# StoryForge
+# StoryForge - Individual MVP# StoryForge
 
-AI-powered video content generation platform that transforms text into comprehensive multimedia stories with voice narration and intelligent B-roll footage integration.
 
-## 🎯 MVP Testing (Individual Users)
 
-**🚀 Ready to test?** Check out the **[Individual MVP Testing Guide](INDIVIDUAL_MVP_TESTING.md)** for quick start instructions and test scenarios.
+AI-powered video content generation platform that transforms text into comprehensive multimedia stories with voice narration and intelligent B-roll footage integration.AI-powered video content generation platform that transforms text into comprehensive multimedia stories with voice narration and intelligent B-roll footage integration.
 
-**Branch**: `individual-mvp` | **Status**: 100% Functional | **Time to Video**: 2-5 minutes
 
----
 
-## 🚀 Overview
+## 🚀 Quick Start## 🎯 MVP Testing (Individual Users)
 
-StoryForge is a modular AI platform designed for automated video content generation. The system transforms raw text input into production-ready video content through a sophisticated multi-stage pipeline with professional-grade B-roll intelligence.
+
+
+### 1. Installation**🚀 Ready to test?** Check out the **[Individual MVP Testing Guide](INDIVIDUAL_MVP_TESTING.md)** for quick start instructions and test scenarios.
+
+
+
+```bash**Branch**: `individual-mvp` | **Status**: 100% Functional | **Time to Video**: 2-5 minutes
+
+# Install dependencies
+
+pip install -r requirements.txt---
+
+
+
+# Configure API keys in config.yml## 🚀 Overview
+
+cp config.yml.example config.yml
+
+# Edit config.yml with your API keys (Anthropic, OpenAI, Gemini)StoryForge is a modular AI platform designed for automated video content generation. The system transforms raw text input into production-ready video content through a sophisticated multi-stage pipeline with professional-grade B-roll intelligence.
+
+```
 
 ### Current Status
 
+### 2. Generate Video
+
 The project features a complete, production-ready modular architecture with two main packages:
 
-1. **✅ Script & Voice** - Content generation module (Production Ready)
-2. **✅ B-roll Intelligence** - AI-powered video matching and selection (Production Ready)
+```bash
+
+# One-command video generation1. **✅ Script & Voice** - Content generation module (Production Ready)
+
+python generate_video.py --input "Your content text here" --output "my-video"2. **✅ B-roll Intelligence** - AI-powered video matching and selection (Production Ready)
+
 3. **✅ Video Assembly** - MoviePy-based final video creation (MVP Complete)
 
-## 📦 Architecture
+# Or step by step:
+
+# Step 1: Generate script and voice## 📦 Architecture
+
+python script_and_voice/module_script_and_voice.py --project my-project --language english --input-file input.txt
 
 ### Production Modules
 
-#### 1. Script & Voice Package ✅
+# Step 2: Select B-roll footage  
+
+python -m b_roll.cli match-video --project-name my-project --duration 60#### 1. Script & Voice Package ✅
+
 **Location**: `script_and_voice/`
-**Status**: Production ready with comprehensive testing
 
-Complete content generation module that handles:
+# Step 3: Assemble final video**Status**: Production ready with comprehensive testing
+
+python simple_video_assembler.py my-project english
+
+```Complete content generation module that handles:
+
 - Multi-language script generation using Claude API
-- High-quality voice synthesis with Gemini TTS
+
+### 3. Web Interface (Timeline Editor)- High-quality voice synthesis with Gemini TTS
+
 - Organized project structure creation
-- Direct file operations with clean architecture
 
-**📚 [View Script & Voice Documentation](script_and_voice/README.md)**
+```bash- Direct file operations with clean architecture
 
-#### 2. B-roll Intelligence Package ✅
-**Location**: `b_roll/`
-**Status**: Production ready with CLI interface
+# Start editing server
 
-Professional B-roll selection system that handles:
+python editing_server/server.py**📚 [View Script & Voice Documentation](script_and_voice/README.md)**
+
+
+
+# Open browser to http://localhost:8080#### 2. B-roll Intelligence Package ✅
+
+# Edit B-roll timing and preview video**Location**: `b_roll/`
+
+```**Status**: Production ready with CLI interface
+
+
+
+## 📦 ArchitectureProfessional B-roll selection system that handles:
+
 - AI-powered video metadata extraction using OpenAI Vision
-- Semantic video matching with vector embeddings
-- Intelligent B-roll ranking and selection
-- Timing synchronization and JSON output generation
-- Complete CLI interface for daily operations
+
+- **`script_and_voice/`** - Script generation and voice synthesis- Semantic video matching with vector embeddings
+
+- **`b_roll/`** - AI-powered B-roll video selection- Intelligent B-roll ranking and selection
+
+- **`editing_server/`** - Web interface for timeline editing  - Timing synchronization and JSON output generation
+
+- **`generate_video.py`** - Main entry point for complete pipeline- Complete CLI interface for daily operations
+
+- **`simple_video_assembler.py`** - Final video assembly
 
 **📚 [View B-roll Intelligence Documentation](b_roll/README.md)**
 
+## 🎯 MVP Features
+
 ## 🌟 Key Features
 
-### 🎯 Professional Content Generation
-- **Multi-language Support**: French, English, German, Italian, Spanish, Dutch, Swedish, Norwegian, Danish, Finnish, Polish
-- **AI Script Generation**: Claude API for high-quality content creation
-- **Voice Synthesis**: Gemini TTS for natural-sounding narration
-- **Clean Architecture**: Direct file operations with organized project structure
+✅ Text to script generation (Claude API)  
 
-### 🧠 Intelligent B-roll Selection
+✅ Multi-language voice synthesis (Gemini TTS)  ### 🎯 Professional Content Generation
+
+✅ AI-powered B-roll selection (OpenAI Vision)  - **Multi-language Support**: French, English, German, Italian, Spanish, Dutch, Swedish, Norwegian, Danish, Finnish, Polish
+
+✅ Video assembly with MoviePy  - **AI Script Generation**: Claude API for high-quality content creation
+
+✅ Web timeline editor  - **Voice Synthesis**: Gemini TTS for natural-sounding narration
+
+✅ Standalone module execution  - **Clean Architecture**: Direct file operations with organized project structure
+
+
+
+## 📋 Requirements### 🧠 Intelligent B-roll Selection
+
 - **AI Video Analysis**: OpenAI Vision API for automatic video metadata extraction
-- **Semantic Matching**: Vector embeddings with 92% relevance accuracy  
-- **LLM Ranking**: GPT-powered intelligent B-roll selection and ranking
-- **Perfect Timing**: Frame-accurate synchronization with audio timeline
+
+- Python 3.8+- **Semantic Matching**: Vector embeddings with 92% relevance accuracy  
+
+- API Keys: Anthropic (Claude), OpenAI (GPT-4V), Gemini (TTS)- **LLM Ranking**: GPT-powered intelligent B-roll selection and ranking
+
+- B-roll video library in `b-roll/` directory- **Perfect Timing**: Frame-accurate synchronization with audio timeline
+
 - **CLI Interface**: 5 professional commands for daily operations
 
+## 🔧 Configuration
+
 ### 🚀 Production Ready
-- **Complete Integration**: Both modules work seamlessly together
+
+Edit `config.yml`:- **Complete Integration**: Both modules work seamlessly together
+
 - **Professional Output**: JSON timing files compatible with video editing software
-- **Scalable Processing**: Handle hundreds of videos with automated pipelines
-- **Quality Metrics**: 95% time reduction vs manual B-roll selection
 
-### Project Structure
+```yaml- **Scalable Processing**: Handle hundreds of videos with automated pipelines
 
-```
-storyforge/
-├── script_and_voice/          # ✅ Content generation module
-│   ├── module_script_and_voice.py  # CLI interface
+api:- **Quality Metrics**: 95% time reduction vs manual B-roll selection
+
+  anthropic:
+
+    api_key: "your-claude-key"### Project Structure
+
+  openai:
+
+    api_key: "your-openai-key" ```
+
+  gemini:storyforge/
+
+    api_key: "your-gemini-key"├── script_and_voice/          # ✅ Content generation module
+
+```│   ├── module_script_and_voice.py  # CLI interface
+
 │   ├── paraphraser.py        # Script generation
-│   ├── gemini_tts.py         # Voice synthesis
+
+## 📚 Documentation│   ├── gemini_tts.py         # Voice synthesis
+
 │   ├── config.yml            # Module configuration
-│   ├── README.md             # 📚 Complete documentation
-│   └── tests/                # Comprehensive test suite
+
+- **[Script & Voice Module](script_and_voice/README.md)** - Content generation│   ├── README.md             # 📚 Complete documentation
+
+- **[B-roll Intelligence](b_roll/README.md)** - Video selection system│   └── tests/                # Comprehensive test suite
+
 ├── b_roll/                   # ✅ B-roll Intelligence module
-│   ├── cli.py                # CLI interface with 5 commands
+
+---│   ├── cli.py                # CLI interface with 5 commands
+
 │   ├── meta_extractor.py     # AI video metadata extraction
-│   ├── vector_matcher.py     # Semantic similarity engine
+
+**KISS Principle**: Simple, modular architecture. Each component can run independently or as part of the web interface.│   ├── vector_matcher.py     # Semantic similarity engine
 │   ├── broll_finder.py       # Main orchestration logic
 │   ├── utils.py              # Shared utility functions
 │   └── README.md             # 📚 Business case documentation
