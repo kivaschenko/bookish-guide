@@ -63,22 +63,53 @@ def clean_broll_selections(config):
 
 def get_video_duration_estimate(video_path):
     """
-    Get an estimated duration for a video file
+    Get the actual duration for a video or audio file
 
     Args:
-        video_path (Path): Path to the video file
+        video_path (Path): Path to the video or audio file
 
     Returns:
-        float: Estimated duration in seconds
+        float: Actual duration in seconds
     """
     try:
-        # Simple file size based estimation
-        file_size = video_path.stat().st_size
-        # Rough estimate: 1MB per second for typical video quality
-        estimated_duration = file_size / (1024 * 1024)
-        return max(1.0, estimated_duration)  # Minimum 1 second
-    except Exception:
-        return 10.0  # Default fallback
+        from moviepy import VideoFileClip, AudioFileClip
+        import logging
+
+        video_path = Path(video_path)
+        file_extension = video_path.suffix.lower()
+
+        # Try to get actual duration using moviepy
+        if file_extension in [".mp4", ".mov", ".avi", ".mkv", ".webm"]:
+            # Video file
+            with VideoFileClip(str(video_path)) as clip:
+                duration = clip.duration
+                logging.debug(f"Video duration for {video_path.name}: {duration:.3f}s")
+                return duration
+        elif file_extension in [".mp3", ".wav", ".m4a", ".ogg"]:
+            # Audio file
+            with AudioFileClip(str(video_path)) as clip:
+                duration = clip.duration
+                logging.debug(f"Audio duration for {video_path.name}: {duration:.3f}s")
+                return duration
+        else:
+            # Unknown format, fall back to file size estimation
+            logging.warning(
+                f"Unknown file format {file_extension}, using size estimation"
+            )
+            file_size = video_path.stat().st_size
+            # Rough estimate: 1MB per second for typical video quality
+            estimated_duration = file_size / (1024 * 1024)
+            return max(1.0, estimated_duration)  # Minimum 1 second
+
+    except Exception as e:
+        logging.warning(f"Could not get duration for {video_path}: {e}")
+        # Fallback: try simple file size estimation
+        try:
+            file_size = video_path.stat().st_size
+            estimated_duration = file_size / (1024 * 1024)
+            return max(1.0, estimated_duration)  # Minimum 1 second
+        except Exception:
+            return 10.0  # Default fallback
 
 
 def ensure_directory_exists(path):

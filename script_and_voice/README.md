@@ -19,13 +19,13 @@ This module provides script generation and voice synthesis capabilities through 
 
 ```bash
 # Generate script only
-python module_script_and_voice.py --project my-video --language english --input-file input.txt -s
+python module_script_and_voice.py --project my-video --language english -s
 
 # Generate audio only (requires existing script)
 python module_script_and_voice.py --project my-video --language english -ag
 
 # Generate both script and audio (default)
-python module_script_and_voice.py --project my-video --language french --input-file input.txt
+python module_script_and_voice.py --project my-video --language french 
 
 # Show help
 python module_script_and_voice.py --help

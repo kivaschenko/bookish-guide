@@ -55,3 +55,18 @@ temp/*
 
 # Specific virtual environment
 venv/
+
+# Requirements installation marker
+.requirements_installed
+
+# Vue.js build output
+dist/
+build/
+node_modules/
+
+# SQLite database
+*.sqlite3
+storyforge.db
+
+# Additional ignores
+legacy_code_and_examples/
