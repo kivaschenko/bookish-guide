@@ -202,6 +202,12 @@ Examples:
                 sys.exit(1)
 
             # Save script files directly to project directory
+            if "ideas" in result:
+                ideas_file = language_dir / "input_ideas.txt"
+                with open(ideas_file, "w", encoding="utf-8") as f:
+                    f.write(result["ideas"])
+                logging.info(f"📋 Ideas saved: {ideas_file}")
+
             if "outline" in result:
                 outline_file = language_dir / "outline.json"
                 with open(outline_file, "w", encoding="utf-8") as f:

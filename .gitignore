@@ -26,6 +26,7 @@ Thumbs.db
 # Logs
 *.log
 log*.txt
+.sty
 
 # Temporary files
 *.tmp

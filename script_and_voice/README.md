@@ -61,6 +61,7 @@ The module creates the following structure in the projects directory:
 projects/
 └── {project_name}/
     ├── {language}/
+    │   ├── input_ideas.txt        # Structured ideas from raw input
     │   ├── outline.json           # Video outline
     │   ├── full_script.json       # Complete script with timing
     │   └── audio/                 # Audio files directory
@@ -76,12 +77,14 @@ projects/
 projects/
 └── product-demo/
     ├── english/
+    │   ├── input_ideas.txt
     │   ├── outline.json
     │   ├── full_script.json
     │   └── audio/
     │       ├── bullet_001.mp3
     │       └── bullet_002.mp3
     ├── french/
+    │   ├── input_ideas.txt
     │   ├── outline.json
     │   ├── full_script.json
     │   └── audio/

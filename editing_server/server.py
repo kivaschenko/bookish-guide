@@ -111,6 +111,88 @@ def get_file_hash(file_path):
         return None
 
 
+def validate_timeline_data(timeline_data):
+    """
+    Validate timeline data for required fields and data integrity.
+
+    Args:
+        timeline_data: List of timeline entries
+
+    Returns:
+        dict: {
+            'valid': bool,
+            'errors': list of error messages,
+            'warnings': list of warning messages,
+            'stats': dict with statistics
+        }
+    """
+    errors = []
+    warnings = []
+    stats = {
+        "total_entries": len(timeline_data),
+        "missing_broll": 0,
+        "missing_audio": 0,
+        "missing_phrase": 0,
+        "has_alternatives": 0,
+        "has_images": 0,
+        "invalid_times": 0,
+    }
+
+    required_fields = ["rush", "phrase", "broll", "start_time", "end_time"]
+
+    for i, entry in enumerate(timeline_data):
+        entry_id = f"Entry {i + 1}"
+
+        # Check required fields
+        for field in required_fields:
+            if field not in entry or not entry[field]:
+                errors.append(f"{entry_id}: Missing required field '{field}'")
+                if field == "broll":
+                    stats["missing_broll"] += 1
+                elif field == "rush":
+                    stats["missing_audio"] += 1
+                elif field == "phrase":
+                    stats["missing_phrase"] += 1
+
+        # Check time validity
+        if "start_time" in entry and "end_time" in entry:
+            try:
+                start = float(entry["start_time"])
+                end = float(entry["end_time"])
+                if start >= end:
+                    errors.append(
+                        f"{entry_id}: start_time ({start}) >= end_time ({end})"
+                    )
+                    stats["invalid_times"] += 1
+                elif start < 0:
+                    errors.append(f"{entry_id}: negative start_time ({start})")
+                    stats["invalid_times"] += 1
+            except (ValueError, TypeError):
+                errors.append(f"{entry_id}: Invalid time format")
+                stats["invalid_times"] += 1
+
+        # Check for alternatives and images (not errors, just stats)
+        if "broll2" in entry and entry["broll2"]:
+            stats["has_alternatives"] += 1
+        if "image" in entry and entry["image"]:
+            stats["has_images"] += 1
+
+        # Warnings for common issues
+        if "selected_broll" in entry:
+            selected = entry["selected_broll"]
+            if selected not in ["broll", "broll2", "broll3"]:
+                warnings.append(
+                    f"{entry_id}: Unknown selected_broll value '{selected}'"
+                )
+
+    return {
+        "valid": len(errors) == 0,
+        "errors": errors,
+        "warnings": warnings,
+        "stats": stats,
+    }
+
+
 def log_file_change(
     file_path, operation_type, details=None, before_content=None, after_content=None
 ):
@@ -243,7 +325,26 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             temp_path = Path("temp")
         self.broll_timing_file = temp_path / "broll_timing.json"
         self.ressources_dir = Path("b-roll/ressources")
-        self.ressources_dir.mkdir(exist_ok=True)
+        self.ressources_dir.mkdir(exist_ok=True, parents=True)
+
+        # Store project and language info for path resolution
+        self.temp_path = temp_path
+        self.project_name = "unknown"
+        self.language = None
+
+        # Extract project name and language from path
+        # Path format: projects/<project-name>/<language>/temp/ or projects/<project-name>/temp/
+        parts = temp_path.parts
+        if "projects" in parts:
+            project_idx = parts.index("projects")
+            if len(parts) > project_idx + 1:
+                self.project_name = parts[project_idx + 1]
+            if len(parts) > project_idx + 2 and parts[project_idx + 2] != "temp":
+                self.language = parts[project_idx + 2]
+
+        logging.info(
+            f"📁 Project: {self.project_name}, Language: {self.language or 'N/A'}"
+        )
 
         # Store initial file state for change tracking
         self.last_known_hash = get_file_hash(self.broll_timing_file)
@@ -354,22 +455,19 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
         """Serve the main HTML interface."""
         logging.debug("SERVER: _serve_interface() called")
 
-        # Get project name from temp path
-        project_name = "unknown"
-        if hasattr(self, "broll_timing_file") and self.broll_timing_file:
-            # Extract project name from temp path
-            temp_path = self.broll_timing_file.parent
-            if temp_path.name == "temp" and temp_path.parent.name != "temp":
-                project_name = temp_path.parent.name
+        # Use stored project name and language
+        project_path = self.project_name
+        if self.language:
+            project_path = f"{self.project_name}/{self.language}"
 
-        logging.debug(f"SERVER: Detected project name: {project_name}")
+        logging.debug(f"SERVER: Project path for interface: {project_path}")
 
-        # Read HTML file and replace project name
+        # Read HTML file and replace placeholders
         interface_path = Path(__file__).parent / "interface.html"
         logging.debug(f"SERVER: HTML file path: {interface_path}")
 
         if not interface_path.exists():
-            logging.debug(f"SERVER: ERROR - HTML file not found: {interface_path}")
+            logging.error(f"SERVER: ERROR - HTML file not found: {interface_path}")
             self._send_404()
             return
 
@@ -378,7 +476,9 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             html_content = f.read()
 
         logging.debug(f"SERVER: HTML read, size: {len(html_content)} characters")
-        html_content = html_content.replace("{{PROJECT_NAME}}", project_name)
+        html_content = html_content.replace("{{PROJECT_NAME}}", self.project_name)
+        html_content = html_content.replace("{{PROJECT_PATH}}", project_path)
+        html_content = html_content.replace("{{LANGUAGE}}", self.language or "")
         logging.debug("SERVER: PROJECT_NAME replacement done")
 
         self._send_response(200, html_content, "text/html")
@@ -411,6 +511,31 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
         with open(self.broll_timing_file, "r", encoding="utf-8") as f:
             timeline_data = json.load(f)
 
+        # Validate timeline data
+        validation_result = validate_timeline_data(timeline_data)
+
+        if not validation_result["valid"]:
+            logging.warning("⚠️  Timeline validation errors found:")
+            for error in validation_result["errors"][:5]:  # Show first 5 errors
+                logging.warning(f"   • {error}")
+            if len(validation_result["errors"]) > 5:
+                logging.warning(
+                    f"   • ...and {len(validation_result['errors']) - 5} more errors"
+                )
+
+        if validation_result["warnings"]:
+            logging.info("ℹ️  Timeline validation warnings:")
+            for warning in validation_result["warnings"][:3]:
+                logging.info(f"   • {warning}")
+
+        # Log stats
+        stats = validation_result["stats"]
+        logging.info(
+            f"📊 Timeline Stats: {stats['total_entries']} entries, "
+            f"{stats['has_alternatives']} with alternatives, "
+            f"{stats['has_images']} with images"
+        )
+
         logging.debug(f"SERVER: Timeline loaded, {len(timeline_data)} elements")
         response_data = json.dumps(timeline_data, indent=2)
         logging.debug(
@@ -424,7 +549,10 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
         """Serve B-roll files for preview."""
         file_path = Path(self.path[1:])  # Remove initial '/'
 
+        logging.debug(f"📹 Requested B-roll file: {file_path}")
+
         if file_path.exists():
+            logging.debug(f"✅ B-roll found: {file_path}")
             # Determine MIME type
             if file_path.suffix.lower() in [".jpg", ".jpeg"]:
                 content_type = "image/jpeg"
@@ -446,13 +574,43 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
         else:
-            self._send_404()
+            # Serve placeholder image for missing B-roll thumbnails
+            if file_path.suffix.lower() in [".jpg", ".jpeg", ".png"]:
+                logging.debug(f"📦 Serving placeholder for missing B-roll: {file_path}")
+                self._serve_placeholder_image(str(file_path))
+            else:
+                logging.warning(f"❌ B-roll not found: {file_path}")
+                self._send_404()
+
+    def _serve_placeholder_image(self, filename):
+        """Serve a placeholder SVG image for missing B-roll files."""
+        # Extract just the filename without path for display
+        display_name = Path(filename).stem[:40] + "..."
+
+        # Create an SVG placeholder
+        svg_content = f"""<svg width="240" height="136" xmlns="http://www.w3.org/2000/svg">
+            <rect width="240" height="136" fill="#f1f3f4"/>
+            <rect x="10" y="10" width="220" height="116" fill="#e1e5e9" stroke="#adb5bd" stroke-width="2" rx="8"/>
+            <text x="120" y="60" font-family="Arial, sans-serif" font-size="14" fill="#6c757d" text-anchor="middle">🎥</text>
+            <text x="120" y="80" font-family="Arial, sans-serif" font-size="10" fill="#6c757d" text-anchor="middle">B-roll not found</text>
+            <text x="120" y="95" font-family="Arial, sans-serif" font-size="8" fill="#adb5bd" text-anchor="middle">{display_name}</text>
+        </svg>"""
+
+        self.send_response(200)
+        self.send_header("Content-type", "image/svg+xml")
+        self.send_header("Content-length", str(len(svg_content.encode())))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(svg_content.encode())
 
     def _serve_project_file(self):
         """Serve files from projects folder for preview."""
         file_path = Path(self.path[1:])  # Remove initial '/'
 
+        logging.debug(f"📂 Requested project file: {file_path}")
+
         if file_path.exists():
+            logging.debug(f"✅ File found: {file_path}")
             # Determine MIME type
             if file_path.suffix.lower() in [".jpg", ".jpeg"]:
                 content_type = "image/jpeg"
@@ -478,6 +636,7 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
         else:
+            logging.warning(f"❌ File not found: {file_path}")
             self._send_404()
 
     def _handle_upload(self):

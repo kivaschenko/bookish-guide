@@ -126,12 +126,6 @@ class Paraphraser:
         Returns:
             list: Messages formatted for OpenAI API
         """
-        language_instruction = (
-            "Generate the outline in FRENCH language."
-            if language.lower() == "french"
-            else "Generate the outline in ENGLISH language."
-        )
-
         # Get configuration values first
         word_coefficient = self.config.get("script", {}).get("word_coefficient", 0.8)
         max_target_words = self.config.get("script", {}).get("max_target_words", 3000)
@@ -179,45 +173,138 @@ class Paraphraser:
             f"Sections needed: {num_sections} (max {max_keypoints_per_section} keypoints per section)"
         )
 
+        # Language-specific examples for hooks, curiosity loops, and key points
+        if language.lower() == "french":
+            examples_block = """
+HOOK EXAMPLES (First 10 seconds - must grab attention):
+❌ BAD: "Aujourd'hui on parle d'inflation" (boring, generic)
+❌ BAD: "Bonjour, je vais vous expliquer l'investissement" (slow start)
+✅ GOOD: "En 2023, l'inflation a volé 1 400€ à chaque Français. Voici comment les récupérer."
+✅ GOOD: "Warren Buffett a gagné 47% pendant la crise de 2008 avec une technique simple. Je vous la montre."
+
+CURIOSITY LOOP EXAMPLES (Promise that keeps them watching):
+❌ BAD: "Nous verrons comment investir" (vague, no specific benefit)
+❌ BAD: "C'est important pour vous" (weak, everyone says this)
+✅ GOOD: "À la fin, vous saurez éviter l'erreur qui coûte 20 000€ par an aux débutants"
+✅ GOOD: "Je révèle la stratégie utilisée par seulement 3% des investisseurs - et qui bat le marché"
+
+RHETORICAL QUESTION EXAMPLES (Make them think, not yes/no):
+❌ BAD: "Est-ce que vous investissez?" (yes/no, not thought-provoking)
+❌ BAD: "Voulez-vous devenir riche?" (obvious, everyone says yes)
+✅ GOOD: "Pourquoi les banques nous cachent-elles cette information?"
+✅ GOOD: "Qu'est-ce qui différencie un investisseur qui gagne de celui qui perd?"
+
+KEY POINT FORMAT (Concise concept names):
+✅ GOOD: "La règle des 4% pour la retraite" (7 words, specific)
+✅ GOOD: "L'erreur des débutants avec les ETF" (6 words, concrete)
+✅ GOOD: "Diversification géographique" (2 words, clear)
+❌ BAD: "Comprendre les concepts fondamentaux de l'investissement à long terme pour réussir" (14 words, too long)
+❌ BAD: "Important stuff about money" (vague, not specific)
+"""
+        else:  # English and other languages
+            examples_block = """
+HOOK EXAMPLES (First 10 seconds - must grab attention):
+❌ BAD: "Today we're talking about inflation" (boring, generic)
+❌ BAD: "Hello, I'm going to explain investing" (slow start)
+✅ GOOD: "In 2023, inflation stole $1,400 from every American. Here's how to get it back."
+✅ GOOD: "Warren Buffett made 47% during the 2008 crisis with one simple technique. I'll show you."
+
+CURIOSITY LOOP EXAMPLES (Promise that keeps them watching):
+❌ BAD: "We'll see how to invest" (vague, no specific benefit)
+❌ BAD: "This is important for you" (weak, everyone says this)
+✅ GOOD: "By the end, you'll know how to avoid the $20,000/year mistake most beginners make"
+✅ GOOD: "I'm revealing the strategy used by only 3% of investors - that beats the market"
+
+RHETORICAL QUESTION EXAMPLES (Make them think, not yes/no):
+❌ BAD: "Do you invest?" (yes/no, not thought-provoking)
+❌ BAD: "Do you want to be rich?" (obvious, everyone says yes)
+✅ GOOD: "Why do banks hide this information from us?"
+✅ GOOD: "What separates investors who win from those who lose?"
+
+KEY POINT FORMAT (Concise concept names):
+✅ GOOD: "The 4% rule for retirement" (5 words, specific)
+✅ GOOD: "Common beginner ETF mistake" (4 words, concrete)
+✅ GOOD: "Geographic diversification" (2 words, clear)
+❌ BAD: "Understanding fundamental concepts of long-term investment strategies for success" (10 words, too long)
+❌ BAD: "Important stuff about money" (vague, not specific)
+"""
+
+        output_format_label = (
+            "OUTPUT FORMAT (STRICT JSON)"
+            if language.lower() == "english"
+            else "FORMAT DE SORTIE (JSON STRICT)"
+        )
+
         prompt = [
             {
                 "role": "system",
-                "content": f"""You are an expert in YouTube storytelling and high-retention video scripting.
-             Create an OUTLINE for a new video optimized for retention, following the exact JSON format provided.
+                "content": f"""You are an expert YouTube retention strategist. Create a video OUTLINE optimized for viewer retention and watch time.
 
-             LANGUAGE REQUIREMENT: {language_instruction}
+TARGET LANGUAGE: {language.upper()} - ALL text fields must be in {language.upper()}
 
-             OBJECTIVE:
-             - Improve retention and clarity
-             - Add curiosity loops
-             - Prepare for automated script generation
-             - Create exactly {num_sections} sections
-             - Each section should have 2-{max_keypoints_per_section} key_points
-             - Total key_points should be approximately {num_key_points}
+VIDEO SPECIFICATIONS:
+- Target length: {final_target_words} words (approximately {final_target_words // 150} minutes)
+- Number of sections: {num_sections}
+- Key points per section: 2-{max_keypoints_per_section}
+- Total key points needed: approximately {num_key_points}
 
-             RULES:
-             - Do not copy the original text
-             - Respect the JSON structure and fields strictly
-             - Stay concise and actionable
-             - Use oral and engaging language
-             - ALL content must be in {language.upper()} language
+AUDIENCE: {target_audience}
+TONE STYLE: {tone_style}
 
-             CONSTRAINTS:
-             - JSON must be valid and ready to parse
-             - Every field must be filled, even with empty string if not relevant
-             - "curiosity_loop" = promise or teaser to come
-             - "rhetorical_question" = thought-provoking question to make audience reflect and stay engaged
-             - Each key_point should be concise (5-10 words) - just the main idea
+{examples_block}
 
-             EXPECTED RESULT:
-             Generate only the JSON, without comment or explanation.""",
+RETENTION STRATEGY (Critical for success):
+1. HOOK (first 10 seconds): Must grab attention immediately - use shocking fact, bold promise, or intriguing question
+2. CURIOSITY LOOPS: Every section should promise something valuable coming later - keep them watching
+3. RHETORICAL QUESTIONS: Make audience pause and reflect (1-2 per section) - engage their thinking
+4. MICRO-LOOPS: Use transitions like "But here's where it gets interesting..." or "Wait until you see this..."
+
+CONTENT TRANSFORMATION RULES:
+- Use the input text as INSPIRATION, not as content to copy word-for-word
+- Extract facts, data, and key concepts BUT rewrite all explanations in your own words
+- If input says "I did X" or "In my experience" → transform to "Research shows X" or "Studies reveal X"
+- Remove ALL author self-promotion (courses, books, coaching, success stories)
+- Remove channel promotion, sponsor mentions, calls-to-action from original
+- Focus on TEACHING valuable concepts that benefit the viewer
+- Maintain factual accuracy but change the presentation style
+
+FIELD-BY-FIELD GUIDELINES:
+- "title_variants": 3 clickable video titles, each 8-12 words, include numbers/benefits/intrigue
+- "hook.text": 20-30 words maximum, must grab attention in first 3 seconds
+- "hook.curiosity_loop": Specific promise of value coming later (not vague "you'll learn a lot")
+- "section.title": 4-7 words, descriptive and clear
+- "section.core_idea": 1-2 sentences maximum explaining the main concept of this section
+- "key_points.text": 5-10 words MAXIMUM - just the concept name, not full sentences
+- "micro_curiosity_loop": Teaser for the next section - keep them from clicking away
+- "rhetorical_question": Thought-provoking question (not yes/no), makes them reflect
+- "visual_suggestion": Specific B-roll ideas (not vague "stock footage" - be concrete)
+
+JSON TECHNICAL REQUIREMENTS:
+- ALL fields are required (use empty string "" if truly not applicable)
+- Valid JSON syntax - check quotes, commas, brackets carefully
+- Numbers without quotes (integers and floats)
+- No comments allowed in JSON
+- No trailing commas
+
+QUALITY CHECKLIST - Verify before responding:
+□ Is the hook attention-grabbing within the first 3 seconds?
+□ Does each section have a compelling curiosity loop that creates suspense?
+□ Are ALL key_points concise (5-10 words maximum)?
+□ Is EVERY field filled with content in {language.upper()} language?
+□ Is the JSON syntactically valid and parseable?
+□ Did I transform the content (not copy verbatim from source)?
+□ Did I remove author self-promotion and channel promotion?
+□ Are rhetorical questions thought-provoking (not simple yes/no)?
+□ Are visual suggestions specific and concrete?
+
+RESPOND WITH VALID JSON ONLY. NO PREAMBLE. NO EXPLANATION. NO META-COMMENTARY.""",
             },
             {
                 "role": "user",
-                "content": f"""TRANSCRIPT_SOURCE:
-        {original_text}
+                "content": f"""SOURCE MATERIAL (use as inspiration, transform into your own words):
+{original_text}
 
-        FORMAT DE SORTIE (JSON STRICT):
+{output_format_label}:
         {{
           "video_meta": {{
             "title_variants": ["", "", ""],
@@ -416,54 +503,141 @@ class Paraphraser:
         Returns:
             list: Messages formatted for OpenAI API
         """
-        language_styles = {
-            "french": """
+        # Detailed language-specific voice-over style guides
+        if language.lower() == "french":
+            style_guide = """
+FRENCH VOICE-OVER STYLE GUIDE:
 
-             - SVO, active voice, present tense, 12-18 words per sentence
-             - No lists or colons and concrete first without too much comas.
-             - End each block with a consequence or action
-             - Address the audience in formal "vous" """,
-            "english": """- Use engaging, conversational English
-             - SVO, active voice, present tense, 12-18 words per sentence
-             - No lists or colons, concrete first
-             - End each block with a consequence or action
-             - Address the audience directly""",
-        }
+1. SENTENCE STRUCTURE:
+   - SVO (Subject-Verb-Object), active voice, present tense
+   - 12-18 words per sentence MAXIMUM
+   - Maximum 1-2 commas per sentence (keep it simple)
+   - Start with something concrete, end with consequence/action
+   
+2. RHYTHM & CONVERSATIONAL FLOW:
+   - Vary sentence length: Short → Medium → Short (creates rhythm)
+   - Use French verbal tics naturally (2-3 per paragraph):
+     "en fait", "donc", "d'ailleurs", "par exemple", "c'est-à-dire", 
+     "clairement", "typiquement", "autrement dit"
+   - Transitions that sound natural spoken aloud:
+     "Et là" / "Mais attention" / "Le truc, c'est que" / "Sauf que" / 
+     "D'abord" / "Ensuite" / "Et surtout"
 
-        writing_style = language_styles.get(
-            language.lower(), language_styles["english"]
-        )
+3. TONE - Formal "VOUS" but Conversational:
+   - Think: Conference speaker, NOT textbook or friend
+   - ❌ "Il convient de noter que" → ✅ "Attention, vous devez savoir que"
+   - ❌ "Premièrement, deuxièmement" → ✅ "D'abord... Ensuite... Et surtout"
+   - ❌ "Par conséquent" → ✅ "Donc" / "Du coup"
+   
+4. TECHNICAL TERMS (Your audience knows finance):
+   - Use them when needed, BUT always explain simply right after
+   - ✅ "Les ETF, c'est-à-dire des paniers d'actions automatiques"
+   - ✅ "Le rendement, autrement dit l'argent que vous gagnez chaque année"
+   - ✅ "La plus-value, donc le profit quand vous vendez"
+
+5. EXAMPLES - Before/After Comparison:
+
+❌ BAD EXAMPLE (too formal, written style, stiff):
+"L'inflation constitue un phénomène économique complexe qui nécessite une compréhension approfondie. Premièrement, elle érode progressivement le pouvoir d'achat des ménages. Deuxièmement, elle affecte négativement la valeur des investissements à long terme."
+
+✅ GOOD EXAMPLE (conversational voice-over, flows naturally):
+"L'inflation, c'est simple : votre argent perd de la valeur chaque année. Par exemple, vos 1000€ d'aujourd'hui valent seulement 960€ l'année prochaine. Et là, vous perdez du pouvoir d'achat. Le truc, c'est que ça touche aussi vos investissements. Donc vous devez protéger votre capital."
+
+6. PARAGRAPH STRUCTURE (Follow this template):
+   - Opening: State the concept concretely (1-2 sentences)
+   - Example or data point to illustrate (1 sentence)
+   - Consequence or "So what?" (1-2 sentences)
+   - Optional: Action or implication (1 sentence)
+"""
+        else:  # English and other languages
+            style_guide = """
+ENGLISH VOICE-OVER STYLE GUIDE:
+
+1. SENTENCE STRUCTURE:
+   - SVO (Subject-Verb-Object), active voice, present tense
+   - 12-18 words per sentence MAXIMUM
+   - Maximum 1-2 commas per sentence (keep it simple)
+   - Start with something concrete, end with consequence/action
+
+2. RHYTHM & CONVERSATIONAL FLOW:
+   - Vary sentence length: Short → Medium → Short (creates rhythm)
+   - Use English conversational markers naturally (2-3 per paragraph):
+     "actually", "basically", "in fact", "for example", "meaning", 
+     "clearly", "typically", "in other words"
+   - Transitions that sound natural spoken aloud:
+     "Here's the thing" / "But wait" / "Now here's why" / "Except" / 
+     "First" / "Then" / "Most importantly"
+
+3. TONE - Direct but Conversational:
+   - Think: TED talk speaker, NOT textbook or casual friend
+   - ❌ "It should be noted that" → ✅ "Here's what you need to know"
+   - ❌ "Firstly, secondly" → ✅ "First... Then... Most importantly"
+   - ❌ "Therefore, consequently" → ✅ "So" / "That means"
+
+4. TECHNICAL TERMS (Your audience knows finance):
+   - Use them when needed, BUT always explain simply right after
+   - ✅ "ETFs, basically baskets of stocks that trade like single stocks"
+   - ✅ "Yield, meaning the money you earn on your investment each year"
+   - ✅ "Capital gains, the profit when you sell for more than you paid"
+
+5. EXAMPLES - Before/After Comparison:
+
+❌ BAD EXAMPLE (too formal, written style, stiff):
+"Inflation represents a complex economic phenomenon requiring comprehensive understanding. Firstly, it progressively erodes household purchasing power. Secondly, it negatively affects the value of long-term investments."
+
+✅ GOOD EXAMPLE (conversational voice-over, flows naturally):
+"Inflation is simple: your money loses value every year. For example, your $1000 today is worth only $960 next year. And that means you lose buying power. Here's the thing: it also hits your investments. So you need to protect your capital."
+
+6. PARAGRAPH STRUCTURE (Follow this template):
+   - Opening: State the concept concretely (1-2 sentences)
+   - Example or data point to illustrate (1 sentence)
+   - Consequence or "So what?" (1-2 sentences)
+   - Optional: Action or implication (1 sentence)
+"""
 
         prompt = [
             {
                 "role": "system",
-                "content": f"""
-You are an expert YouTube voice-over writer. Write a clear, engaging script from a key point.
+                "content": f"""You are an expert YouTube voice-over scriptwriter. Write a script designed to be SPOKEN aloud, not read silently.
 
-LANGUAGE: {language.upper()}
+TARGET LANGUAGE: {language.upper()}
+TARGET LENGTH: {target_words} words (±10 words acceptable, quality over exact count)
 
-STYLE:
-{writing_style}
+CONTEXT: You are expanding ONE key point from a larger video outline into a complete voice-over paragraph.
+The key point "{key_point_text}" is intentionally brief. Your job is to develop it fully while staying focused on this specific topic.
 
-RULES:
-- Around {target_words} words
-- Sound natural, like someone explaining a simple idea to a friend.
-- One main idea, max two examples
-- Avoid abstract, metaphors or poetic expressions
-- Reply ONLY in valid JSON
-- Use simple, everyday words so anyone can understand. Avoid jargon, or technical terms.
-- All content in {language.upper()}
-- Speak as an external and neutral observer, international perspective as a global advisor, avoid national pronouns. Use third person perspective for all countries and entities.
+{style_guide}
 
-FORMAT: {{"title": "short descriptive title (5 words max)", "paragraph": "your generated voice-over script here"}}
-""",
+CRITICAL RULES FOR VOICE-OVER:
+✓ Write for EARS, not EYES - how would you say this out loud naturally?
+✓ One main idea + maximum two concrete examples
+✓ NO bullet points, NO lists, NO colons in the paragraph (pure flowing text)
+✓ NO abstract philosophizing - stay concrete and practical
+✓ Use third-person neutral perspective (international advisor voice):
+  ❌ "We must invest" / "Our country" / "I recommend"
+  ✅ "Investors should" / "Countries typically" / "Data shows"
+
+QUALITY CHECKLIST - Verify before responding:
+□ Would this sound natural if read aloud? (test it!)
+□ Did I vary sentence length for rhythm?
+□ Did I include 2-3 conversational markers/verbal tics?
+□ Did I explain any technical terms in simple language?
+□ Is it approximately {target_words} words (±10)?
+□ Is ALL content in {language.upper()}?
+□ Does it follow the paragraph structure template?
+□ Did I avoid lists, bullet points, and colons?
+
+OUTPUT FORMAT (JSON):
+{{"title": "Short descriptive title (5 words maximum)", "paragraph": "Your complete voice-over script here as one flowing paragraph"}}
+
+RESPOND WITH VALID JSON ONLY.""",
             },
             {
                 "role": "user",
-                "content": f"""KEY POINT:
+                "content": f"""KEY POINT TO DEVELOP:
 {key_point_text}
 
-Generate a short, intelligible voice-over script based on this key point.""",
+Write a {target_words}-word voice-over paragraph expanding on this key point. Make it sound natural, conversational, and engaging when spoken aloud. Follow all style guidelines above.""",
             },
         ]
 
@@ -481,81 +655,92 @@ Generate a short, intelligible voice-over script based on this key point.""",
             list: Messages formatted for OpenAI API
         """
         # Get style configuration
-        tone_style = self.config.get("script", {}).get(
-            "tone_style", "pédagogique, rythmé, incisif, conversation orale"
-        )
         target_audience = self.config.get("script", {}).get(
             "target_audience",
             "investisseurs particuliers, curieux en économie, 30–60 ans",
         )
 
-        language_instructions = {
-            "french": "en français",
-            "english": "in English",
-            "german": "auf Deutsch",
-            "italian": "in italiano",
-            "spanish": "en español",
-            "dutch": "in het Nederlands",
-            "swedish": "på svenska",
-            "norwegian": "på norsk",
-            "danish": "på dansk",
-            "finnish": "suomeksi",
-            "polish": "po polsku",
-        }
+        # Language-specific tone examples
+        if language.lower() == "french":
+            tone_examples = """
+TONE EXAMPLES (French):
+❌ BAD (too formal/academic):
+- "L'inflation représente un défi macroéconomique significatif"
+- "Il convient de noter que les investisseurs avertis"
+- "Premièrement, il est essentiel de comprendre"
 
-        lang_instruction = language_instructions.get(language.lower(), "en français")
+✅ GOOD (conversational but professional):
+- "L'inflation, c'est un gros problème pour l'économie"
+- "Attention : les investisseurs doivent savoir que"
+- "D'abord, vous devez comprendre"
+
+STYLE: Direct, conversational, concrete. Like a smart conference speaker explaining to interested professionals."""
+        else:
+            tone_examples = """
+TONE EXAMPLES (English):
+❌ BAD (too formal/academic):
+- "Inflation represents a significant macroeconomic challenge"
+- "It should be noted that informed investors"
+- "Firstly, it is essential to understand"
+
+✅ GOOD (conversational but professional):
+- "Inflation is a major problem for the economy"
+- "Here's what investors need to know"
+- "First, you need to understand"
+
+STYLE: Direct, conversational, concrete. Like a smart conference speaker explaining to interested professionals."""
 
         prompt = [
             {
                 "role": "system",
-                "content": f"""You are an expert content analyst. Transform raw text into structured ideas using markdown format.
+                "content": f"""You are an expert content analyst transforming complex text into clear, scannable ideas.
 
-TASK: Convert the input text into a well-organized markdown document with:
-- Clear sections and subsections
-- Bullet points for each idea
-- Logical hierarchy and flow
-- All content in {lang_instruction}
+TARGET OUTPUT LANGUAGE: {language.upper()} (ALL content must be in {language.upper()})
 
-STYLE REQUIREMENTS:
-- Tone: {tone_style}
-- Target audience: {target_audience}
-- Transform the original style to match our brand voice
-- Make it engaging and accessible for our audience
-- Avoid copying the original author's style or phrasing
+AUDIENCE: {target_audience}
 
-FORMAT REQUIREMENTS:
-- Use # for main sections
-- Use ## for subsections  
-- Use ### for sub-subsections
-- Use bullet points (-) for individual ideas
-- Keep ideas concise but complete
-- Maintain logical flow and connections
-- Preserve all important information
-- Make it easy to scan and understand
+{tone_examples}
 
-STRUCTURE EXAMPLE:
-# Main Topic
-## Key Theme 1
-### Important Point A
-- Specific idea 1
-- Specific idea 2
-### Important Point B
-- Specific idea 3
-- Specific idea 4
+YOUR TASK:
+1. Read the input text carefully
+2. Extract ONLY the core ideas (ignore fluff, author self-promotion, CTAs)
+3. Organize into logical hierarchy using markdown
+4. Rewrite in YOUR OWN WORDS using our brand voice (conversational, direct, concrete)
+5. Make it scannable - a busy person should understand the main points in 30 seconds
 
-## Key Theme 2
-### Important Point C
-- Specific idea 5
-- Specific idea 6
+MARKDOWN STRUCTURE:
+- # = Main topic (1 only)
+- ## = Major themes (3-5 recommended)
+- ### = Sub-topics under each theme
+- Bullet points (-) = Individual facts/ideas/examples
+- Keep bullets SHORT (10-15 words maximum)
+- Use numbers when showing sequences or steps
 
-RESPOND ONLY WITH THE MARKDOWN CONTENT, NO ADDITIONAL TEXT.""",
+CONTENT TRANSFORMATION RULES:
+- Don't copy the author's exact phrasing - paraphrase in your own words
+- Remove "In this video..." or "I will show you..." type phrases
+- Remove promotional language, course pitches, channel promotion, sponsor mentions
+- Remove personal anecdotes unless they contain valuable lessons
+- If input says "I did X" → transform to "Research shows X" or "Data reveals X"
+- Use technical terms when needed BUT explain them simply
+- Stay concrete - avoid abstract philosophizing
+
+QUALITY CHECKLIST (verify before responding):
+□ Can someone scan this in 30 seconds and grasp the main ideas?
+□ Is every bullet point valuable and concise?
+□ Did I use simple, everyday words where possible?
+□ Is ALL content in {language.upper()} language?
+□ Did I remove author self-promotion?
+□ Is the hierarchy logical and easy to follow?
+
+OUTPUT FORMAT: Markdown document ONLY. No preamble, no explanation, no meta-commentary.""",
             },
             {
                 "role": "user",
                 "content": f"""INPUT TEXT TO STRUCTURE:
 {original_text}
 
-Convert this text into structured markdown format with clear sections, subsections, and bullet points. Make it easy to understand and follow the logical flow of ideas.""",
+Transform this into structured markdown ideas following all instructions above. Remember: output in {language.upper()} language, use conversational tone, make it scannable, remove fluff.""",
             },
         ]
 

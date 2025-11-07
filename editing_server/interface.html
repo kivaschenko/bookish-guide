@@ -19,6 +19,63 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        
+        /* Statistics Dashboard */
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .stat-card.warning .stat-value {
+            color: #dc3545;
+        }
+        
+        .stat-card.success .stat-value {
+            color: #28a745;
+        }
+        
+        .stat-card.info .stat-value {
+            color: #007AFF;
+        }
+        
         .timeline {
             background: white;
             border-radius: 8px;
@@ -251,18 +308,144 @@
             pointer-events: none;
             z-index: 10;
         }
+        
+        /* Badge compteur pour duplicatas */
+        .duplicate-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 15;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        .duplicate-badge:hover {
+            transform: scale(1.1);
+            background: #c82333;
+        }
+        
+        /* Modal pour afficher les duplicatas */
+        .duplicate-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .duplicate-modal.show {
+            display: flex;
+        }
+        
+        .duplicate-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .duplicate-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        
+        .duplicate-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        .duplicate-list-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .duplicate-list-item:hover {
+            background: #e9ecef;
+        }
+        
+        .duplicate-list-item.current {
+            background: #d1ecf1;
+            border: 2px solid #0c5460;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1 id="headerTitle">🎬 Éditeur de Timeline B-rolls</h1>
-        <p>Glissez-déposez des images pour remplacer les B-rolls. Les changements sont sauvegardés automatiquement.</p>
+        <h1 id="headerTitle">🎬 B-roll Timeline Editor</h1>
+        <p>Drag and drop images to replace B-rolls. Changes are saved automatically.</p>
+        <div id="saveStatus" style="font-size: 12px; color: #6c757d; margin-top: 8px; display: none;">
+            <span id="saveStatusText">✓ Saved</span>
+            <span id="saveStatusTime" style="margin-left: 8px;"></span>
+        </div>
+        
+        <!-- Statistics Dashboard -->
+        <div class="stats-dashboard" id="statsDashboard">
+            <div class="stat-card info">
+                <div class="stat-icon">📝</div>
+                <div class="stat-value" id="statTotalBullets">-</div>
+                <div class="stat-label">Total Bullets</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-icon">🎬</div>
+                <div class="stat-value" id="statAlternatives">-</div>
+                <div class="stat-label">Using Alternatives</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-icon">🖼️</div>
+                <div class="stat-value" id="statImages">-</div>
+                <div class="stat-label">Image Overlays</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-value" id="statDuplicates">-</div>
+                <div class="stat-label">Duplicate B-rolls</div>
+            </div>
+        </div>
     </div>
     
     <div class="status" id="status"></div>
     
+    <!-- Modal for duplicate B-roll information -->
+    <div class="duplicate-modal" id="duplicateModal">
+        <div class="duplicate-modal-content">
+            <div class="duplicate-modal-header">
+                <h3 style="margin: 0;">🔄 B-roll Used Multiple Times</h3>
+                <button class="duplicate-modal-close" onclick="closeDuplicateModal()">×</button>
+            </div>
+            <div id="duplicateModalBody">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+    
     <div class="loading" id="loading">
-        <p>⏳ Chargement de la timeline...</p>
+        <p>⏳ Loading timeline...</p>
     </div>
     
     <div class="timeline" id="timeline">
@@ -270,7 +453,7 @@
     </div>
 
     <button id="audioPreviewBtn" class="audio-preview-btn">
-        🎵 Prévisualiser l'audio
+        🎵 Preview audio
     </button>
 
     <script>
@@ -282,17 +465,52 @@
         let isPlaying = false;
         let timelineData = [];
         let projectName = "{{PROJECT_NAME}}"; // Sera remplacé par le serveur
+        let projectPath = "{{PROJECT_PATH}}"; // Inclut le language si présent
+        let language = "{{LANGUAGE}}"; // Language si présent
         let autoScrollInterval = null; // Pour le scroll automatique
 
         
         console.log('DEBUG JS: Variables globales initialisées');
         console.log('DEBUG JS: projectName =', projectName);
+        console.log('DEBUG JS: projectPath =', projectPath);
+        console.log('DEBUG JS: language =', language);
+        
+        // Update save status display
+        function updateSaveStatus(message, isError = false) {
+            const saveStatus = document.getElementById('saveStatus');
+            const saveStatusText = document.getElementById('saveStatusText');
+            const saveStatusTime = document.getElementById('saveStatusTime');
+            
+            if (saveStatus && saveStatusText && saveStatusTime) {
+                saveStatus.style.display = 'block';
+                
+                if (isError) {
+                    saveStatusText.textContent = '❌ ' + message;
+                    saveStatusText.style.color = '#dc3545';
+                } else {
+                    saveStatusText.textContent = '✓ ' + message;
+                    saveStatusText.style.color = '#28a745';
+                }
+                
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                saveStatusTime.textContent = timeStr;
+                
+                // Fade out after 3 seconds for success messages
+                if (!isError) {
+                    setTimeout(() => {
+                        saveStatus.style.opacity = '0.5';
+                    }, 3000);
+                }
+            }
+        }
         
         // Mettre à jour le titre avec le nom du projet
         function updateHeaderTitle() {
             const headerTitle = document.getElementById('headerTitle');
             if (headerTitle && projectName && projectName !== '{{PROJECT_NAME}}') {
-                headerTitle.textContent = `🎬 Éditeur de Timeline B-rolls - ${projectName}`;
+                const langSuffix = language ? ` (${language})` : '';
+                headerTitle.textContent = `🎬 B-roll Timeline Editor - ${projectName}${langSuffix}`;
             }
         }
 
@@ -320,7 +538,7 @@
                     console.log('DEBUG: Resuming existing audio');
                     currentAudio.play();
                     isPlaying = true;
-                    audioBtn.textContent = "⏸️ Pause de l audio";
+                    audioBtn.textContent = "⏸️ Pause audio";
                     audioBtn.classList.add('paused');
                     highlightGroupHeader(currentAudioIndex, true);
                     return;
@@ -329,24 +547,35 @@
                 if (currentAudioIndex >= timelineData.length) {
                     currentAudioIndex = 0;
                 }
-                const bulletNum = (currentAudioIndex+1).toString().padStart(2, '0');
-                const rushName = 'bullet' + bulletNum + '.mp3'; // Générer le nom du rush basé sur l'index
-                const audioPath = '/projects/' + projectName + '/temp/audio/bullet' + bulletNum + '.mp3';
-                console.log('DEBUG: Creating new audio for index:', currentAudioIndex, 'bullet:', bulletNum);
+                
+                // Use the actual rush name from timeline data
+                const currentItem = timelineData[currentAudioIndex];
+                const rushName = currentItem.rush || currentItem.audio_file;
+                
+                // Build audio path: /projects/<project>/<language>/audio/<filename>
+                const audioPath = language 
+                    ? `/projects/${projectName}/${language}/audio/${rushName}`
+                    : `/projects/${projectName}/audio/${rushName}`;
+                    
+                console.log('DEBUG: Creating new audio for index:', currentAudioIndex);
                 console.log('DEBUG: Rush name:', rushName);
                 console.log('DEBUG: Audio path:', audioPath);
+                
                 currentAudio = new Audio(audioPath);
                 currentAudio.playbackRate = 1.5; // Vitesse de lecture à 1.5x
                 currentAudio.play().then(() => {
                     console.log('DEBUG: Audio play started successfully');
                     isPlaying = true;
-                    audioBtn.textContent = "⏸️ Pause de l audio";
+                    audioBtn.textContent = "⏸️ Pause audio";
                     audioBtn.classList.add('paused');
                     // Appliquer la surbrillance après un petit délai pour s'assurer que le DOM est prêt
                     setTimeout(() => {
                         console.log('DEBUG: Applying highlight after timeout');
                         highlightGroupHeader(currentAudioIndex, true);
                     }, 100);
+                }).catch(err => {
+                    console.error('DEBUG: Error playing audio:', err);
+                    alert(`Cannot play audio: ${audioPath}\nCheck if file exists.`);
                 });
                 currentAudio.onended = function() {
                     console.log('=== TRANSITION AUDIO ===');
@@ -362,7 +591,7 @@
                     } else {
                         console.log('DEBUG: Reached end of timeline');
                         isPlaying = false;
-                        audioBtn.textContent = "🎵 Prévisualiser l audio";
+                        audioBtn.textContent = "🎵 Preview audio";
                         audioBtn.classList.remove('paused');
                         highlightGroupHeader(currentAudioIndex, false);
                         currentAudioIndex = 0;
@@ -375,7 +604,7 @@
                 if (currentAudio) {
                     currentAudio.pause();
                     isPlaying = false;
-                    audioBtn.textContent = "🎵 Prévisualiser l audio";
+                    audioBtn.textContent = "🎵 Preview audio";
                     audioBtn.classList.remove('paused');
                     highlightGroupHeader(currentAudioIndex, false);
                 }
@@ -387,6 +616,60 @@
             console.log('DEBUG: DOMContentLoaded - appel loadTimeline');
             updateHeaderTitle(); // Mettre à jour le titre avec le nom du projet
             loadTimeline();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            // Space - Play/Pause audio
+            if (e.code === 'Space') {
+                e.preventDefault();
+                const audioBtn = document.getElementById('audioPreviewBtn');
+                if (audioBtn) audioBtn.click();
+            }
+            
+            // Numbers 1, 2, 3 - Select B-roll alternatives for focused item
+            if (e.key >= '1' && e.key <= '3') {
+                const focusedItem = document.querySelector('.broll-item:focus-within');
+                if (focusedItem) {
+                    const index = focusedItem.getAttribute('data-index');
+                    if (index) {
+                        const brollType = e.key === '1' ? 'broll' : e.key === '2' ? 'broll2' : 'broll3';
+                        const radio = document.getElementById(`${brollType}_${index}`);
+                        if (radio) {
+                            radio.checked = true;
+                            radio.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
+            }
+            
+            // Arrow Up/Down - Navigate bullets
+            if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+                e.preventDefault();
+                const headers = Array.from(document.querySelectorAll('.rush-group-header'));
+                const currentHeader = document.querySelector('.rush-group-header.playing-audio-group');
+                let targetIndex = 0;
+                
+                if (currentHeader) {
+                    const currentIndex = headers.indexOf(currentHeader);
+                    if (e.code === 'ArrowUp') {
+                        targetIndex = Math.max(0, currentIndex - 1);
+                    } else {
+                        targetIndex = Math.min(headers.length - 1, currentIndex + 1);
+                    }
+                } else if (e.code === 'ArrowDown' && headers.length > 0) {
+                    targetIndex = 0;
+                }
+                
+                if (headers[targetIndex]) {
+                    headers[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         });
 
         function formatTime(seconds) {
@@ -467,6 +750,9 @@
                 
                 // Marquer les doublons initiaux
                 updateDuplicateHighlights();
+                
+                // Update statistics dashboard
+                updateStatistics();
                 
                 console.log('DEBUG JS: Masquage du loading');
                 document.getElementById('loading').style.display = 'none';
@@ -636,8 +922,63 @@
             // Ajouter les événements de changement de sélection pour détecter les doublons et sauvegarder
             const radioButtons = div.querySelectorAll('input[type="radio"]');
             radioButtons.forEach(radio => {
-                radio.addEventListener('change', () => {
+                radio.addEventListener('change', async (e) => {
                     if (radio.checked) {
+                        // Check if this B-roll is already used elsewhere
+                        const brollIndex = index;
+                        const brollType = radio.value;
+                        let selectedBroll = null;
+                        
+                        if (brollType === 'broll' && item.broll) {
+                            selectedBroll = item.broll;
+                        } else if (brollType === 'broll2' && item.broll2) {
+                            selectedBroll = item.broll2;
+                        } else if (brollType === 'broll3' && item.broll3) {
+                            selectedBroll = item.broll3;
+                        }
+                        
+                        // Count how many times this B-roll is already selected
+                        let usageCount = 0;
+                        const allRadios = document.querySelectorAll('input[type="radio"]:checked');
+                        allRadios.forEach(r => {
+                            const rItem = r.closest('[data-index]');
+                            if (rItem) {
+                                const rIndex = parseInt(rItem.getAttribute('data-index'));
+                                if (rIndex !== brollIndex && timelineData[rIndex]) {
+                                    const rType = r.value;
+                                    let rBroll = null;
+                                    if (rType === 'broll' && timelineData[rIndex].broll) {
+                                        rBroll = timelineData[rIndex].broll;
+                                    } else if (rType === 'broll2' && timelineData[rIndex].broll2) {
+                                        rBroll = timelineData[rIndex].broll2;
+                                    } else if (rType === 'broll3' && timelineData[rIndex].broll3) {
+                                        rBroll = timelineData[rIndex].broll3;
+                                    }
+                                    if (rBroll === selectedBroll) {
+                                        usageCount++;
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // Show confirmation if duplicate
+                        if (usageCount > 0 && selectedBroll) {
+                            const confirmMsg = `⚠️ This B-roll is already used ${usageCount} time${usageCount > 1 ? 's' : ''}.\n\nAre you sure you want to use it again?`;
+                            if (!confirm(confirmMsg)) {
+                                // User cancelled - revert to previous selection
+                                e.preventDefault();
+                                // Find previously checked radio in this group
+                                const previousRadio = Array.from(radioButtons).find(r => r !== radio && r.checked);
+                                if (previousRadio) {
+                                    previousRadio.checked = true;
+                                } else {
+                                    // No previous selection, uncheck current
+                                    radio.checked = false;
+                                }
+                                return;
+                            }
+                        }
+                        
                         updateDuplicateHighlights();
                         saveBrollSelection(index, radio.value);
                     }
@@ -839,9 +1180,11 @@
                     });
                     
                     if (updateResponse.ok) {
-                        console.log(`✅ B-roll sélectionnée sauvegardée: ${selectedBrollType} pour l'index ${brollIndex}`);
+                        console.log(`✅ B-roll selected saved: ${selectedBrollType} for index ${brollIndex}`);
+                        updateSaveStatus('Saved');
                     } else {
-                        console.error('❌ Erreur lors de la sauvegarde sur le serveur');
+                        console.error('❌ Error saving to server');
+                        updateSaveStatus('Error', true);
                     }
                 } else {
                     console.error(`❌ Index invalide: ${brollIndex} (max: ${timelineData.length - 1})`);
@@ -852,22 +1195,24 @@
         }
 
         function updateDuplicateHighlights() {
-            // Supprimer tous les overlays de doublons existants
+            // Remove all existing duplicate overlays and badges
             document.querySelectorAll('.broll-duplicate-overlay').forEach(overlay => {
                 overlay.remove();
             });
+            document.querySelectorAll('.duplicate-badge').forEach(badge => {
+                badge.remove();
+            });
 
-            // Collecter toutes les b-rolls sélectionnées
-            const selectedBrolls = new Set();
+            // Build a map of B-roll usage: brollFilename -> [indices where it's selected]
+            const brollUsage = new Map();
             const radioButtons = document.querySelectorAll('input[type="radio"]:checked');
             
             radioButtons.forEach(radio => {
                 const brollItem = radio.closest('[data-index]');
                 if (brollItem) {
-                    const brollIndex = brollItem.getAttribute('data-index');
-                    const brollType = radio.value; // broll1, broll2, ou broll3
+                    const brollIndex = parseInt(brollItem.getAttribute('data-index'));
+                    const brollType = radio.value; // broll, broll2, or broll3
                     
-                    // Récupérer le nom du fichier b-roll depuis les données
                     if (timelineData[brollIndex]) {
                         let brollFilename = null;
                         if (brollType === 'broll' && timelineData[brollIndex].broll) {
@@ -879,70 +1224,230 @@
                         }
                         
                         if (brollFilename) {
-                            selectedBrolls.add(brollFilename);
+                            if (!brollUsage.has(brollFilename)) {
+                                brollUsage.set(brollFilename, []);
+                            }
+                            brollUsage.get(brollFilename).push({
+                                index: brollIndex,
+                                phrase: timelineData[brollIndex].phrase || `Bullet ${brollIndex + 1}`
+                            });
                         }
                     }
                 }
             });
 
-            // Marquer toutes les occurrences de b-rolls sélectionnées
-            selectedBrolls.forEach(selectedBroll => {
-                const allBrollItems = document.querySelectorAll('[data-index]');
-                
-                allBrollItems.forEach(brollItem => {
-                    const brollIndex = brollItem.getAttribute('data-index');
-                    if (timelineData[brollIndex]) {
-                        const item = timelineData[brollIndex];
+            // Find duplicates (B-rolls used more than once)
+            const duplicates = new Map();
+            brollUsage.forEach((usage, brollFilename) => {
+                if (usage.length > 1) {
+                    duplicates.set(brollFilename, usage);
+                }
+            });
+
+            // Highlight all B-roll alternatives that have duplicates
+            const allBrollItems = document.querySelectorAll('[data-index]');
+            
+            allBrollItems.forEach(brollItem => {
+                const brollIndex = parseInt(brollItem.getAttribute('data-index'));
+                if (timelineData[brollIndex]) {
+                    const item = timelineData[brollIndex];
+                    
+                    // Check which alternative is selected
+                    const radioButtons = brollItem.querySelectorAll('input[type="radio"]');
+                    let selectedBrollFilename = null;
+                    let isSelectedInThisItem = false;
+                    
+                    radioButtons.forEach(radio => {
+                        if (radio.checked) {
+                            const brollType = radio.value;
+                            if (brollType === 'broll' && item.broll) {
+                                selectedBrollFilename = item.broll;
+                                isSelectedInThisItem = true;
+                            } else if (brollType === 'broll2' && item.broll2) {
+                                selectedBrollFilename = item.broll2;
+                                isSelectedInThisItem = true;
+                            } else if (brollType === 'broll3' && item.broll3) {
+                                selectedBrollFilename = item.broll3;
+                                isSelectedInThisItem = true;
+                            }
+                        }
+                    });
+
+                    // For each B-roll alternative in this item
+                    const images = brollItem.querySelectorAll('img');
+                    images.forEach((img, imgIndex) => {
+                        const brollType = imgIndex === 0 ? 'broll' : imgIndex === 1 ? 'broll2' : 'broll3';
+                        let itemBroll = null;
                         
-                        // Vérifier si cette b-roll est sélectionnée dans cet item
-                        const radioButtons = brollItem.querySelectorAll('input[type="radio"]');
-                        let isSelectedInThisItem = false;
-                        let selectedRadio = null;
+                        if (brollType === 'broll' && item.broll) {
+                            itemBroll = item.broll;
+                        } else if (brollType === 'broll2' && item.broll2) {
+                            itemBroll = item.broll2;
+                        } else if (brollType === 'broll3' && item.broll3) {
+                            itemBroll = item.broll3;
+                        }
                         
-                        radioButtons.forEach(radio => {
-                            if (radio.checked) {
-                                selectedRadio = radio;
-                                const brollType = radio.value;
-                                if ((brollType === 'broll' && item.broll === selectedBroll) ||
-                                    (brollType === 'broll2' && item.broll2 === selectedBroll) ||
-                                    (brollType === 'broll3' && item.broll3 === selectedBroll)) {
-                                    isSelectedInThisItem = true;
+                        if (itemBroll && duplicates.has(itemBroll)) {
+                            const container = img.closest('div[style*="position: relative"]');
+                            const isOverlayZone = container && container.classList.contains('drop-zone');
+                            
+                            if (container && !isOverlayZone) {
+                                const usage = duplicates.get(itemBroll);
+                                const usageCount = usage.length;
+                                
+                                // Add red overlay only if NOT selected in this item
+                                const isThisAlternativeSelected = (selectedBrollFilename === itemBroll);
+                                
+                                if (!isThisAlternativeSelected && !container.querySelector('.broll-duplicate-overlay')) {
+                                    const overlay = document.createElement('div');
+                                    overlay.className = 'broll-duplicate-overlay';
+                                    container.appendChild(overlay);
+                                }
+                                
+                                // Add usage count badge for ALL occurrences (selected or not)
+                                if (!container.querySelector('.duplicate-badge')) {
+                                    const badge = document.createElement('div');
+                                    badge.className = 'duplicate-badge';
+                                    badge.textContent = `Used ${usageCount}×`;
+                                    badge.title = 'Click to see where this B-roll is used';
+                                    badge.onclick = (e) => {
+                                        e.stopPropagation();
+                                        showDuplicateModal(itemBroll, usage, brollIndex);
+                                    };
+                                    container.appendChild(badge);
                                 }
                             }
-                        });
-
-                        // Si cette b-roll est sélectionnée ailleurs mais pas ici, la marquer en rouge
-                        if (!isSelectedInThisItem) {
-                            // Chercher les images correspondantes
-                            const images = brollItem.querySelectorAll('img');
-                            images.forEach((img, imgIndex) => {
-                                const brollType = imgIndex === 0 ? 'broll' : imgIndex === 1 ? 'broll2' : 'broll3';
-                                let itemBroll = null;
-                                
-                                if (brollType === 'broll' && item.broll) {
-                                    itemBroll = item.broll;
-                                } else if (brollType === 'broll2' && item.broll2) {
-                                    itemBroll = item.broll2;
-                                } else if (brollType === 'broll3' && item.broll3) {
-                                    itemBroll = item.broll3;
-                                }
-                                
-                                if (itemBroll === selectedBroll) {
-                                    // Ajouter l'overlay rouge seulement si ce n'est pas une zone d'overlay
-                                    const container = img.closest('div[style*="position: relative"]');
-                                    const isOverlayZone = container && container.classList.contains('drop-zone');
-                                    if (container && !isOverlayZone && !container.querySelector('.broll-duplicate-overlay')) {
-                                        const overlay = document.createElement('div');
-                                        overlay.className = 'broll-duplicate-overlay';
-                                        container.appendChild(overlay);
-                                    }
-                                }
-                            });
+                        }
+                    });
+                }
+            });
+            
+            // Update statistics after highlighting duplicates
+            updateStatistics();
+        }
+        
+        function updateStatistics() {
+            if (!timelineData || timelineData.length === 0) {
+                return;
+            }
+            
+            // Count total bullets
+            const totalBullets = timelineData.length;
+            
+            // Count bullets using alternative B-rolls (broll2 or broll3 selected)
+            let alternativeCount = 0;
+            const radioButtons = document.querySelectorAll('input[type="radio"]:checked');
+            radioButtons.forEach(radio => {
+                if (radio.value === 'broll2' || radio.value === 'broll3') {
+                    alternativeCount++;
+                }
+            });
+            
+            // Count image overlays
+            let imageCount = 0;
+            timelineData.forEach(item => {
+                if (item.image) {
+                    imageCount++;
+                }
+            });
+            
+            // Count duplicates (B-rolls used more than once)
+            const brollUsage = new Map();
+            radioButtons.forEach(radio => {
+                const brollItem = radio.closest('[data-index]');
+                if (brollItem) {
+                    const brollIndex = parseInt(brollItem.getAttribute('data-index'));
+                    const brollType = radio.value;
+                    
+                    if (timelineData[brollIndex]) {
+                        let brollFilename = null;
+                        if (brollType === 'broll' && timelineData[brollIndex].broll) {
+                            brollFilename = timelineData[brollIndex].broll;
+                        } else if (brollType === 'broll2' && timelineData[brollIndex].broll2) {
+                            brollFilename = timelineData[brollIndex].broll2;
+                        } else if (brollType === 'broll3' && timelineData[brollIndex].broll3) {
+                            brollFilename = timelineData[brollIndex].broll3;
+                        }
+                        
+                        if (brollFilename) {
+                            if (!brollUsage.has(brollFilename)) {
+                                brollUsage.set(brollFilename, 0);
+                            }
+                            brollUsage.set(brollFilename, brollUsage.get(brollFilename) + 1);
                         }
                     }
-                });
+                }
             });
+            
+            let duplicateCount = 0;
+            brollUsage.forEach(count => {
+                if (count > 1) {
+                    duplicateCount++;
+                }
+            });
+            
+            // Update UI
+            document.getElementById('statTotalBullets').textContent = totalBullets;
+            document.getElementById('statAlternatives').textContent = alternativeCount;
+            document.getElementById('statImages').textContent = imageCount;
+            document.getElementById('statDuplicates').textContent = duplicateCount;
         }
+        
+        function showDuplicateModal(brollFilename, usage, currentIndex) {
+            const modal = document.getElementById('duplicateModal');
+            const modalBody = document.getElementById('duplicateModalBody');
+            
+            // Build modal content
+            let html = `
+                <div style="margin-bottom: 15px;">
+                    <strong>B-roll:</strong> ${brollFilename}<br>
+                    <strong>Used in ${usage.length} locations:</strong>
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+            `;
+            
+            usage.forEach(u => {
+                const isCurrent = u.index === currentIndex;
+                html += `
+                    <div class="duplicate-list-item ${isCurrent ? 'current' : ''}" 
+                         onclick="jumpToBullet(${u.index})">
+                        ${isCurrent ? '➜ ' : ''}
+                        <strong>Bullet ${u.index + 1}</strong>: ${u.phrase.substring(0, 80)}${u.phrase.length > 80 ? '...' : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            modalBody.innerHTML = html;
+            modal.classList.add('show');
+        }
+        
+        function closeDuplicateModal() {
+            const modal = document.getElementById('duplicateModal');
+            modal.classList.remove('show');
+        }
+        
+        function jumpToBullet(index) {
+            closeDuplicateModal();
+            const targetItem = document.querySelector(`[data-index="${index}"]`);
+            if (targetItem) {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Flash highlight
+                targetItem.style.transition = 'background 0.5s';
+                targetItem.style.background = '#fff3cd';
+                setTimeout(() => {
+                    targetItem.style.background = '';
+                }, 1500);
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('duplicateModal');
+            if (e.target === modal) {
+                closeDuplicateModal();
+            }
+        });
     </script>
 </body>
 </html> 
