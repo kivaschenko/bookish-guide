@@ -154,9 +154,10 @@ storyforge/
 └── projects/                 # Generated content output
     └── {project_name}/
         ├── {language}/       # Language-specific content
-        │   ├── outline.json
-        │   ├── full_script.json
-        │   └── audio/        # Voice files
+        │   ├── input_ideas.txt    # Structured ideas from raw input
+        │   ├── outline.json       # Video outline
+        │   ├── full_script.json   # Complete script
+        │   └── audio/             # Voice files
         ├── temp/
         │   └── broll_timing.json  # Timeline data
         └── metadata_{lang}.json
