@@ -111,6 +111,88 @@ def get_file_hash(file_path):
         return None
 
 
+def validate_timeline_data(timeline_data):
+    """
+    Validate timeline data for required fields and data integrity.
+
+    Args:
+        timeline_data: List of timeline entries
+
+    Returns:
+        dict: {
+            'valid': bool,
+            'errors': list of error messages,
+            'warnings': list of warning messages,
+            'stats': dict with statistics
+        }
+    """
+    errors = []
+    warnings = []
+    stats = {
+        "total_entries": len(timeline_data),
+        "missing_broll": 0,
+        "missing_audio": 0,
+        "missing_phrase": 0,
+        "has_alternatives": 0,
+        "has_images": 0,
+        "invalid_times": 0,
+    }
+
+    required_fields = ["rush", "phrase", "broll", "start_time", "end_time"]
+
+    for i, entry in enumerate(timeline_data):
+        entry_id = f"Entry {i + 1}"
+
+        # Check required fields
+        for field in required_fields:
+            if field not in entry or not entry[field]:
+                errors.append(f"{entry_id}: Missing required field '{field}'")
+                if field == "broll":
+                    stats["missing_broll"] += 1
+                elif field == "rush":
+                    stats["missing_audio"] += 1
+                elif field == "phrase":
+                    stats["missing_phrase"] += 1
+
+        # Check time validity
+        if "start_time" in entry and "end_time" in entry:
+            try:
+                start = float(entry["start_time"])
+                end = float(entry["end_time"])
+                if start >= end:
+                    errors.append(
+                        f"{entry_id}: start_time ({start}) >= end_time ({end})"
+                    )
+                    stats["invalid_times"] += 1
+                elif start < 0:
+                    errors.append(f"{entry_id}: negative start_time ({start})")
+                    stats["invalid_times"] += 1
+            except (ValueError, TypeError):
+                errors.append(f"{entry_id}: Invalid time format")
+                stats["invalid_times"] += 1
+
+        # Check for alternatives and images (not errors, just stats)
+        if "broll2" in entry and entry["broll2"]:
+            stats["has_alternatives"] += 1
+        if "image" in entry and entry["image"]:
+            stats["has_images"] += 1
+
+        # Warnings for common issues
+        if "selected_broll" in entry:
+            selected = entry["selected_broll"]
+            if selected not in ["broll", "broll2", "broll3"]:
+                warnings.append(
+                    f"{entry_id}: Unknown selected_broll value '{selected}'"
+                )
+
+    return {
+        "valid": len(errors) == 0,
+        "errors": errors,
+        "warnings": warnings,
+        "stats": stats,
+    }
+
+
 def log_file_change(
     file_path, operation_type, details=None, before_content=None, after_content=None
 ):
@@ -428,6 +510,31 @@ class TimelineEditingHandler(BaseHTTPRequestHandler):
 
         with open(self.broll_timing_file, "r", encoding="utf-8") as f:
             timeline_data = json.load(f)
+
+        # Validate timeline data
+        validation_result = validate_timeline_data(timeline_data)
+
+        if not validation_result["valid"]:
+            logging.warning("⚠️  Timeline validation errors found:")
+            for error in validation_result["errors"][:5]:  # Show first 5 errors
+                logging.warning(f"   • {error}")
+            if len(validation_result["errors"]) > 5:
+                logging.warning(
+                    f"   • ...and {len(validation_result['errors']) - 5} more errors"
+                )
+
+        if validation_result["warnings"]:
+            logging.info("ℹ️  Timeline validation warnings:")
+            for warning in validation_result["warnings"][:3]:
+                logging.info(f"   • {warning}")
+
+        # Log stats
+        stats = validation_result["stats"]
+        logging.info(
+            f"📊 Timeline Stats: {stats['total_entries']} entries, "
+            f"{stats['has_alternatives']} with alternatives, "
+            f"{stats['has_images']} with images"
+        )
 
         logging.debug(f"SERVER: Timeline loaded, {len(timeline_data)} elements")
         response_data = json.dumps(timeline_data, indent=2)

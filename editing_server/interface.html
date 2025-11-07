@@ -257,6 +257,10 @@
     <div class="header">
         <h1 id="headerTitle">🎬 B-roll Timeline Editor</h1>
         <p>Drag and drop images to replace B-rolls. Changes are saved automatically.</p>
+        <div id="saveStatus" style="font-size: 12px; color: #6c757d; margin-top: 8px; display: none;">
+            <span id="saveStatusText">✓ Saved</span>
+            <span id="saveStatusTime" style="margin-left: 8px;"></span>
+        </div>
     </div>
     
     <div class="status" id="status"></div>
@@ -291,6 +295,36 @@
         console.log('DEBUG JS: projectName =', projectName);
         console.log('DEBUG JS: projectPath =', projectPath);
         console.log('DEBUG JS: language =', language);
+        
+        // Update save status display
+        function updateSaveStatus(message, isError = false) {
+            const saveStatus = document.getElementById('saveStatus');
+            const saveStatusText = document.getElementById('saveStatusText');
+            const saveStatusTime = document.getElementById('saveStatusTime');
+            
+            if (saveStatus && saveStatusText && saveStatusTime) {
+                saveStatus.style.display = 'block';
+                
+                if (isError) {
+                    saveStatusText.textContent = '❌ ' + message;
+                    saveStatusText.style.color = '#dc3545';
+                } else {
+                    saveStatusText.textContent = '✓ ' + message;
+                    saveStatusText.style.color = '#28a745';
+                }
+                
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                saveStatusTime.textContent = timeStr;
+                
+                // Fade out after 3 seconds for success messages
+                if (!isError) {
+                    setTimeout(() => {
+                        saveStatus.style.opacity = '0.5';
+                    }, 3000);
+                }
+            }
+        }
         
         // Mettre à jour le titre avec le nom du projet
         function updateHeaderTitle() {
@@ -403,6 +437,60 @@
             console.log('DEBUG: DOMContentLoaded - appel loadTimeline');
             updateHeaderTitle(); // Mettre à jour le titre avec le nom du projet
             loadTimeline();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            // Space - Play/Pause audio
+            if (e.code === 'Space') {
+                e.preventDefault();
+                const audioBtn = document.getElementById('audioPreviewBtn');
+                if (audioBtn) audioBtn.click();
+            }
+            
+            // Numbers 1, 2, 3 - Select B-roll alternatives for focused item
+            if (e.key >= '1' && e.key <= '3') {
+                const focusedItem = document.querySelector('.broll-item:focus-within');
+                if (focusedItem) {
+                    const index = focusedItem.getAttribute('data-index');
+                    if (index) {
+                        const brollType = e.key === '1' ? 'broll' : e.key === '2' ? 'broll2' : 'broll3';
+                        const radio = document.getElementById(`${brollType}_${index}`);
+                        if (radio) {
+                            radio.checked = true;
+                            radio.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
+            }
+            
+            // Arrow Up/Down - Navigate bullets
+            if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+                e.preventDefault();
+                const headers = Array.from(document.querySelectorAll('.rush-group-header'));
+                const currentHeader = document.querySelector('.rush-group-header.playing-audio-group');
+                let targetIndex = 0;
+                
+                if (currentHeader) {
+                    const currentIndex = headers.indexOf(currentHeader);
+                    if (e.code === 'ArrowUp') {
+                        targetIndex = Math.max(0, currentIndex - 1);
+                    } else {
+                        targetIndex = Math.min(headers.length - 1, currentIndex + 1);
+                    }
+                } else if (e.code === 'ArrowDown' && headers.length > 0) {
+                    targetIndex = 0;
+                }
+                
+                if (headers[targetIndex]) {
+                    headers[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         });
 
         function formatTime(seconds) {
@@ -855,9 +943,11 @@
                     });
                     
                     if (updateResponse.ok) {
-                        console.log(`✅ B-roll sélectionnée sauvegardée: ${selectedBrollType} pour l'index ${brollIndex}`);
+                        console.log(`✅ B-roll selected saved: ${selectedBrollType} for index ${brollIndex}`);
+                        updateSaveStatus('Saved');
                     } else {
-                        console.error('❌ Erreur lors de la sauvegarde sur le serveur');
+                        console.error('❌ Error saving to server');
+                        updateSaveStatus('Error', true);
                     }
                 } else {
                     console.error(`❌ Index invalide: ${brollIndex} (max: ${timelineData.length - 1})`);
