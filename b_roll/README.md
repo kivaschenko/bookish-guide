@@ -118,7 +118,7 @@ python -m b_roll.cli analyze-library --verbose
 3. **Indexing**: Create efficient search index for similarity calculations
 
 #### Phase 3: Script-Based Retrieval
-1. **Script Analysis**: Parse narrative content (e.g., from `exponential_video.py`)
+1. **Script Analysis**: Parse narrative content (e.g., from `generate_video.py`)
 2. **Vector Search**: Perform cosine similarity calculation (no LLM needed)
 3. **Candidate Selection**: Retrieve top 10 closest matches based on semantic similarity
 
@@ -161,7 +161,7 @@ The B-roll package now **completely replaces** the old `src/` B-roll modules:
 - `src/b_roll_finder.py` → `b_roll/broll_finder.py` ✅
 - Individual functions → `b_roll/utils.py` ✅
 
-#### Updated Imports in exponential_video.py
+#### Updated Imports in generate_video.py
 ```python
 # OLD imports (deprecated)
 from src.b_roll_finder import prepare_brolls_vector
@@ -265,13 +265,11 @@ python -m b_roll.cli clean-selections
 
 # Optional: Analyze library statistics
 python -m b_roll.cli analyze-library --verbose
-python exponential_video.py --meta
 
-# Step 2: Generate vector embeddings and select B-rolls for script
-python exponential_video.py --vectorbroll --project "my-project"
+# Step 2: Generate full video with B-roll selection
+python generate_video.py --input "Your script text..." --output "my-project"
 
-# Step 3: Test selection quality (optional validation)
-python exponential_video.py --testbrollchoice
+# Note: B-roll selection is integrated into generate_video.py workflow
 ```
 
 ## 🧪 Testing with Sample Videos
@@ -504,7 +502,7 @@ You've correctly identified `src/meta_extractor.py` as a key replacement target.
 - **Technical**: Existing video editing workflow compatible with JSON output
 - **Content**: B-roll library (we can assist with initial processing)
 - **Volume**: Minimum 10+ videos/month for ROI optimization
-- **Integration**: Current `exponential_video.py` script or API integration
+- **Integration**: Current `generate_video.py` script or API integration
 
 ### Success Metrics
 - **Efficiency Gain**: Target 80%+ time reduction in B-roll selection

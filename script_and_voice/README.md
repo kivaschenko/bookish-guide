@@ -36,7 +36,7 @@ python module_script_and_voice.py --help
 The module is automatically called by the main pipeline when using the `-s` (script) option:
 
 ```bash
-python exponential_video.py -s project-name
+python generate_video.py -s project-name
 ```
 
 ## Command Line Arguments
