@@ -255,14 +255,14 @@
 </head>
 <body>
     <div class="header">
-        <h1 id="headerTitle">🎬 Éditeur de Timeline B-rolls</h1>
-        <p>Glissez-déposez des images pour remplacer les B-rolls. Les changements sont sauvegardés automatiquement.</p>
+        <h1 id="headerTitle">🎬 B-roll Timeline Editor</h1>
+        <p>Drag and drop images to replace B-rolls. Changes are saved automatically.</p>
     </div>
     
     <div class="status" id="status"></div>
     
     <div class="loading" id="loading">
-        <p>⏳ Chargement de la timeline...</p>
+        <p>⏳ Loading timeline...</p>
     </div>
     
     <div class="timeline" id="timeline">
@@ -270,7 +270,7 @@
     </div>
 
     <button id="audioPreviewBtn" class="audio-preview-btn">
-        🎵 Prévisualiser l'audio
+        🎵 Preview audio
     </button>
 
     <script>
@@ -282,17 +282,22 @@
         let isPlaying = false;
         let timelineData = [];
         let projectName = "{{PROJECT_NAME}}"; // Sera remplacé par le serveur
+        let projectPath = "{{PROJECT_PATH}}"; // Inclut le language si présent
+        let language = "{{LANGUAGE}}"; // Language si présent
         let autoScrollInterval = null; // Pour le scroll automatique
 
         
         console.log('DEBUG JS: Variables globales initialisées');
         console.log('DEBUG JS: projectName =', projectName);
+        console.log('DEBUG JS: projectPath =', projectPath);
+        console.log('DEBUG JS: language =', language);
         
         // Mettre à jour le titre avec le nom du projet
         function updateHeaderTitle() {
             const headerTitle = document.getElementById('headerTitle');
             if (headerTitle && projectName && projectName !== '{{PROJECT_NAME}}') {
-                headerTitle.textContent = `🎬 Éditeur de Timeline B-rolls - ${projectName}`;
+                const langSuffix = language ? ` (${language})` : '';
+                headerTitle.textContent = `🎬 B-roll Timeline Editor - ${projectName}${langSuffix}`;
             }
         }
 
@@ -320,7 +325,7 @@
                     console.log('DEBUG: Resuming existing audio');
                     currentAudio.play();
                     isPlaying = true;
-                    audioBtn.textContent = "⏸️ Pause de l audio";
+                    audioBtn.textContent = "⏸️ Pause audio";
                     audioBtn.classList.add('paused');
                     highlightGroupHeader(currentAudioIndex, true);
                     return;
@@ -329,24 +334,35 @@
                 if (currentAudioIndex >= timelineData.length) {
                     currentAudioIndex = 0;
                 }
-                const bulletNum = (currentAudioIndex+1).toString().padStart(2, '0');
-                const rushName = 'bullet' + bulletNum + '.mp3'; // Générer le nom du rush basé sur l'index
-                const audioPath = '/projects/' + projectName + '/temp/audio/bullet' + bulletNum + '.mp3';
-                console.log('DEBUG: Creating new audio for index:', currentAudioIndex, 'bullet:', bulletNum);
+                
+                // Use the actual rush name from timeline data
+                const currentItem = timelineData[currentAudioIndex];
+                const rushName = currentItem.rush || currentItem.audio_file;
+                
+                // Build audio path: /projects/<project>/<language>/audio/<filename>
+                const audioPath = language 
+                    ? `/projects/${projectName}/${language}/audio/${rushName}`
+                    : `/projects/${projectName}/audio/${rushName}`;
+                    
+                console.log('DEBUG: Creating new audio for index:', currentAudioIndex);
                 console.log('DEBUG: Rush name:', rushName);
                 console.log('DEBUG: Audio path:', audioPath);
+                
                 currentAudio = new Audio(audioPath);
                 currentAudio.playbackRate = 1.5; // Vitesse de lecture à 1.5x
                 currentAudio.play().then(() => {
                     console.log('DEBUG: Audio play started successfully');
                     isPlaying = true;
-                    audioBtn.textContent = "⏸️ Pause de l audio";
+                    audioBtn.textContent = "⏸️ Pause audio";
                     audioBtn.classList.add('paused');
                     // Appliquer la surbrillance après un petit délai pour s'assurer que le DOM est prêt
                     setTimeout(() => {
                         console.log('DEBUG: Applying highlight after timeout');
                         highlightGroupHeader(currentAudioIndex, true);
                     }, 100);
+                }).catch(err => {
+                    console.error('DEBUG: Error playing audio:', err);
+                    alert(`Cannot play audio: ${audioPath}\nCheck if file exists.`);
                 });
                 currentAudio.onended = function() {
                     console.log('=== TRANSITION AUDIO ===');
@@ -362,7 +378,7 @@
                     } else {
                         console.log('DEBUG: Reached end of timeline');
                         isPlaying = false;
-                        audioBtn.textContent = "🎵 Prévisualiser l audio";
+                        audioBtn.textContent = "🎵 Preview audio";
                         audioBtn.classList.remove('paused');
                         highlightGroupHeader(currentAudioIndex, false);
                         currentAudioIndex = 0;
@@ -375,7 +391,7 @@
                 if (currentAudio) {
                     currentAudio.pause();
                     isPlaying = false;
-                    audioBtn.textContent = "🎵 Prévisualiser l audio";
+                    audioBtn.textContent = "🎵 Preview audio";
                     audioBtn.classList.remove('paused');
                     highlightGroupHeader(currentAudioIndex, false);
                 }
