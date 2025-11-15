@@ -49,6 +49,10 @@ assets/*
 source/*
 temp/*
 
+# Configuration files with secrets
+config.yml
+script_and_voice/config.yml
+
 # Environment files
 .env
 .env.local
